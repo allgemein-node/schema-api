@@ -3,18 +3,13 @@
 
 
 import {IEntityOptions} from '../lib/options/IEntityOptions';
-import {MetaArgs} from '@allgemein/base/browser';
-import {METADATA_PROPERTY_KEY} from '..';
+import {METADATA_ENTITY_KEY, METADATA_PROPERTY_KEY} from '..';
+import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
 
 export function Entity(options: IEntityOptions = {}) {
   return function (object: Function) {
-    //
-    // const xsDef = EntityRegistry.createEntity(object, options);
-    // EntityRegistry.register(xsDef);
     options.sourceClass = object;
-    MetaArgs.key(METADATA_PROPERTY_KEY).push(options);
-
-
+    MetadataStorage.key(METADATA_ENTITY_KEY).push(options);
   };
 }
 

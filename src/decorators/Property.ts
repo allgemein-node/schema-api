@@ -8,7 +8,7 @@ import {
   JS_PRIMATIVE_TYPES,
   METADATA_PROPERTY_KEY,
   METADATA_SCHEMA_KEY
-} from '../libs/schema_api/Constants';
+} from '../lib/Constants';
 
 export function Property(typeOrOptions: IPropertyOptions | Function | string = null) {
   return function (source: any, propertyName: string) {
