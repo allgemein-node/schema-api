@@ -1,4 +1,6 @@
-import {suite, test} from 'mocha-typescript';
+import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
+import {suite, test} from '@testdeck/mocha';
+
 
 
 @suite('functional/json-schema')

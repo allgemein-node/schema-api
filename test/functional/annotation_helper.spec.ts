@@ -1,6 +1,6 @@
-import {suite, test} from 'mocha-typescript';
 import {AnnotationsHelper, ClassRef, XS_ANNOTATION_OPTIONS_CACHE} from '../../src';
-import {MetaArgs} from 'commons-base';
+import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
+import {suite, test} from '@testdeck/mocha';
 
 
 @suite('functional/annotation_helper')
@@ -14,7 +14,7 @@ class AnnotationsHelperSpec {
 
     AnnotationsHelper.forEntityOn(Anno01, {test: true});
 
-    const cache = MetaArgs.key(XS_ANNOTATION_OPTIONS_CACHE);
+    const cache = MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE);
 
     console.log(cache);
     const classRef = ClassRef.get(Anno01);
