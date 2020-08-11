@@ -3,7 +3,7 @@ import {ClassRef} from './ClassRef';
 import {XS_ANNOTATION_OPTIONS_CACHE, XS_TYPE_ENTITY, XS_TYPE_PROPERTY} from './Constants';
 import {IClassRef} from './IClassRef';
 
-import {ClassUtils, MetaArgs} from 'commons-base/browser';
+import {ClassUtils, MetaArgs} from '@allgemein/base/browser';
 import {IPropertyExtentions} from './IPropertyExtentions';
 
 

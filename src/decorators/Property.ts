@@ -1,7 +1,7 @@
 
 import 'reflect-metadata';
 import * as _ from 'lodash';
-import {ClassUtils, MetaArgs} from 'commons-base/browser';
+import {ClassUtils, MetaArgs} from '@allgemein/base/browser';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
 import {
   JS_DATA_TYPES,

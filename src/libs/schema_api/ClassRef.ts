@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {ClassUtils, NotYetImplementedError} from 'commons-base/browser';
+import {ClassUtils, NotYetImplementedError} from '@allgemein/base/browser';
 import {SchemaUtils} from './SchemaUtils';
 import {
   XS_DEFAULT,

@@ -1,7 +1,7 @@
 import {IEntityRef} from "./IEntityRef";
 import {IClassRef} from "./IClassRef";
 import * as _ from "lodash";
-import {NotYetImplementedError} from "commons-base/browser";
+import {NotYetImplementedError} from "@allgemein/base/browser";
 import {IBuildOptions} from "./IBuildOptions";
 
 export class SchemaUtils {

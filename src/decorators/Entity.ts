@@ -3,7 +3,7 @@
 
 
 import {IEntityOptions} from '../lib/options/IEntityOptions';
-import {MetaArgs} from 'commons-base/browser';
+import {MetaArgs} from '@allgemein/base/browser';
 import {METADATA_PROPERTY_KEY} from '..';
 
 export function Entity(options: IEntityOptions = {}) {
