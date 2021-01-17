@@ -1,9 +1,7 @@
-export interface IObjectOptions {
+import {IAbstractOptions} from './IAbstractOptions';
 
-  sourceClass?: Function;
+export interface IObjectOptions extends IAbstractOptions {
 
   name?: string;
-
-  [k: string]: any;
 
 }

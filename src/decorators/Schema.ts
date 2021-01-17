@@ -1,11 +1,11 @@
 import {ISchemaOptions} from '../lib/options/ISchemaOptions';
-import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
-import {METADATA_OBJECT_KEY, METADATA_SCHEMA_KEY} from '..';
+import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
 
 
 export function Schema(options: ISchemaOptions) {
   return function (object: Function) {
-    MetadataStorage.key(METADATA_SCHEMA_KEY).push(options);
+    options.target = object;
+    EntityMetadataRegistry.$().add('schema', options);
   };
 }
 

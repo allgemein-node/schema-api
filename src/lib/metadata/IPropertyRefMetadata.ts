@@ -1,5 +1,5 @@
 import {IClassRefMetadata} from "./IClassRefMetadata";
-import {IValidationMetadataArgs} from "./validation/IValidationMetadataArgs";
+import {IValidationMetadataArgs} from "./../validation/IValidationMetadataArgs";
 
 export interface IPropertyRefMetadata {
   id?: string,

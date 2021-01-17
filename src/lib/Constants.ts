@@ -12,6 +12,14 @@ export const XS_TYPE_PROPERTY = 'property';
 export const XS_TYPE_BINDING_SCHEMA_ENTITY = 'schema_entity';
 export const XS_TYPE_BINDING_SCHEMA_CLASS_REF = 'schema_class_ref';
 
+export type METADATA_TYPE =
+  'schema'
+  | 'object'
+  | 'entity'
+  | 'property'
+  | 'class_ref';
+
+
 export type XS_TYPE =
   'schema'
   | 'entity'
@@ -27,11 +35,12 @@ export const XS_ID_SEPARATOR = '--';
 
 export const XS_DEFAULT_SCHEMA = 'default';
 
-export const METADATA_SCHEMA_KEY = 'schema/annotations/schema';
-export const METADATA_ENTITY_KEY = 'schema/annotations/entity';
-export const METADATA_PROPERTY_KEY = 'schema/annotations/property';
-export const METADATA_OBJECT_KEY = 'schema/annotations/object';
+// export const METADATA_SCHEMA_KEY = 'schema/annotations/schema';
+// export const METADATA_ENTITY_KEY = 'schema/annotations/entity';
+// export const METADATA_PROPERTY_KEY = 'schema/annotations/property';
+// export const METADATA_OBJECT_KEY = 'schema/annotations/object';
 
+export const METADATA_REGISTRY = 'metadata/registry';
 
 
 export type ClassType<T> = { new(...args: any[]): T; };

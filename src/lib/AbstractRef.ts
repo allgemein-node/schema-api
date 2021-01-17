@@ -4,29 +4,30 @@ import {ClassRef} from "./ClassRef";
 import {LookupRegistry} from "./LookupRegistry";
 import {IBaseRef} from "./IBaseRef";
 import {AnnotationsHelper} from "./AnnotationsHelper";
+import {IClassRef} from './IClassRef';
 
 
 export abstract class AbstractRef implements IBaseRef {
 
   private readonly _baseType: XS_TYPE;
 
-  private _lookupRegistry: string = XS_DEFAULT;
-
-  readonly name: string;
+  private _context: string = XS_DEFAULT;
 
   private _options: any = {};
 
-  readonly object: ClassRef;
+  readonly name: string;
+
+  readonly object: IClassRef;
 
 
-  constructor(type: XS_TYPE, name: string, object: ClassRef | Function | string = null, lookupRegistry: string = XS_DEFAULT) {
-    this._lookupRegistry = lookupRegistry;
+  constructor(type: XS_TYPE, name: string, object: IClassRef | Function | string = null, context: string = XS_DEFAULT) {
+    this._context = context;
     this._baseType = type;
     this.name = name;
     if (object instanceof ClassRef) {
       this.object = object;
     } else {
-      this.object = object ? ClassRef.get(object, this._lookupRegistry, type == XS_TYPE_PROPERTY) : null;
+      this.object = object ? ClassRef.get(object, this._context, type == XS_TYPE_PROPERTY) : null;
     }
     switch (type) {
       case XS_TYPE_ENTITY:
@@ -40,7 +41,7 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   getLookupRegistry() {
-    return LookupRegistry.$(this._lookupRegistry)
+    return LookupRegistry.$(this._context)
   }
 
 

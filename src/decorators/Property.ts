@@ -1,19 +1,15 @@
-
 import 'reflect-metadata';
 import * as _ from 'lodash';
-import {ClassUtils, MetaArgs} from '@allgemein/base/browser';
+import {ClassUtils} from '@allgemein/base/browser';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
-import {
-  JS_DATA_TYPES,
-  JS_PRIMATIVE_TYPES,
-  METADATA_PROPERTY_KEY,
-  METADATA_SCHEMA_KEY
-} from '../lib/Constants';
+import {JS_DATA_TYPES, JS_PRIMATIVE_TYPES} from '../lib/Constants';
+import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
 
 export function Property(typeOrOptions: IPropertyOptions | Function | string = null) {
   return function (source: any, propertyName: string) {
-    let options: IPropertyOptions = {};
-    // source = ClassUtils.getFunction(source);
+    let options: IPropertyOptions = {
+      target: source.constructor
+    };
 
     if (_.isString(typeOrOptions)) {
       options.type = <JS_DATA_TYPES>typeOrOptions;
@@ -33,7 +29,7 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
       options.type = options.targetClass;
     }
 
-    options.sourceClass = source.constructor;
+
     options.propertyName = propertyName;
 
     if (_.isEmpty(options.type)) {
@@ -52,6 +48,7 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
       }
     }
 
-    MetaArgs.key(METADATA_PROPERTY_KEY).push(options);
+    EntityMetadataRegistry.$().add('property', options);
+
   };
 }

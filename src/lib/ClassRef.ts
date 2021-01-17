@@ -5,7 +5,7 @@ import {
   XS_DEFAULT,
   XS_DEFAULT_SCHEMA,
   XS_GLOBALLY,
-  XS_ID_SEPARATOR,
+  XS_ID_SEPARATOR, XS_TYPE_BINDING_SCHEMA_CLASS_REF,
   XS_TYPE_CLASS_REF,
   XS_TYPE_ENTITY,
   XS_TYPE_PROPERTY,
@@ -17,18 +17,32 @@ import {IEntityRef} from './IEntityRef';
 import {IPropertyRef} from './IPropertyRef';
 import {IClassRef} from './IClassRef';
 import {IBuildOptions} from './IBuildOptions';
-import {IClassRefMetadata} from './IClassRefMetadata';
+import {IClassRefMetadata} from './metadata/IClassRefMetadata';
+import {ISchemaRef} from './ISchemaRef';
 
+/**
+ * Reflective reference to a class function
+ *
+ * There can exist multiple ClassRef depending of context for a single class function.
+ * The context is defined by the lookup registry.
+ * It can be also a placeholder, for a dummy or later loaded class.
+ *
+ * This is a default implementation for IClassRef
+ *
+ */
 export class ClassRef implements IClassRef {
 
   static __inc: number = 0;
 
-  private lookupRegistry: string = XS_DEFAULT;
+  private context: string = XS_DEFAULT;
 
   private readonly idx: number;
 
-  schema: string = XS_DEFAULT_SCHEMA;
+  // schema: string = XS_DEFAULT_SCHEMA;
 
+  /**
+   * Original reference to the class function or the given class name as string
+   */
   originalValue: string | Function;
 
   readonly className: string;
@@ -105,6 +119,12 @@ export class ClassRef implements IClassRef {
   }
 
   setSchema(s: string) {
+    const schema = this.getLookupRegistry().find(XS_TYPE_SCHEMA, (x: ISchemaRef) => x.name === s);
+    if(!schema){
+
+    }
+    const binding = Binding.create(XS_TYPE_SCHEMA, schema, XS_TYPE_CLASS_REF, this);
+    this.getLookupRegistry().find()
     this.schema = s;
   }
 
@@ -189,7 +209,7 @@ export class ClassRef implements IClassRef {
   }
 
 
-  static get(klass: string | Function, registryName: string = XS_DEFAULT, resolve: boolean = false): ClassRef {
+  static get(klass: string | Function | IClassRef, registryName: string = XS_DEFAULT, resolve: boolean = false): ClassRef {
     if (resolve) {
       klass = this.checkIfFunctionCallback(klass);
     }
@@ -206,7 +226,7 @@ export class ClassRef implements IClassRef {
     }
 
     classRef = new ClassRef(klass);
-    classRef.lookupRegistry = registryName;
+    classRef.context = registryName;
     let binding = Binding.create(XS_TYPE_SCHEMA, XS_DEFAULT_SCHEMA, XS_TYPE_CLASS_REF, classRef);
     LookupRegistry.$(registryName).add(binding.bindingType, binding);
     return LookupRegistry.$(registryName).add(XS_TYPE_CLASS_REF, classRef);
@@ -225,7 +245,7 @@ export class ClassRef implements IClassRef {
 
 
   getLookupRegistry() {
-    return LookupRegistry.$(this.lookupRegistry);
+    return LookupRegistry.$(this.context);
   }
 
 
@@ -245,7 +265,7 @@ export class ClassRef implements IClassRef {
   new<T>(): T {
     let klass = this.getClass();
     let instance = Reflect.construct(klass, []);
-    Reflect.defineProperty(instance, 'xs:registry', {value: this.lookupRegistry});
+    Reflect.defineProperty(instance, 'xs:registry', {value: this.context});
     Reflect.defineProperty(instance, 'xs:schema', {value: this.getSchema()});
     Reflect.defineProperty(instance, 'xs:name', {value: this.className});
     return instance;
@@ -268,7 +288,10 @@ export class ClassRef implements IClassRef {
     return <T>SchemaUtils.transform(this, data, options);
   }
 
-
+  /**
+   *
+   * @param follow
+   */
   toJson(follow?: boolean): IClassRefMetadata {
     let meta: IClassRefMetadata = {
       schema: this.getSchema(),

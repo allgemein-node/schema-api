@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {XS_DEFAULT, XS_TYPE} from "./Constants";
+import {XS_DEFAULT} from './Constants';
 
 export class LookupRegistry {
 
@@ -30,14 +30,14 @@ export class LookupRegistry {
     return this.$self[name];
   }
 
-  list(context: XS_TYPE) {
+  list(context: string) {
     if (!_.has(this._entries, context)) {
       this._entries[context] = [];
     }
     return this._entries[context];
   }
 
-  add<T>(context: XS_TYPE, entry: T): T {
+  add<T>(context: string, entry: T): T {
     if (!_.has(this._entries, context)) {
       this._entries[context] = [];
     }
@@ -45,21 +45,21 @@ export class LookupRegistry {
     return entry;
   }
 
-  remove<T>(context: XS_TYPE, search: any): T[] {
+  remove<T>(context: string, search: any): T[] {
     if (!_.has(this._entries, context)) {
       this._entries[context] = [];
     }
     return _.remove<T>(this._entries[context], search);
   }
 
-  filter<T>(context: XS_TYPE, search: any): T[] {
+  filter<T>(context: string, search: any): T[] {
     if (!_.has(this._entries, context)) {
       this._entries[context] = [];
     }
     return _.filter(this._entries[context], search);
   }
 
-  find<T>(context: XS_TYPE, search: any): T {
+  find<T>(context: string, search: any): T {
     if (!_.has(this._entries, context)) {
       this._entries[context] = [];
     }
@@ -87,7 +87,7 @@ export class LookupRegistry {
    * @param context
    * @param search
    */
-  static find<T>(context: XS_TYPE, search: any): T {
+  static find<T>(context: string, search: any): T {
     const registryNames = _.keys(this.$self);
     for (const registryName of registryNames) {
       const found = <T>this.$self[registryName].find(context, search);
@@ -104,8 +104,8 @@ export class LookupRegistry {
    * @param context
    * @param search
    */
-  static filter<T>(context: XS_TYPE, search: any): T[] {
-    const results:T[] = [];
+  static filter<T>(context: string, search: any): T[] {
+    const results: T[] = [];
     const registryNames = _.keys(this.$self);
     for (const registryName of registryNames) {
       const found = <T[]>this.$self[registryName].filter(context, search);

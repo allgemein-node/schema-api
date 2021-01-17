@@ -1,13 +1,11 @@
-
 import {IObjectOptions} from '../lib/options/IObjectOptions';
-import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
-import {METADATA_ENTITY_KEY, METADATA_OBJECT_KEY} from '..';
+import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
 
 
 export function Object(options: IObjectOptions = {}) {
   return function (object: Function) {
-    // classRefGet(object).setOptions(options);
-    MetadataStorage.key(METADATA_OBJECT_KEY).push(options);
+    options.target = object;
+    EntityMetadataRegistry.$().add('object', options);
   };
 }
 

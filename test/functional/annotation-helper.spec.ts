@@ -1,6 +1,9 @@
-import {AnnotationsHelper, ClassRef, XS_ANNOTATION_OPTIONS_CACHE} from '../../src';
+
 import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
 import {suite, test} from '@testdeck/mocha';
+import {AnnotationsHelper} from '../../src/lib/AnnotationsHelper';
+import {XS_ANNOTATION_OPTIONS_CACHE} from '../../src/lib/Constants';
+import {ClassRef} from '../../src/lib/ClassRef';
 
 
 @suite('functional/annotation_helper')

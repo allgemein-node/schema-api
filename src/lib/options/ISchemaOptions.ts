@@ -1,7 +1,7 @@
-export interface ISchemaOptions {
-  sourceClass?: Function;
+import {IAbstractOptions} from './IAbstractOptions';
 
-  name?: string;
+export interface ISchemaOptions extends IAbstractOptions {
 
-  [k: string]: any;
+  name: string;
+
 }

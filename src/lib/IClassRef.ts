@@ -1,6 +1,6 @@
 import {IPropertyRef} from './IPropertyRef';
 import {IBuildOptions} from './IBuildOptions';
-import {IClassRefMetadata} from './IClassRefMetadata';
+import {IClassRefMetadata} from './metadata/IClassRefMetadata';
 import {IBaseRef} from './IBaseRef';
 
 export interface IClassRef extends IBaseRef {

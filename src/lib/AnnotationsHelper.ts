@@ -3,8 +3,9 @@ import {ClassRef} from './ClassRef';
 import {XS_ANNOTATION_OPTIONS_CACHE, XS_TYPE_ENTITY, XS_TYPE_PROPERTY} from './Constants';
 import {IClassRef} from './IClassRef';
 
-import {ClassUtils, MetaArgs} from '@allgemein/base/browser';
+import {ClassUtils} from '@allgemein/base/browser';
 import {IPropertyExtentions} from './IPropertyExtentions';
+import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
 
 
 export class AnnotationsHelper {
@@ -25,7 +26,7 @@ export class AnnotationsHelper {
       }
     }
 
-    MetaArgs.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
+    MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
       type: XS_TYPE_PROPERTY,
       object: source,
       property: property,
@@ -49,7 +50,7 @@ export class AnnotationsHelper {
       }
     }
 
-    MetaArgs.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
+    MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
       type: XS_TYPE_ENTITY,
       object: source,
       options: options
@@ -62,7 +63,7 @@ export class AnnotationsHelper {
     }
 
     const object = classRef.getClass(true);
-    const addOns = _.filter(MetaArgs.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
+    const addOns = _.filter(MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
       property ?
         (classRef.isPlaceholder ? ClassUtils.getClassName(x.object) === classRef.name : x.object === object) &&
         x.property === property &&

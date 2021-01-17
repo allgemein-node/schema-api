@@ -2,7 +2,7 @@ import {IPropertyRef} from "./IPropertyRef";
 import {IClassRef} from "./IClassRef";
 import {IBuildOptions} from "./IBuildOptions";
 import {IBaseRef} from "./IBaseRef";
-import {IEntityRefMetadata} from "./IEntityRefMetadata";
+import {IEntityRefMetadata} from "./metadata/IEntityRefMetadata";
 
 export interface IEntityRef extends IBaseRef {
 

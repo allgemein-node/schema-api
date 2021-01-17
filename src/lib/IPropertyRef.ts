@@ -1,6 +1,6 @@
 import {IClassRef} from "./IClassRef";
 import {IEntityRef} from "./IEntityRef";
-import {IPropertyRefMetadata} from "./IPropertyRefMetadata";
+import {IPropertyRefMetadata} from "./metadata/IPropertyRefMetadata";
 import {IBaseRef} from "./IBaseRef";
 import {IBuildOptions} from "./IBuildOptions";
 
