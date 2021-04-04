@@ -1,11 +1,12 @@
 import {ISchemaOptions} from '../lib/options/ISchemaOptions';
-import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
+import {METATYPE_SCHEMA} from '../lib/Constants';
+import {MetadataRegistry} from '../lib/registry/MetadataRegistry';
 
 
 export function Schema(options: ISchemaOptions) {
   return function (object: Function) {
     options.target = object;
-    EntityMetadataRegistry.$().add('schema', options);
+    MetadataRegistry.$().add(METATYPE_SCHEMA, options);
   };
 }
 

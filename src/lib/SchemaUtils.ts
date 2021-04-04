@@ -1,8 +1,9 @@
-import {IEntityRef} from "./IEntityRef";
-import {IClassRef} from "./IClassRef";
-import * as _ from "lodash";
-import {NotYetImplementedError} from "@allgemein/base/browser";
-import {IBuildOptions} from "./IBuildOptions";
+import * as _ from 'lodash';
+import {NotYetImplementedError} from '@allgemein/base/browser';
+import {C_PROP_NAME, OPT_CREAT_AND_COPY} from './Constants';
+import {IClassRef} from '../api/IClassRef';
+import {IEntityRef} from '../api/IEntityRef';
+import {IBuildOptions} from '../api/IBuildOptions';
 
 export class SchemaUtils {
 
@@ -19,13 +20,13 @@ export class SchemaUtils {
    * @param options: IBuildOptions
    *
    */
-  static transform(entityRef: IEntityRef | IClassRef, data: any, options: IBuildOptions = {}) {
-    let object = entityRef.create();
+  static transform<T>(entityRef: IEntityRef | IClassRef, data: any, options: IBuildOptions = {}): T {
+    let object: T = entityRef.create();
     if (options.beforeBuild) {
-      options.beforeBuild(entityRef, data, object, options)
+      options.beforeBuild(entityRef, data, object, options);
     }
 
-    if (!_.get(options, 'createAndCopy', false)) {
+    if (!_.get(options, OPT_CREAT_AND_COPY, false)) {
 
       for (let p of entityRef.getPropertyRefs()) {
         if ((_.isNull(data[p.name]) || _.isUndefined(data[p.name]))) {
@@ -33,7 +34,7 @@ export class SchemaUtils {
           continue;
         }
         if (p.isReference()) {
-          let ref = p.isEntityReference() ? p.getEntityRef() : p.getTargetRef();
+          let ref = p.getTargetRef();
           if (p.isCollection() || _.isArray(data[p.name])) {
             object[p.name] = [];
             for (let i = 0; i < data[p.name].length; i++) {
@@ -65,7 +66,7 @@ export class SchemaUtils {
     }
 
     if (options.afterBuild) {
-      options.afterBuild(entityRef, data, object, options)
+      options.afterBuild(entityRef, data, object, options);
     }
     return object;
 
@@ -80,17 +81,27 @@ export class SchemaUtils {
     function X() {
     }
 
-    Object.defineProperty(X, 'name', {value: str});
+    Object.defineProperty(X, C_PROP_NAME, {value: str});
     return X;
   }
 
 
-  static interprete(value: string) {
-    // json
-    // date
-    // number
-    //
+  static getInherited(klass: Function) {
+    const proto = Reflect.getPrototypeOf(klass) as any;
+    if (proto.name && !_.isEmpty(proto.name) && proto.name !== Object.name && proto.name !== klass.name) {
+      return proto;
+    }
+    return null;
   }
 
+  //
+  //
+  // static interprete(value: string) {
+  //   // json
+  //   // date
+  //   // number
+  //   //
+  // }
+  //
 
 }

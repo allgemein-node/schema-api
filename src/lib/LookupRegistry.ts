@@ -1,33 +1,33 @@
 import * as _ from 'lodash';
-import {XS_DEFAULT} from './Constants';
+import {DEFAULT_NAMESPACE} from './Constants';
 
 export class LookupRegistry {
 
-  private static $self: { [name: string]: LookupRegistry } = {};
+  private static $self: { [namespace: string]: LookupRegistry } = {};
 
-  private name: string = XS_DEFAULT;
+  private namespace: string = DEFAULT_NAMESPACE;
 
   private _entries: { [context: string]: any[] } = {};
 
-  constructor(name: string) {
-    this.name = name;
+  constructor(namespace: string) {
+    this.namespace = namespace;
   }
 
-  getName(): string {
-    return this.name;
+  getNamespace(): string {
+    return this.namespace;
   }
 
-  static reset(name: string = XS_DEFAULT): void {
-    if (this.$self[name]) {
-      delete this.$self[name];
+  static reset(namespace: string = DEFAULT_NAMESPACE): void {
+    if (this.$self[namespace]) {
+      delete this.$self[namespace];
     }
   }
 
-  static $(name: string = XS_DEFAULT): LookupRegistry {
-    if (!this.$self[name]) {
-      this.$self[name] = new LookupRegistry(name);
+  static $(namespace: string = DEFAULT_NAMESPACE): LookupRegistry {
+    if (!this.$self[namespace]) {
+      this.$self[namespace] = new LookupRegistry(namespace);
     }
-    return this.$self[name];
+    return this.$self[namespace];
   }
 
   list(context: string) {
@@ -67,17 +67,19 @@ export class LookupRegistry {
   }
 
 
+
+
   /**
-   * return lookup registry names
+   * return lookup registry namespaces
    */
-  static getRegistryNames() {
+  static getRegistryNamespaces() {
     return _.keys(this.$self);
   }
 
   /**
    * return lookup registries
    */
-  static getRegistries() {
+  static getLookupRegistries() {
     return _.keys(this.$self).map(x => this.$self[x]);
   }
 
@@ -106,15 +108,17 @@ export class LookupRegistry {
    */
   static filter<T>(context: string, search: any): T[] {
     const results: T[] = [];
-    const registryNames = _.keys(this.$self);
-    for (const registryName of registryNames) {
-      const found = <T[]>this.$self[registryName].filter(context, search);
+    const namespaces = _.keys(this.$self);
+    for (const namespace of namespaces) {
+      const found = <T[]>this.$self[namespace].filter(context, search);
       if (!_.isEmpty(found)) {
         results.push(...found);
       }
     }
     return results;
   }
+
+
 }
 
 

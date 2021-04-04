@@ -1,18 +1,18 @@
-import {XS_TYPE} from "./Constants";
+import {METADATA_AND_BIND_TYPE} from "./Constants";
 
 export class Binding {
 
-  bindingType: XS_TYPE;
+  bindingType: METADATA_AND_BIND_TYPE;
 
-  sourceType: XS_TYPE;
+  sourceType: METADATA_AND_BIND_TYPE;
   source: any;
 
-  targetType: XS_TYPE;
+  targetType: METADATA_AND_BIND_TYPE;
   target: any;
 
-  static create(sType: XS_TYPE, sName: any, tType: XS_TYPE, tName: any) {
+  static create(sType: METADATA_AND_BIND_TYPE, sName: any, tType: METADATA_AND_BIND_TYPE, tName: any) {
     let b = new Binding();
-    b.bindingType = <XS_TYPE>[sType, tType].join('_');
+    b.bindingType = <METADATA_AND_BIND_TYPE>[sType, tType].join('_');
     b.sourceType = sType;
     b.targetType = tType;
     b.source = sName;

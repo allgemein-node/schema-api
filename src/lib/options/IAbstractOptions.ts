@@ -1,14 +1,22 @@
+import {ClassType} from '../Constants';
+
 export interface IAbstractOptions {
 
   /**
    * target option
    */
-  target?: Function;
+  target?: Function | ClassType<any>;
 
   /**
-   * context of this options
+   * metadata type of this options
    */
-  $type?: string;
+  metaType?: string;
+
+
+  /**
+   * namespace for this object
+   */
+  namespace?: string;
 
   [k: string]: any;
 }

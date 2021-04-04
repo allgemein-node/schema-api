@@ -1,10 +1,11 @@
 import {IEntityOptions} from '../lib/options/IEntityOptions';
-import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
+import {METATYPE_ENTITY} from '../lib/Constants';
+import {MetadataRegistry} from '../lib/registry/MetadataRegistry';
 
 export function Entity(options: IEntityOptions = {}) {
   return function (object: Function) {
     options.target = object;
-    EntityMetadataRegistry.$().add('entity', options);
+    MetadataRegistry.$().add(METATYPE_ENTITY, options);
   };
 }
 

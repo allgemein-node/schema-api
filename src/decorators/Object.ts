@@ -1,11 +1,12 @@
 import {IObjectOptions} from '../lib/options/IObjectOptions';
-import {EntityMetadataRegistry} from '../lib/EntityMetadataRegistry';
+import {METATYPE_OBJECT} from '../lib/Constants';
+import {MetadataRegistry} from '../lib/registry/MetadataRegistry';
 
 
 export function Object(options: IObjectOptions = {}) {
   return function (object: Function) {
     options.target = object;
-    EntityMetadataRegistry.$().add('object', options);
+    MetadataRegistry.$().add(METATYPE_OBJECT, options);
   };
 }
 

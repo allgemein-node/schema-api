@@ -1,11 +1,10 @@
 import * as _ from 'lodash';
 import {ClassRef} from './ClassRef';
-import {XS_ANNOTATION_OPTIONS_CACHE, XS_TYPE_ENTITY, XS_TYPE_PROPERTY} from './Constants';
-import {IClassRef} from './IClassRef';
-
-import {ClassUtils} from '@allgemein/base/browser';
-import {IPropertyExtentions} from './IPropertyExtentions';
+import {XS_ANNOTATION_OPTIONS_CACHE, METATYPE_ENTITY, METATYPE_PROPERTY} from './Constants';
+import {ClassUtils} from '@allgemein/base';
 import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
+import {IPropertyExtentions} from '../api/IPropertyExtentions';
+import {IClassRef} from '../api/IClassRef';
 
 
 export class AnnotationsHelper {
@@ -27,7 +26,7 @@ export class AnnotationsHelper {
     }
 
     MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
-      type: XS_TYPE_PROPERTY,
+      type: METATYPE_PROPERTY,
       object: source,
       property: property,
       options: options
@@ -51,7 +50,7 @@ export class AnnotationsHelper {
     }
 
     MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
-      type: XS_TYPE_ENTITY,
+      type: METATYPE_ENTITY,
       object: source,
       options: options
     });
@@ -67,9 +66,9 @@ export class AnnotationsHelper {
       property ?
         (classRef.isPlaceholder ? ClassUtils.getClassName(x.object) === classRef.name : x.object === object) &&
         x.property === property &&
-        x.type == XS_TYPE_PROPERTY :
+        x.type == METATYPE_PROPERTY :
         (classRef.isPlaceholder ? ClassUtils.getClassName(x.object) === classRef.name : x.object === object) &&
-        x.type == XS_TYPE_ENTITY
+        x.type == METATYPE_ENTITY
     );
 
     if (addOns) {

@@ -1,49 +1,55 @@
 import * as _ from 'lodash';
-import {XS_DEFAULT, XS_TYPE, XS_TYPE_ENTITY, XS_TYPE_PROPERTY} from "./Constants";
-import {ClassRef} from "./ClassRef";
-import {LookupRegistry} from "./LookupRegistry";
-import {IBaseRef} from "./IBaseRef";
-import {AnnotationsHelper} from "./AnnotationsHelper";
-import {IClassRef} from './IClassRef';
+import {DEFAULT_NAMESPACE, METADATA_AND_BIND_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY} from './Constants';
+import {ClassRef} from './ClassRef';
+import {AnnotationsHelper} from './AnnotationsHelper';
+import {IBaseRef} from '../api/IBaseRef';
+import {IClassRef} from '../api/IClassRef';
+import {RegistryFactory} from './registry/RegistryFactory';
 
 
-export abstract class AbstractRef implements IBaseRef {
+export abstract class AbstractRef<OPTS> implements IBaseRef {
 
-  private readonly _baseType: XS_TYPE;
+  readonly metaType: METADATA_AND_BIND_TYPE;
 
-  private _context: string = XS_DEFAULT;
+  private namespace: string = DEFAULT_NAMESPACE;
 
-  private _options: any = {};
+  options: OPTS = <any>{};
 
   readonly name: string;
 
   readonly object: IClassRef;
 
 
-  constructor(type: XS_TYPE, name: string, object: IClassRef | Function | string = null, context: string = XS_DEFAULT) {
-    this._context = context;
-    this._baseType = type;
+  constructor(type: METADATA_AND_BIND_TYPE,
+              name: string,
+              object: IClassRef | Function | string = null,
+              namespace: string = DEFAULT_NAMESPACE) {
+    this.namespace = namespace;
+    this.metaType = type;
     this.name = name;
     if (object instanceof ClassRef) {
       this.object = object;
     } else {
-      this.object = object ? ClassRef.get(object, this._context, type == XS_TYPE_PROPERTY) : null;
+      this.object = object ? this.getClassRefFor(object, type) : null;
     }
     switch (type) {
-      case XS_TYPE_ENTITY:
-        AnnotationsHelper.merge(this.object, this._options);
+      case METATYPE_ENTITY:
+        AnnotationsHelper.merge(this.object, this.options);
         break;
-      case XS_TYPE_PROPERTY:
-        AnnotationsHelper.merge(this.object, this._options, this.name);
+      case METATYPE_PROPERTY:
+        AnnotationsHelper.merge(this.object, this.options, this.name);
         break;
     }
   }
 
-
-  getLookupRegistry() {
-    return LookupRegistry.$(this._context)
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE) {
+    return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 
+
+  getRegistry() {
+    return RegistryFactory.get(this.namespace);
+  }
 
   getSourceRef() {
     return this.object;
@@ -52,20 +58,20 @@ export abstract class AbstractRef implements IBaseRef {
 
   setOptions(opts: any) {
     if (opts && !_.isEmpty(_.keys(opts))) {
-      if (!_.isEmpty(_.keys(this._options))) {
-        this._options = _.merge(this._options, opts);
+      if (!_.isEmpty(_.keys(this.options))) {
+        this.options = _.merge(this.options, opts);
       } else {
-        this._options = opts;
+        this.options = opts;
       }
     }
   }
 
 
   setOption(key: string, value: any) {
-    if (!this._options) {
-      this._options = {};
+    if (!this.options) {
+      this.options = <any>{};
     }
-    _.set(this._options, key, value);
+    _.set(<any>this.options, key, value);
   }
 
 
@@ -93,33 +99,28 @@ export abstract class AbstractRef implements IBaseRef {
   }
 
 
-  get baseType() {
-    return this._baseType;
-  }
-
-
-  getOptions(key: string = null, defaultValue: any = null) {
+  getOptions(key: string = null, defaultValue: any = null): any | OPTS {
     if (key) {
-      return _.get(this._options, key, defaultValue);
+      return _.get(this.options, key, defaultValue);
     }
-    return this._options;
+    return this.options;
   }
 
 
   abstract id(): string;
 
 
-  toJson() {
-    let options = _.cloneDeep(this.getOptions());
-    let o: any = {
-      id: this.id(),
-      name: this.name,
-      type: this.baseType,
-      machineName: this.machineName,
-      options: options
-    };
-    return o;
-  }
+  // toJson() {
+  //   let options = _.cloneDeep(this.getOptions());
+  //   let o: any = {
+  //     id: this.id(),
+  //     name: this.name,
+  //     type: this.metaType,
+  //     machineName: this.machineName,
+  //     options: options
+  //   };
+  //   return o;
+  // }
 
 }
 

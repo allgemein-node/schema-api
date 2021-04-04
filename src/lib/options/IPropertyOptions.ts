@@ -5,5 +5,7 @@ export interface IPropertyOptions extends IAbstractOptions {
 
   propertyName?: string;
 
+  cardinality?: number;
+
   type?: JS_DATA_TYPES | any;
 }

@@ -1,24 +1,19 @@
 import {IClassRef} from "./IClassRef";
-import {IEntityRef} from "./IEntityRef";
-import {IPropertyRefMetadata} from "./metadata/IPropertyRefMetadata";
 import {IBaseRef} from "./IBaseRef";
 import {IBuildOptions} from "./IBuildOptions";
 
 export interface IPropertyRef extends IBaseRef {
 
-  label(): string;
-
   isIdentifier(): boolean;
 
   isReference(): boolean;
 
-  isEntityReference(): boolean;
-
-  getEntityRef(): IEntityRef;
-
   getType(): string;
 
-  getSourceRef(): IClassRef;
+  /**
+   * get class ref of the property
+   */
+  getClassRef(): IClassRef;
 
   getTargetRef(): IClassRef;
 
@@ -26,7 +21,7 @@ export interface IPropertyRef extends IBaseRef {
 
   convert(i: any, options?: IBuildOptions): any;
 
-  toJson(follow?: boolean): IPropertyRefMetadata;
+  // toJson(follow?: boolean): IPropertyRefMetadata;
 
   get(instance: any): any;
 }

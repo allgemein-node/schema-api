@@ -1,4 +1,5 @@
-import {XS_TYPE} from "./Constants";
+import {METADATA_AND_BIND_TYPE} from '../lib/Constants';
+
 
 export interface IBaseRef {
 
@@ -17,8 +18,10 @@ export interface IBaseRef {
    */
   machineName: string;
 
-
-  baseType: XS_TYPE;
+  /**
+   * meta data tpye
+   */
+  metaType: METADATA_AND_BIND_TYPE;
 
   /**
    * Unique identifier
