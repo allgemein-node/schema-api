@@ -1,73 +1,153 @@
-import * as _ from 'lodash';
 import {suite, test} from '@testdeck/mocha';
-import {EntityMetadataRegistry} from '../../src/lib/EntityMetadataRegistry';
+import {PlainObject} from './data/classes/PlainObject';
+import {expect} from 'chai';
+import {JsonSchemaSerializer} from '../../src/lib/converter/JsonSchemaSerializer';
+import 'reflect-metadata';
+import {ExtendedObject} from './data/classes/ExtendedObject';
+import {ObjectWithInitProp} from './data/classes/ObjectWithInitProp';
+import {ClassRef} from '../../src/lib/ClassRef';
+import {AnnotatedPrimatives2} from './data/classes/AnnotatedPrimatives';
 import {inspect} from 'util';
-import {JsonSchemaConverter} from '../../src/lib/converter/JsonSchemaConverter';
 
-
-@suite('functional/schema')
+@suite('functional/json-schema')
 class JsonSchemaSpec {
 
-  static before() {
-    require('./schema/simple/SimpleEntity').SimpleEntity;
-  }
-
   /**
-   * TODO test the different propery types
-   *
-   *   | 'string'
-   | 'number'
-   | 'integer'
-   | 'boolean'
-   | 'object'
-   | 'array'
-   | 'null';
-   *
+   * Generate json schema for simple plain object without properties.
    */
   @test
-  async 'simple entity to json schema'() {
-    const registry = EntityMetadataRegistry.$();
-    // const registry = EntityMetadataRegistry.$().getMetadata();
-    console.log(inspect(registry.getMetadata(), false, 10));
-
-
-    const entitySchemas = [];
-    const targets = registry.getTargets();
-    for (const target of targets) {
-
-      const entries = registry.getByTarget(target);
-
-      const entitySchema = JsonSchemaConverter.toJSONSchema(target, entries);
-      if (_.isArray(entitySchema)) {
-        entitySchemas.push(...entitySchema);
-      } else {
-        entitySchemas.push(entitySchema);
+  async 'generate json schema for simple plain object without properties'() {
+    const serializer = new JsonSchemaSerializer();
+    const schema = serializer.serialize(PlainObject);
+    expect(schema).to.be.deep.eq({
+      '$ref': '#/definitions/PlainObject',
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        PlainObject: {type: 'object', '$target': PlainObject, properties: {}}
       }
-
-    }
-
-    console.log(inspect(entitySchemas, false, 10));
-
+    });
   }
 
-  @test
-  async 'interprete json schema as simple entity'() {
 
+  /**
+   * Generate json schema for extend object
+   */
+  @test
+  async 'generate simple schema for extended object'() {
+    const serializer = new JsonSchemaSerializer();
+    const schema = serializer.serialize(ExtendedObject);
+    expect(schema).to.be.deep.eq({
+        '$ref': '#/definitions/ExtendedObject',
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          ExtendedObject: {
+            type: 'object',
+            $target: ExtendedObject,
+            properties: {},
+            allOf: [{$ref: '#/definitions/PlainObject'}]
+          },
+          PlainObject: {
+            type: 'object',
+            $target: PlainObject,
+            properties: {},
+          }
+
+        }
+      }
+    );
   }
 
-  @test
-  async 'complex entity with relations to json schema'() {
 
+  /**
+   * Generate json schema for extend object
+   */
+  @test
+  async 'generate schema for class with properties'() {
+    const serializer = new JsonSchemaSerializer();
+    const schema = serializer.serialize(ObjectWithInitProp);
+    expect(schema).to.be.deep.eq({
+      '$ref': '#/definitions/ObjectWithInitProp',
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'definitions': {
+        'ObjectWithInitProp': {
+          '$target': ObjectWithInitProp,
+          'properties': {
+            'arrValue': {
+              'type': 'array'
+            },
+            'boolValue': {
+              'type': 'boolean',
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string'
+            },
+            'numericValue': {
+              'type': 'number'
+            },
+            'objArrValue': {
+              'type': 'array'
+            },
+            'objValue': {
+              'type': 'object'
+            },
+            'plainObjArrValue': {
+              'type': 'array'
+            },
+            'plainObjValue': {
+              '$target': PlainObject,
+              'type': 'object',
+              $ref: '#/definitions/PlainObject'
+            },
+            'stringValue': {
+              'type': 'string'
+            },
+          },
+          'type': 'object'
+        }
+      }
+    });
   }
 
+
+  /**
+   * Generate json schema for extend object
+   */
   @test
-  async 'interprete json schema as complex entity'() {
+  async 'generate schema for annotated class ref with primative properties'() {
+    const serializer = new JsonSchemaSerializer();
+    const ref = ClassRef.get(AnnotatedPrimatives2);
 
-  }
-
-  @test
-  async 'entity in multiple schema'() {
-
+    const schema = serializer.serialize(ref);
+    console.log(inspect(schema, false, 10));
+    expect(schema).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      '$ref': '#/definitions/AnnotatedPrimatives2',
+      'definitions': {
+        'AnnotatedPrimatives2': {
+          '$target': ref,
+          'properties': {
+            'boolValue': {
+              'type': 'boolean'
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string'
+            },
+            'nullValue': {
+              'type': 'string'
+            },
+            'numberValue': {
+              'type': 'number'
+            },
+            'strValue': {
+              'type': 'string'
+            }
+          },
+          'type': 'object'
+        }
+      }
+    });
   }
 }
 
