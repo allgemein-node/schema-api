@@ -3,6 +3,7 @@ import {IPropertyRef} from './IPropertyRef';
 import {METADATA_AND_BIND_TYPE} from '../lib/Constants';
 import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
+import {IBaseRef} from './IBaseRef';
 
 /**
  *
@@ -29,6 +30,9 @@ export interface ILookupRegistry {
   listProperties(filter?: (x: IPropertyRef) => boolean): IPropertyRef[];
 
   getPropertyRefs(ref: IClassRef | IEntityRef): IPropertyRef[];
+
+
+  create<T>(context: string, options: any): T;
 
   /**
    * Add some entries of given context (mostly passing to same method of LookupRegistry)

@@ -46,6 +46,9 @@ export abstract class AbstractRef<OPTS> implements IBaseRef {
     return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 
+  getNamespace() {
+    return this.namespace;
+  }
 
   getRegistry() {
     return RegistryFactory.get(this.namespace);

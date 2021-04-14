@@ -1,3 +1,5 @@
+import {IClassRef} from '../api/IClassRef';
+
 export const DEFAULT_NAMESPACE = 'default';
 
 // export const XS_GLOBAL = 'default';
@@ -93,3 +95,10 @@ export const C_PROP_NAME = 'name';
 export const __CLASS__ = '__CLASS__';
 export const __NS__ = '__NS__';
 export const OPT_CREAT_AND_COPY = 'createAndCopy';
+export type CLASS_TYPE = Function | ClassType<any>;
+
+
+export interface IMinMax {
+  min: number;
+  max: number;
+}

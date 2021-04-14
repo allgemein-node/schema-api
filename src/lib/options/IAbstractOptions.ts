@@ -1,4 +1,5 @@
 import {ClassType} from '../Constants';
+import {IClassRef} from '../../api/IClassRef';
 
 export interface IAbstractOptions {
 
@@ -18,5 +19,8 @@ export interface IAbstractOptions {
    */
   namespace?: string;
 
+  /**
+   * default key definitions
+   */
   [k: string]: any;
 }

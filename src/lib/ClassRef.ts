@@ -17,6 +17,7 @@ import {IEntityRef} from '../api/IEntityRef';
 import {IPropertyRef} from '../api/IPropertyRef';
 import {IBuildOptions} from '../api/IBuildOptions';
 import {RegistryFactory} from './registry/RegistryFactory';
+import {MetadataRegistry} from './registry/MetadataRegistry';
 
 /**
  * Reflective reference to a class function
@@ -47,22 +48,25 @@ export class ClassRef implements IClassRef {
 
   private _cacheEntity: IEntityRef;
 
-  private _options: any = {};
+  private _cachedOptions: any;
 
   isEntity: boolean = false;
 
-  isPlaceholder: boolean = false;
+  private _isPlaceholder: boolean = false;
+
+  private _isAnonymous: boolean = false;
 
   readonly metaType = METATYPE_CLASS_REF;
 
   extends: IClassRef[] = [];
 
   constructor(klass: string | Function, namespace: string = DEFAULT_NAMESPACE) {
+    this._isAnonymous = _.isFunction(klass) && klass.name === 'anonymous';
     this.className = ClassRef.getClassName(klass);
     this.namespace = namespace;
     if (_.isString(klass)) {
       this.originalValue = klass;
-      this.isPlaceholder = true;
+      this._isPlaceholder = true;
     } else {
       this.originalValue = ClassUtils.getFunction(klass);
     }
@@ -70,6 +74,13 @@ export class ClassRef implements IClassRef {
 
   }
 
+  isPlaceholder() {
+    return this._isPlaceholder;
+  }
+
+  isAnonymous() {
+    return this._isAnonymous;
+  }
 
   static getClassName(k: any) {
     if (k[__CLASS__]) {
@@ -81,27 +92,40 @@ export class ClassRef implements IClassRef {
 
   updateClass(cls: Function) {
     this.originalValue = ClassUtils.getFunction(cls);
-    this.isPlaceholder = false;
+    this._isPlaceholder = false;
+  }
+
+  private getOptionsEntry() {
+    if (!this._cachedOptions) {
+      this._cachedOptions = MetadataRegistry.$().find(METATYPE_CLASS_REF, (x: any) => x.target === this.getClass(true));
+      if (!this._cachedOptions) {
+        this._cachedOptions = {target: this.getClass(true)};
+        MetadataRegistry.$().add(METATYPE_CLASS_REF, this._cachedOptions);
+      }
+    }
+    return this._cachedOptions;
   }
 
   getOptions(key?: string): any {
     if (key) {
-      return _.get(this._options, key);
+      return _.get(this.getOptionsEntry(), key);
     }
-    return this._options;
+    return this.getOptionsEntry();
   }
 
   setOptions(options: any) {
     if (options && !_.isEmpty(_.keys(options))) {
-      this._options = options;
+      const opts = this.getOptionsEntry();
+      for (const k of _.keys(opts)) {
+        delete opts[k];
+      }
+      _.assign(opts, options);
     }
   }
 
   setOption(key: string, value: any) {
-    if (!this._options) {
-      this._options = {};
-    }
-    _.set(this._options, key, value);
+    const opts = this.getOptionsEntry();
+    _.set(opts, key, value);
   }
 
   get name() {
@@ -110,19 +134,19 @@ export class ClassRef implements IClassRef {
 
 
   get storingName() {
-    let name = _.get(this._options, C_PROP_NAME, this.className);
+    let name = _.get(this._cachedOptions, C_PROP_NAME, this.className);
     return _.snakeCase(name);
   }
 
   set storingName(v: string) {
-    _.set(this._options, C_PROP_NAME, v);
+    _.set(this._cachedOptions, C_PROP_NAME, v);
   }
 
   /**
    * Check if name is passed by options
    */
   hasName() {
-    return _.has(this._options, C_PROP_NAME);
+    return _.has(this._cachedOptions, C_PROP_NAME);
   }
 
   /**
@@ -153,20 +177,32 @@ export class ClassRef implements IClassRef {
         this.originalValue = SchemaUtils.clazz(this.originalValue);
         return this.originalValue;
       }
+      // } else if (_.isObjectLike(this.originalValue) && this.isPlaceholder) {
+      //   return this.originalValue as Function;
     }
     throw new NotYetImplementedError('getClass for ' + this.originalValue);
   }
 
 
   static find(klass: string | Function, namespace: string = DEFAULT_NAMESPACE): ClassRef {
-    let name = ClassRef.getClassName(klass);
-    let classRef = null;
-    if (namespace === GLOBAL_NAMESPACE) {
-      classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className == name);
+    if (_.isString(klass)) {
+      let name = ClassRef.getClassName(klass);
+      let classRef = null;
+      if (namespace === GLOBAL_NAMESPACE) {
+        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className === name);
+      } else {
+        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className === name);
+      }
+      return classRef;
     } else {
-      classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className == name);
+      let classRef = null;
+      if (namespace === GLOBAL_NAMESPACE) {
+        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.getClass(true) === klass);
+      } else {
+        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.getClass(true) === klass);
+      }
+      return classRef;
     }
-    return classRef;
   }
 
 
@@ -226,9 +262,12 @@ export class ClassRef implements IClassRef {
     if (resolve) {
       klass = this.checkIfFunctionCallback(klass);
     }
+
+    const isAnonymous = _.isFunction(klass) && klass.name === 'anonymous';
+
     let classRef = this.find(klass, namespace);
     if (classRef) {
-      if (classRef.isPlaceholder && _.isFunction(klass)) {
+      if (classRef.isPlaceholder && _.isFunction(klass) && !isAnonymous) {
         classRef.updateClass(klass);
       }
       return classRef;
@@ -366,6 +405,7 @@ export class ClassRef implements IClassRef {
    */
   addExtend(ref: IClassRef) {
     this.extends.push(ref);
+    return ref;
   }
 
 }

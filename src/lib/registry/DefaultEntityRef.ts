@@ -14,6 +14,7 @@ export class DefaultEntityRef extends AbstractRef<IEntityOptions> implements IEn
     this.setOptions(options);
   }
 
+
   build<T>(instance: any, options?: IBuildOptions): T {
     return SchemaUtils.transform(this, instance, options);
   }

@@ -11,6 +11,8 @@ export function isEntityRef(x: any): x is IEntityRef {
 
 export interface IEntityRef extends IBaseRef {
 
+  getNamespace(): string;
+
   getPropertyRef(name: string): IPropertyRef;
 
   getPropertyRefs(): IPropertyRef[];

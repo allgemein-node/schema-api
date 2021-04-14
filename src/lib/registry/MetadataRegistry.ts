@@ -2,7 +2,14 @@
  * Handler for metadata
  */
 import * as _ from 'lodash';
-import {C_EVENT_ADD, C_EVENT_REMOVE, METADATA_REGISTRY, METADATA_TYPE, METATYPE_SCHEMA} from './../Constants';
+import {
+  C_EVENT_ADD,
+  C_EVENT_REMOVE,
+  CLASS_TYPE,
+  METADATA_REGISTRY,
+  METADATA_TYPE,
+  METATYPE_SCHEMA
+} from './../Constants';
 import {IEntityOptions} from './../options/IEntityOptions';
 import {IPropertyOptions} from './../options/IPropertyOptions';
 import {ISchemaOptions} from './../options/ISchemaOptions';
@@ -78,7 +85,6 @@ export class MetadataRegistry extends EventEmitter {
     if (!_.isEmpty(remove) && trigger) {
       this.emit(C_EVENT_REMOVE, context, remove);
     }
-
   }
 
   // private update(context: METADATA_TYPE) {
@@ -86,19 +92,26 @@ export class MetadataRegistry extends EventEmitter {
   // }
 
   getByContext<T extends IAbstractOptions>(context: METADATA_TYPE): T[] {
-    return <T[]>this.metadata.filter(x => x.metaType === context);
+    return <T[]>this.metadata.filter(x =>
+      x.metaType === context
+    );
   }
 
   getTargets() {
     return this.targets;
   }
 
-  getByContextAndTarget<T extends IAbstractOptions>(context: METADATA_TYPE, target: any): T[] {
-    return <T[]>this.metadata.filter(x => x.metaType === context && x.target === target);
+  getByContextAndTarget<T extends IAbstractOptions>(context: METADATA_TYPE, target: CLASS_TYPE): T[] {
+    return <T[]>this.metadata.filter(x =>
+      x.metaType === context &&
+      x.target === target
+    );
   }
 
-  getByTarget(target: any) {
-    return this.metadata.filter(x => x.target === target);
+  getByTarget(target: CLASS_TYPE) {
+    return this.metadata.filter(x =>
+      x.target === target
+    );
   }
 
   private createSearchFunction(find: any) {
@@ -112,12 +125,13 @@ export class MetadataRegistry extends EventEmitter {
     return lookup;
   }
 
-  find(context: METADATA_TYPE, find: any) {
+
+  find(context: METADATA_TYPE, find: CLASS_TYPE) {
     const lookup = this.createSearchFunction(find);
     return this.metadata.find((x => x.metaType === context && lookup(x)));
   }
 
-  filter(context: METADATA_TYPE, find: any) {
+  filter(context: METADATA_TYPE, find: CLASS_TYPE) {
     const lookup = this.createSearchFunction(find);
     return this.metadata.filter((x => x.context === context && lookup(x)));
   }

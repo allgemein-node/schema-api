@@ -16,7 +16,7 @@ import {
 import {IPropertyOptions} from './../options/IPropertyOptions';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
-import {IClassRef} from '../../api/IClassRef';
+import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {LookupRegistry} from '../LookupRegistry';
 import {MetadataRegistry} from './MetadataRegistry';
@@ -24,11 +24,11 @@ import {DefaultPropertyRef} from './DefaultPropertyRef';
 import {ClassRef} from '../ClassRef';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {DefaultEntityRef} from './DefaultEntityRef';
-import {JsonSchemaSerializer} from '../converter/JsonSchemaSerializer';
 import {hasClassPropertiesInDefinition, IJsonSchema7} from '../metadata/JsonSchema7';
 import {ISchemaOptions} from '../options/ISchemaOptions';
 import {IObjectOptions} from '../options/IObjectOptions';
 import {ClassUtils} from '@allgemein/base/browser';
+import {JsonSchema} from '../json-schema/JsonSchema';
 
 
 /**
@@ -67,10 +67,10 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
       if (find) {
         // update
       } else {
-        this.createPropertyForOptions(options);
+        this.create(context, options);
       }
     } else if (context === 'entity') {
-      this.createEntityForOptions(options);
+      this.create(context, options);
     }
   }
 
@@ -173,8 +173,8 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    * Create properties for class or entity ref.
    */
   createPropertiesForRef(clsRef: IClassRef): DefaultPropertyRef[] {
-    const cls = clsRef.getClass();
-    const jsonSchema = (new JsonSchemaSerializer).describeClass(cls);
+    const cls = clsRef.getClass(true);
+    const jsonSchema = JsonSchema.serialize(cls);
     const propOptions: IPropertyOptions[] = [];
     const metaPropOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_PROPERTY, cls) as IPropertyOptions[];
     if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
@@ -265,6 +265,23 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
     return this.filter(METATYPE_PROPERTY, filter);
   }
 
+
+  create<T>(context: string, options: any): T {
+    switch (context as METADATA_TYPE) {
+      case 'class_ref':
+        break;
+      case 'entity':
+        if(isClassRef(options)){
+          return <any>this.createEntityForRef(options);
+        }else{
+          return <any>this.createEntityForOptions(options);
+        }
+      case 'property':
+        return <any>this.createPropertyForOptions(options);
+    }
+
+    return null;
+  }
 
   /**
    * TODO

@@ -6,7 +6,7 @@ import {ILookupRegistry} from './ILookupRegistry';
 
 export function isClassRef(x: any): x is IClassRef {
   if (x !== undefined) {
-    return (x as IClassRef).getClass !== undefined && (x as IClassRef).getPropertyRefs !== undefined;
+    return (x as IClassRef).getClass !== undefined && (x as IClassRef).getPropertyRefs !== undefined && x.getClassRef === undefined;
   }
   return false;
 }
@@ -14,7 +14,9 @@ export function isClassRef(x: any): x is IClassRef {
 
 export interface IClassRef extends IBaseRef {
 
-  isPlaceholder: boolean;
+  isPlaceholder(): boolean;
+
+  isAnonymous(): boolean;
 
   getClass(create?: boolean): Function;
 
@@ -35,6 +37,8 @@ export interface IClassRef extends IBaseRef {
   getExtend(): IClassRef;
 
   getExtends(): IClassRef[];
+
+  addExtend(ref: IClassRef): IClassRef;
 
   // toJson(withProperties?: boolean): IClassRefMetadata;
 
