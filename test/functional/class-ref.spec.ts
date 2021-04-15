@@ -12,6 +12,8 @@ import {DynamicObject} from './data/classes/DynamicObject';
 import {AnnotatedProperties} from './data/classes/AnnotatedProperties';
 import {AnnotatedObjectWithRefs} from './data/classes/AnnotatedPropertiesWithRefs';
 import {AnnotatedPrimatives} from './data/classes/AnnotatedPrimatives';
+import {PlainObject02} from './data/classes/PlainObject02';
+import {ObjectWithInitProp02} from './data/classes/ObjectWithInitProp02';
 
 
 @suite('functional/class-ref')
@@ -39,18 +41,18 @@ class ClassRefSpec {
   async 'create class ref for plain class dynamically properties'() {
     // declaring property
     MetadataRegistry.$().add(METATYPE_PROPERTY, <IPropertyOptions>{
-      target: PlainObject,
+      target: PlainObject02,
       propertyName: 'dynaProp'
     }, false);
 
-    const classRef = ClassRef.get(PlainObject);
+    const classRef = ClassRef.get(PlainObject02);
     const namespace = classRef.getNamespace();
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
     const refs = classRef.getPropertyRefs();
     expect(refs).to.have.length(1);
 
     // remove
-    MetadataRegistry.$().remove(METATYPE_PROPERTY, x => x.propertyName === 'dynaProp' && x.target === PlainObject, false);
+    MetadataRegistry.$().remove(METATYPE_PROPERTY, x => x.propertyName === 'dynaProp' && x.target === PlainObject02, false);
 
     // TODO create new
 
@@ -75,15 +77,16 @@ class ClassRefSpec {
    */
   @test
   async 'override create class ref from plain class with initialized property'() {
-    MetadataRegistry.$().add(METATYPE_PROPERTY, <IPropertyOptions>{
-      target: ObjectWithInitProp,
-      propertyName: 'plainObjArrValue',
-      type: 'array',
-      $target: PlainObject,
-      // items: {$ref: PlainObject}
-    });
+    MetadataRegistry.$()
+      .add(METATYPE_PROPERTY,
+        <IPropertyOptions>{
+          target: ObjectWithInitProp02,
+          propertyName: 'plainObjArrValue',
+          type: 'array',
+          $target: PlainObject
+        }, false);
 
-    const classRef = ClassRef.get(ObjectWithInitProp);
+    const classRef = ClassRef.get(ObjectWithInitProp02);
     const namespace = classRef.getNamespace();
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
     const refs = classRef.getPropertyRefs();
@@ -93,14 +96,13 @@ class ClassRefSpec {
     MetadataRegistry.$().remove(METATYPE_PROPERTY,
       x =>
         x.propertyName === 'plainObjArrValue' &&
-        x.target === ObjectWithInitProp
+        x.target === ObjectWithInitProp02
     );
   }
 
 
   @test
   async 'dynamically attach property on already created class ref'() {
-
     const classRef = ClassRef.get(DynamicObject);
     const namespace = classRef.getNamespace();
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
@@ -260,7 +262,6 @@ class ClassRefSpec {
     expect(prop.isReference()).to.be.true;
 
   }
-
 
 
   @test

@@ -5,11 +5,17 @@ import {expect} from 'chai';
 import {JsonSchema} from '../../src/lib/json-schema/JsonSchema';
 import {IJsonSchema7} from '../../src/lib/metadata/JsonSchema7';
 import {IClassRef, isClassRef} from '../../src/api/IClassRef';
-import {DEFAULT_NAMESPACE} from '../../src/lib/Constants';
+import {DEFAULT_NAMESPACE, METATYPE_CLASS_REF} from '../../src/lib/Constants';
 import {IEntityRef, isEntityRef} from '../../src/api/IEntityRef';
+import {inspect} from 'util';
+import {PlainObject} from './data/classes/PlainObject';
+import {ExtendedObject} from './data/classes/ExtendedObject';
+import {ObjectWithInitProp} from './data/classes/ObjectWithInitProp';
+import {ClassRef} from '../../src/lib/ClassRef';
+import {AnnotatedPrimatives2} from './data/classes/AnnotatedPrimatives';
 
-@suite('functional/json-schema-draft-07-unserialize')
-class JsonSchemaDraft07UnSerializeSpec {
+@suite('functional/json-schema-draft-07')
+class JsonSchemaDraft07SerializationSpec {
 
   @test
   async 'parse json schema and create class ref'() {
@@ -339,41 +345,346 @@ class JsonSchemaDraft07UnSerializeSpec {
     expect(_.first(properties).getType()).to.be.eq('string');
   }
 
-  @test.skip
-  async 'parse json schema with ref to follow files'() {
 
-
-  }
-
-  @test.skip
+  @test
   async 'parse json schema with ref to follow http'() {
-
-
+    const json: IJsonSchema7 = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      $ref: 'https://raw.githubusercontent.com/allgemein-node/schema-api/master/test/functional/data/json/person.schema.json'
+    };
+    const classRef = await JsonSchema.unserialize(json) as IEntityRef;
+    expect(isEntityRef(classRef)).to.be.true;
+    expect(isClassRef(classRef)).to.be.false;
+    expect(classRef.name).to.be.eq('Person');
+    expect(classRef.getClassRef().getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+    let properties = classRef.getClassRef().getPropertyRefs();
+    expect(properties).to.have.length(4);
+    expect(_.first(properties).name).to.be.eq('firstname');
+    expect(_.first(properties).getType()).to.be.eq('string');
   }
 
 
-  @test.skip
+  @test
+  async 'parse json schema with ref to follow files'() {
+    const json: IJsonSchema7 = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      $ref: 'file:///' + __dirname + '/data/json/person.schema.json'
+    };
+    const classRef = await JsonSchema.unserialize(json, {
+      className: 'PersonSecond',
+      ignoreDeclared: true
+    }) as IEntityRef;
+    expect(isEntityRef(classRef)).to.be.true;
+    expect(isClassRef(classRef)).to.be.false;
+    expect(classRef.name).to.be.eq('PersonSecond');
+    expect(classRef.getClassRef().getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+    let properties = classRef.getClassRef().getPropertyRefs();
+    expect(properties).to.have.length(4);
+    expect(_.first(properties).name).to.be.eq('firstname');
+    expect(_.first(properties).getType()).to.be.eq('string');
+  }
+
+
+  @test
   async 'parse json schema with in namespace with already existing class name'() {
+    const json: IJsonSchema7 = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      title: 'Car',
+      type: 'object',
+      properties: {
+        label: {
+          type: 'string'
+        }
+      }
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {rootAsEntity: false}) as IClassRef;
+    expect(isClassRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.name).to.be.eq(json.title);
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
 
+    let classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
+    expect(classRefs).to.have.length(1);
+
+    const classRefSecond = await JsonSchema.unserialize(json, {rootAsEntity: false, forceClassRefCreation: false});
+    expect(isClassRef(classRefSecond)).to.be.true;
+    expect(classRefSecond.name).to.be.eq(json.title);
+    expect(classRefSecond.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+
+    classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
+    expect(classRefs).to.have.length(1);
+
+    const classRefThird = await JsonSchema.unserialize(json, {rootAsEntity: false, forceClassRefCreation: true});
+    expect(isClassRef(classRefThird)).to.be.true;
+    expect(classRefThird.name).to.be.eq(json.title);
+    expect(classRefThird.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+
+    classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
+    expect(classRefs).to.have.length(2);
 
   }
 
 
-  @test.skip
+  @test
   async 'parse json schema with unknown options for class ref'() {
-
-
+    const json: IJsonSchema7 & any = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      title: 'HiddenData',
+      hidden: 'data',
+      properties: {}
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {rootAsEntity: false}) as IClassRef;
+    expect(isClassRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+    const opts = classRefFirst.getOptions();
+    expect(opts.hidden).to.be.eq('data');
   }
 
-  @test.skip
+  @test
   async 'parse json schema with unknown options for entity ref'() {
-
-
+    const json: IJsonSchema7 & any = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      title: 'HiddenData2',
+      hidden: 'data2',
+      properties: {}
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {forceClassRefCreation: true}) as IClassRef;
+    expect(isEntityRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+    const opts = classRefFirst.getOptions();
+    expect(opts.hidden).to.be.eq('data2');
   }
 
-  @test.skip
+  @test
   async 'parse json schema with unknown options for properties'() {
+    const json: IJsonSchema7 & any = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      title: 'HiddenData3',
+      properties: {
+        hiddenValue: {
+          type: 'string',
+          hallo: 'welt'
+        }
+      }
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {forceClassRefCreation: true}) as IClassRef;
+    expect(isEntityRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
 
+    const properties = classRefFirst.getPropertyRefs();
+    expect(properties).to.have.length(1);
+    const options = properties.map(x => x.getOptions()).shift();
+    expect(options.hallo).to.be.eq('welt');
 
   }
+
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'generate json schema for simple plain object without properties'() {
+    const schema = JsonSchema.serialize(PlainObject);
+    expect(schema).to.be.deep.eq({
+      $ref: '#/definitions/PlainObject',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        PlainObject: {
+          type: 'object',
+          title: 'PlainObject',
+          properties: {}
+        }
+      }
+    });
+  }
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'generate json schema for simple plain object without properties and attach target'() {
+    const schema = JsonSchema.serialize(PlainObject, {appendTarget: true});
+    expect(schema).to.be.deep.eq({
+      $ref: '#/definitions/PlainObject',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        PlainObject: {
+          type: 'object',
+          title: 'PlainObject',
+          $target: PlainObject,
+          properties: {}
+        }
+      }
+    });
+  }
+
+  @test
+  async 'generate simple schema for extended object'() {
+    const schema = JsonSchema.serialize(ExtendedObject);
+    expect(schema).to.be.deep.eq({
+        $ref: '#/definitions/ExtendedObject',
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          ExtendedObject: {
+            type: 'object',
+            title: 'ExtendedObject',
+            // $target: ExtendedObject,
+            properties: {},
+            allOf: [{$ref: '#/definitions/PlainObject'}]
+          },
+          PlainObject: {
+            type: 'object',
+            title: 'PlainObject',
+            // $target: PlainObject,
+            properties: {},
+          }
+
+        }
+      }
+    );
+  }
+
+
+  @test
+  async 'generate schema for class with properties'() {
+    const schema = JsonSchema.serialize(ObjectWithInitProp);
+    expect(schema).to.be.deep.eq({
+      '$ref': '#/definitions/ObjectWithInitProp',
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'definitions': {
+        'PlainObject': {
+          'type': 'object',
+          title: 'PlainObject',
+          properties: {},
+        },
+        'ObjectWithInitProp': {
+          title: 'ObjectWithInitProp',
+          'properties': {
+            'arrValue': {
+              'type': 'array',
+              'items': {
+                'type': 'object'
+              }
+            },
+            'boolValue': {
+              'type': 'boolean',
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string'
+            },
+            'numericValue': {
+              'type': 'number'
+            },
+            'objArrValue': {
+              'type': 'array',
+              'items': {
+                type: 'object'
+              }
+            },
+            'objValue': {
+              'type': 'object'
+            },
+            'plainObjArrValue': {
+              'type': 'array',
+              'items': {
+                type: 'object'
+              }
+            },
+            'plainObjValue': {
+              $ref: '#/definitions/PlainObject'
+            },
+            'stringValue': {
+              'type': 'string'
+            },
+          },
+          'type': 'object'
+        }
+      }
+    });
+  }
+
+
+  @test
+  async 'generate schema for annotated class ref with primative properties'() {
+    const ref = ClassRef.get(AnnotatedPrimatives2);
+    const schema = JsonSchema.serialize(ref);
+    expect(schema).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      '$ref': '#/definitions/AnnotatedPrimatives2',
+      'definitions': {
+        'AnnotatedPrimatives2': {
+          'title': 'AnnotatedPrimatives2',
+          'properties': {
+            'boolValue': {
+              'type': 'boolean'
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string'
+            },
+            'nullValue': {
+              'type': 'string'
+            },
+            'numberValue': {
+              'type': 'number'
+            },
+            'strValue': {
+              'type': 'string'
+            }
+          },
+          'type': 'object'
+        }
+      }
+    });
+  }
+
+
+  @test
+  async 'parse and generate schema for primative properties'() {
+    const schema = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      '$ref': '#/definitions/PrimativeClass',
+      'definitions': {
+        'PrimativeClass': {
+          'type': 'object',
+          'title': 'PrimativeClass',
+          'properties': {
+            'boolValue': {
+              'type': 'boolean'
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string'
+            },
+            'nullValue': {
+              'type': 'string'
+            },
+            'numberValue': {
+              'type': 'number'
+            },
+            'strValue': {
+              'type': 'string'
+            }
+          }
+        }
+      }
+    }
+    const entityRef = await JsonSchema.unserialize(schema);
+    expect(entityRef.name).to.be.eq('PrimativeClass');
+    const properties = entityRef.getPropertyRefs();
+    expect(properties).to.have.length(5);
+    expect(properties.map(x => x.name)).to.be.deep.eq([
+      'boolValue', 'dateValue', 'nullValue', 'numberValue', 'strValue'
+    ]);
+
+    const generatedSchema = JsonSchema.serialize(entityRef);
+    expect(generatedSchema).to.be.deep.eq(schema);
+  }
+
+
+
+
 }

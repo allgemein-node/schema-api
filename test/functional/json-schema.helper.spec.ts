@@ -31,7 +31,7 @@ class JsonSchemaHelperSpec {
    */
   @test
   async 'check anonymus functions'() {
-      const ref = ClassRef.get(new Function());
+      // const ref = ClassRef.get(new Function());
 
 
   }

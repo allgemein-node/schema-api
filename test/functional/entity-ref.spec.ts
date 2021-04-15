@@ -70,7 +70,8 @@ class EntityRefSpec {
     expect(classRefs).to.have.length(1);
 
     MetadataRegistry.$().remove(METATYPE_ENTITY,
-      x => x.target === DynamicObjectSec
+      x => x.target === DynamicObjectSec,
+      false
     );
   }
 
