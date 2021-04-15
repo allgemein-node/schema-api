@@ -63,14 +63,17 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    */
   onAdd(context: METADATA_TYPE, options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
     if (context === 'property') {
-      const find = this.getLookupRegistry().find(context, (c: any) => c.target === options.target && c.name === options.name);
+      const find = this.getLookupRegistry().find(context, (c: IPropertyRef) => c.getClassRef().getClass() === options.target && c.name === options.name);
       if (find) {
         // update
       } else {
         this.create(context, options);
       }
     } else if (context === 'entity') {
-      this.create(context, options);
+      const find = this.getLookupRegistry().find(context, (c: IEntityRef) => c.getClassRef().getClass() === options.target);
+      if (!find) {
+        this.create(context, options);
+      }
     }
   }
 
@@ -163,10 +166,13 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
     const clsRef: IClassRef = isEntityRef(ref) ? ref.getClassRef() : ref;
     // Return existing
     const clsRefExists = this.find(METATYPE_CLASS_REF, (x: IClassRef) => x === clsRef);
+    let properties: IPropertyRef[] = [];
     if (clsRefExists) {
-      return this.filter(METATYPE_PROPERTY, (x: IPropertyRef) => x.getClassRef() === clsRefExists);
+      properties = this.filter(METATYPE_PROPERTY, (x: IPropertyRef) => x.getClassRef() === clsRefExists);
+    } else {
+      properties = this.createPropertiesForRef(clsRef);
     }
-    return this.createPropertiesForRef(clsRef);
+    return properties;
   }
 
   /**
@@ -271,9 +277,9 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
       case 'class_ref':
         break;
       case 'entity':
-        if(isClassRef(options)){
+        if (isClassRef(options)) {
           return <any>this.createEntityForRef(options);
-        }else{
+        } else {
           return <any>this.createEntityForOptions(options);
         }
       case 'property':

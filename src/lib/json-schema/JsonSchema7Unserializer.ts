@@ -285,7 +285,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     }
   }
 
-  
+
   onTypeString(dataPointer: any) {
     const propOptions: any = {};
     propOptions.type = 'string';

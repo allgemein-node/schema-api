@@ -345,8 +345,8 @@ export class ClassRef implements IClassRef {
   getPropertyRefs(): IPropertyRef[] {
     const inheritedProps = [].concat(...this.getExtends().map(x => x.getPropertyRefs()));
     const registeredProps = this.getRegistry().getPropertyRefs(this);
-    inheritedProps.forEach(x => {
-      if (!!registeredProps.find(z => x.name === z.name)) {
+    inheritedProps.forEach((x: IPropertyRef) => {
+      if (!registeredProps.find(z => x.name === z.name)) {
         registeredProps.push(x);
       }
     });
