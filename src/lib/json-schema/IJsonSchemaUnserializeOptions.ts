@@ -1,7 +1,7 @@
 import {METADATA_TYPE} from '../Constants';
 import {IParseOptions} from './IParseOptions';
 
-export interface IJsonSchemaUnserializeOptions {
+export interface IJsonSchemaUnserializeOptions extends IParseOptions {
 
   /**
    * Version of json schema
@@ -19,9 +19,9 @@ export interface IJsonSchemaUnserializeOptions {
   collector?: { type: METADATA_TYPE, key: string, fn: (key: string, data: any, options: IParseOptions) => any }[];
 
   /**
-   * If set already existing classes are not followed and parsed
+   * If set then a new class ref will be created even if an with same name already exists
    */
-  skipExistingClasses?: boolean;
+  forceClassRefCreation?: boolean;
 
 
   /**

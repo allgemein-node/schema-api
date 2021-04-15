@@ -1,6 +1,7 @@
 import {IClassRef} from '../../api/IClassRef';
 import {METADATA_TYPE} from '../Constants';
 
+
 export interface IParseOptions {
   isRoot?: boolean;
   ref?: IClassRef;
@@ -9,5 +10,8 @@ export interface IParseOptions {
   propertyName?: string;
   metaType?: METADATA_TYPE;
   sourceRef?: IClassRef;
+  ignoreDeclared?: boolean;
 
 }
+
+export const PARSE_OPTIONS_KEYS: (keyof IParseOptions)[] = ['isRoot', 'className', 'ignoreDeclared'];

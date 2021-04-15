@@ -14,9 +14,15 @@ export class JsonSchema {
 
   static async request(addr: string, opts: any = {}) {
     try {
-      const got = PlatformUtils.load('got');
-      const response = await got(addr, opts);
-      return JSON.parse(response.body);
+      if (addr.startsWith('file:///')) {
+        const buffer = await PlatformUtils.readFile(addr.replace('file://', ''));
+        const strValue = buffer.toString(_.get(opts, 'encoding', 'utf8'));
+        return JSON.parse(strValue);
+      } else {
+        const got = PlatformUtils.load('got');
+        const response = await got(addr, opts);
+        return JSON.parse(response.body);
+      }
     } catch (e) {
       console.error(e);
       return {};

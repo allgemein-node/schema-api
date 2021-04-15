@@ -13,9 +13,12 @@ import {IEntityOptions} from '../options/IEntityOptions';
 import {ClassRef} from '../ClassRef';
 import {NotSupportedError, NotYetImplementedError} from '@allgemein/base/browser';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
-import {IParseOptions} from './IParseOptions';
+import {IParseOptions, PARSE_OPTIONS_KEYS} from './IParseOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
+import {IAbstractOptions} from '../options/IAbstractOptions';
+import {SchemaUtils} from '../SchemaUtils';
 
+const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema'];
 
 export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
@@ -25,7 +28,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   data: IJsonSchema7;
 
-  fetched: { [k: string]: IJsonSchema7 };
+  fetched: { [k: string]: IJsonSchema7 } = {};
 
   constructor(opts: IJsonSchemaUnserializeOptions) {
     this.options = opts;
@@ -39,7 +42,13 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   async unserialize(data: any): Promise<IClassRef | IEntityRef> {
     this.data = data;
     const isRoot = _.get(this.options, 'rootAsEntity', true);
-    return this.parse(data, {isRoot: isRoot});
+    const opts: any = {isRoot: isRoot};
+    PARSE_OPTIONS_KEYS.forEach(x => {
+      if (_.has(this.options, x)) {
+        opts[x] = this.options[x];
+      }
+    });
+    return this.parse(data, opts);
   }
 
   /**
@@ -72,14 +81,6 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       ret = {};
       ret[key] = data[key];
     }
-
-
-    // if (this['onPropertyKey_' + key]) {
-    // }
-    // if (type === 'entity') {
-    // } else if (type === 'class_ref') {
-    // } else if (type === 'property') {
-    // }
 
     if (_.has(this.options, 'collector')) {
       const methods = this.options.collector.filter(x => x.type === type && x.key === key);
@@ -114,7 +115,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       // refers
       const res = await this.followRef(data.$ref, this.data);
       const opts = _.clone(options);
-      opts.className = this.getClassNameFromRef(data.$ref);
+      if (!opts.className) {
+        opts.className = this.getClassNameFromRef(data.$ref);
+      }
       ret = await this.parse(res, opts);
     } else {
       throw new Error('no valid schema element for further parse, key with name type or $ref must be present.');
@@ -137,20 +140,26 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
 
   async followRef($ref: string, data: IJsonSchema7): Promise<any> {
-    const [addr, ref] = $ref.split('#');
+    let [addr, anchor] = $ref.split('#');
+
+    if (!anchor) {
+      anchor = '';
+    }
 
     if (_.isEmpty(addr)) {
       //  local
-      if (/^\//.test(ref)) {
+      if (_.isEmpty(anchor)) {
+        return data;
+      } else if (/^\//.test(anchor)) {
         // starts with path
-        const dottedPath = ref.substr(1).replace(/\//, '.');
+        const dottedPath = anchor.substr(1).replace(/\//, '.');
         const entry = _.get(data, dottedPath, null);
         if (entry) {
           return entry;
         }
       } else {
         // refs to local id
-        const refHashed = '#' + ref;
+        const refHashed = '#' + anchor;
         if (data.$id === refHashed) {
           return data;
         } else {
@@ -170,7 +179,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       if (!this.fetched[addr]) {
         this.fetched[addr] = await JsonSchema.request(addr);
       }
-      return this.followRef('#' + ref, this.fetched[addr]);
+      return this.followRef('#' + anchor, this.fetched[addr]);
     }
     // TODO create exception
     throw new Error($ref + ' not found');
@@ -207,7 +216,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       const dataPointer = data as IJsonSchema7;
       const collectOptions = {};
 
-      this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref'], parseOptions);
+      this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema'], parseOptions);
       _.assign(propOptions, collectOptions);
       if (dataPointer.$ref) {
         const ref = await this.parse(dataPointer, parseOptions);
@@ -344,8 +353,11 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       }
     }
 
-    if (!className && title) {
-      className = _.upperFirst(_.camelCase(title));
+    // title data override passed className
+    if (title) {
+      if (!className || !_.get(this.options, 'ignoreDeclared', false)) {
+        className = _.upperFirst(_.camelCase(title));
+      }
     }
 
     if (!className && options?.isProperty && options.propertyName) {
@@ -353,7 +365,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     }
 
     if (className && !classRef) {
-      classRef = this.getClassRef(className, namespace);
+      const fn = _.get(this.options, 'forceClassRefCreation', false) ? SchemaUtils.clazz(className) : className;
+      classRef = this.getClassRef(fn, namespace);
     }
 
     if (!classRef) {
@@ -370,12 +383,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     if (classRef) {
       // a named class ref exists
-      const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf'];
 
+      const clazz = classRef.getClass(true);
       const refOptions: IEntityOptions = {
         name: classRef.name,
         namespace: this.getNamespace(),
-        target: classRef.getClass(true)
+        target: clazz
       };
 
       const collectorOptions = _.clone(options);
@@ -384,9 +397,18 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       this.collectAndProcess(data, refOptions, skipKeys, collectorOptions);
 
       metaType = collectorOptions.metaType;
-      MetadataRegistry.$().add(metaType, refOptions);
+
+      const entityOptions = MetadataRegistry.$().find(metaType, (x: IAbstractOptions) => x.target === clazz);
+      if (entityOptions) {
+        // merge existing
+        _.assign(entityOptions, refOptions);
+      } else {
+        // create new one
+        MetadataRegistry.$().add(metaType, refOptions);
+      }
+
       if (metaType === METATYPE_ENTITY) {
-        ret = this.getRegistry().getEntityRefFor(refOptions.target);
+        ret = this.getRegistry().getEntityRefFor(clazz);
       } else {
         ret = classRef;
       }
