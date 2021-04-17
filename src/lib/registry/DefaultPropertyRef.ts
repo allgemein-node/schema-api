@@ -6,6 +6,7 @@ import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METATYPE_PROPERTY} from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {ClassRef} from '../ClassRef';
+import {NotYetImplementedError} from '@allgemein/base/browser';
 
 
 export class DefaultPropertyRef extends AbstractRef<IPropertyOptions> implements IPropertyRef {
@@ -25,8 +26,77 @@ export class DefaultPropertyRef extends AbstractRef<IPropertyOptions> implements
   /**
    * TODO
    */
-  convert(i: any, options?: IBuildOptions): any {
+  convert(data: any, options?: IBuildOptions): any {
+    const sourceType = this.getType()
+    if (!sourceType || !_.isString(sourceType)) {
+      return data;
+    }
+
+    const jsType = sourceType.toLowerCase();
+
+    switch (jsType) {
+      case 'datetime':
+      case 'timestamp':
+      case 'date':
+        return new Date(data);
+
+      case 'time':
+      case 'text':
+      case 'string':
+        if (_.isString(data)) {
+          return data;
+        } else if (_.isArray(data) && data.length === 1) {
+          return data[0];
+        } else if (data) {
+          return JSON.stringify(data);
+        } else {
+          return null;
+        }
+        break;
+
+      case 'boolean':
+
+        if (_.isBoolean(data)) {
+          return data;
+        } else if (_.isNumber(data)) {
+          return data > 0;
+        } else if (_.isString(data)) {
+          if (data.toLowerCase() === 'true' || data.toLowerCase() === '1') {
+            return true;
+          }
+          return false;
+        }
+        break;
+
+      case 'double':
+      case 'number':
+        if (_.isString(data)) {
+          if (/^\d+\.|\,\d+$/.test(data)) {
+            return parseFloat(data.replace(',', '.'));
+          } else if (/^\d+$/.test(data)) {
+            return parseInt(data, 0);
+          } else {
+          }
+        } else if (_.isNumber(data)) {
+          return data;
+        } else if (_.isBoolean(data)) {
+          return data ? 1 : 0;
+        } else {
+          // Pass to exception
+        }
+        break;
+
+
+      case 'byte':
+      case 'json':
+      case 'object':
+      case 'array':
+        return data;
+    }
+
+    throw new NotYetImplementedError('value "' + data + '" of type ' + (typeof data) + ' column type=' + jsType);
   }
+
 
   get(instance: any): any {
     return _.get(instance, this.name);
@@ -39,7 +109,7 @@ export class DefaultPropertyRef extends AbstractRef<IPropertyOptions> implements
   }
 
   getType(): string {
-    return this.options.type;
+    return this.getOptions('type');
   }
 
 

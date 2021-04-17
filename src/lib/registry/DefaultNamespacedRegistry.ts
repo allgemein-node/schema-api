@@ -24,7 +24,7 @@ import {DefaultPropertyRef} from './DefaultPropertyRef';
 import {ClassRef} from '../ClassRef';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {DefaultEntityRef} from './DefaultEntityRef';
-import {hasClassPropertiesInDefinition, IJsonSchema7} from '../metadata/JsonSchema7';
+import {hasClassPropertiesInDefinition, IJsonSchema7} from '../json-schema/JsonSchema7';
 import {ISchemaOptions} from '../options/ISchemaOptions';
 import {IObjectOptions} from '../options/IObjectOptions';
 import {ClassUtils} from '@allgemein/base/browser';

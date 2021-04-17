@@ -1,8 +1,5 @@
-import {IClassRef} from '../api/IClassRef';
 
 export const DEFAULT_NAMESPACE = 'default';
-
-// export const XS_GLOBAL = 'default';
 export const GLOBAL_NAMESPACE = '__global__';
 
 export const XS_DEFAULT_CLASSES = 'default_class_ref';
@@ -61,6 +58,7 @@ export type JS_DATA_TYPES =
   ;
 
 export const XS_ANNOTATION_OPTIONS_CACHE = 'anno_options_cache';
+// export const XS_ANNOTATION_OPTIONS_CACHE = 'anno_options_cache';
 
 export const JS_DATA_TYPES: JS_DATA_TYPES[] = [
   'string'
@@ -95,10 +93,14 @@ export const C_PROP_NAME = 'name';
 export const __CLASS__ = '__CLASS__';
 export const __NS__ = '__NS__';
 export const OPT_CREAT_AND_COPY = 'createAndCopy';
-export type CLASS_TYPE = Function | ClassType<any>;
 
+export const STATE_KEY = '$state';
+
+export type CLASS_TYPE = Function | ClassType<any>;
+export type MERGE_TYPE = 'default' | 'assign' | 'merge';
 
 export interface IMinMax {
   min: number;
   max: number;
 }
+

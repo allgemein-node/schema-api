@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import {ClassRef} from './ClassRef';
-import {XS_ANNOTATION_OPTIONS_CACHE, METATYPE_ENTITY, METATYPE_PROPERTY} from './Constants';
+import {MERGE_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY, XS_ANNOTATION_OPTIONS_CACHE} from './Constants';
 import {ClassUtils} from '@allgemein/base';
 import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
 import {IPropertyExtentions} from '../api/IPropertyExtentions';
@@ -9,7 +9,7 @@ import {IClassRef} from '../api/IClassRef';
 
 export class AnnotationsHelper {
 
-  static forPropertyOn(object: Function, property: string, options: any) {
+  static forPropertyOn(object: Function, property: string, options: any, merge?: MERGE_TYPE) {
     const source = ClassUtils.getFunction(object);
     const classRefs: ClassRef[] = ClassRef.filter(c => c.originalValue === source);
 
@@ -18,7 +18,7 @@ export class AnnotationsHelper {
       if (prop) {
         const pOptions = prop.getOptions();
         _.defaults(pOptions, options);
-        if (ref.isEntity) {
+        if (ref.hasEntityRef()) {
           const eOptions = ref.getEntityRef().getOptions();
           _.defaults(eOptions, options);
         }
@@ -29,12 +29,13 @@ export class AnnotationsHelper {
       type: METATYPE_PROPERTY,
       object: source,
       property: property,
-      options: options
+      options: options,
+      merge: merge ? merge : 'default'
     });
   }
 
 
-  static forEntityOn(object: Function, options: any) {
+  static forEntityOn(object: Function, options: any, merge?: MERGE_TYPE) {
     const source = ClassUtils.getFunction(object);
     const classRefs: ClassRef[] = ClassRef.filter(c => c.originalValue === source);
 
@@ -42,7 +43,7 @@ export class AnnotationsHelper {
       if (ref) {
         let pOptions = ref.getOptions();
         _.defaults(pOptions, options);
-        if (ref.isEntity) {
+        if (ref.hasEntityRef()) {
           const eOptions = ref.getEntityRef().getOptions();
           _.defaults(eOptions, options);
         }
@@ -52,7 +53,8 @@ export class AnnotationsHelper {
     MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE).push(<IPropertyExtentions>{
       type: METATYPE_ENTITY,
       object: source,
-      options: options
+      options: options,
+      merge: merge
     });
   }
 
@@ -62,7 +64,7 @@ export class AnnotationsHelper {
     }
 
     const object = classRef.getClass(true);
-    const addOns = _.filter(MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
+    const addOns: IPropertyExtentions[] = _.filter(MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
       property ?
         (classRef.isPlaceholder ? ClassUtils.getClassName(x.object) === classRef.name : x.object === object) &&
         x.property === property &&
@@ -73,7 +75,26 @@ export class AnnotationsHelper {
 
     if (addOns) {
       addOns.forEach(addOn => {
-        _.defaults(options, addOn.options);
+        const merge: MERGE_TYPE = _.get(addOn, 'merge', 'default');
+        switch (merge) {
+          case 'merge':
+            for (const k of _.keys(addOn.options)) {
+              if (_.isUndefined(options[k]) || _.isEmpty(options[k])) {
+                options[k] = addOn.options[k];
+              } else if (_.isArray(options[k])) {
+                options[k].push(addOn.options[k]);
+              } else {
+                options[k] = [options[k], addOn.options[k]];
+              }
+            }
+            break;
+          case 'assign':
+            _.assign(options, addOn.options);
+            break;
+          default:
+            _.defaults(options, addOn.options);
+        }
+
       });
     }
   }

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
-import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from '../metadata/JsonSchema7';
+import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {REFLECT_DESIGN_TYPE} from '../Constants';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {SchemaUtils} from '../SchemaUtils';

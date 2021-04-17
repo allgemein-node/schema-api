@@ -1,6 +1,5 @@
-// import {JSONSchema7, JSONSchema7Definition} from 'json-schema';
 import * as _ from 'lodash';
-import {IJsonSchema7, IJsonSchema7Definition} from '../metadata/JsonSchema7';
+import {IJsonSchema7, IJsonSchema7Definition} from './JsonSchema7';
 import {IClassRef} from '../../api/IClassRef';
 import {IJsonSchemaUnserializeOptions} from './IJsonSchemaUnserializeOptions';
 import {DRAFT_07} from './Constants';

@@ -17,7 +17,7 @@ import {IEntityRef} from '../api/IEntityRef';
 import {IPropertyRef} from '../api/IPropertyRef';
 import {IBuildOptions} from '../api/IBuildOptions';
 import {RegistryFactory} from './registry/RegistryFactory';
-import {MetadataRegistry} from './registry/MetadataRegistry';
+import {AbstractRef} from './AbstractRef';
 
 /**
  * Reflective reference to a class function
@@ -31,11 +31,9 @@ import {MetadataRegistry} from './registry/MetadataRegistry';
 
  class can be in different namespaces
  */
-export class ClassRef implements IClassRef {
+export class ClassRef extends AbstractRef<any> implements IClassRef {
 
   static __inc: number = 0;
-
-  private namespace: string = DEFAULT_NAMESPACE;
 
   private readonly idx: number;
 
@@ -44,43 +42,40 @@ export class ClassRef implements IClassRef {
    */
   originalValue: string | Function;
 
-  readonly className: string;
-
   private _cacheEntity: IEntityRef;
 
-  private _cachedOptions: any;
-
-  isEntity: boolean = false;
-
+  //
+  // isEntity: boolean = false;
+  //
   private _isPlaceholder: boolean = false;
 
   private _isAnonymous: boolean = false;
 
-  readonly metaType = METATYPE_CLASS_REF;
-
   extends: IClassRef[] = [];
 
   constructor(klass: string | Function, namespace: string = DEFAULT_NAMESPACE) {
+    super(METATYPE_CLASS_REF, ClassRef.getClassName(klass), null, namespace);
     this._isAnonymous = _.isFunction(klass) && klass.name === 'anonymous';
-    this.className = ClassRef.getClassName(klass);
-    this.namespace = namespace;
+
+    this.idx = ClassRef.__inc++;
     if (_.isString(klass)) {
       this.originalValue = klass;
       this._isPlaceholder = true;
     } else {
       this.originalValue = ClassUtils.getFunction(klass);
     }
-    this.idx = ClassRef.__inc++;
-
   }
+
 
   isPlaceholder() {
     return this._isPlaceholder;
   }
 
+
   isAnonymous() {
     return this._isAnonymous;
   }
+
 
   static getClassName(k: any) {
     if (k[__CLASS__]) {
@@ -95,58 +90,29 @@ export class ClassRef implements IClassRef {
     this._isPlaceholder = false;
   }
 
-  private getOptionsEntry() {
-    if (!this._cachedOptions) {
-      this._cachedOptions = MetadataRegistry.$().find(METATYPE_CLASS_REF, (x: any) => x.target === this.getClass(true));
-      if (!this._cachedOptions) {
-        this._cachedOptions = {target: this.getClass(true)};
-        MetadataRegistry.$().add(METATYPE_CLASS_REF, this._cachedOptions);
-      }
-    }
-    return this._cachedOptions;
-  }
 
-  getOptions(key?: string): any {
-    if (key) {
-      return _.get(this.getOptionsEntry(), key);
-    }
-    return this.getOptionsEntry();
-  }
+  // get name() {
+  //   return this.className;
+  // }
 
-  setOptions(options: any) {
-    if (options && !_.isEmpty(_.keys(options))) {
-      const opts = this.getOptionsEntry();
-      for (const k of _.keys(opts)) {
-        delete opts[k];
-      }
-      _.assign(opts, options);
-    }
+  get className() {
+    return this.name;
   }
-
-  setOption(key: string, value: any) {
-    const opts = this.getOptionsEntry();
-    _.set(opts, key, value);
-  }
-
-  get name() {
-    return this.className;
-  }
-
 
   get storingName() {
-    let name = _.get(this._cachedOptions, C_PROP_NAME, this.className);
+    let name = this.getOptions(C_PROP_NAME, this.className);
     return _.snakeCase(name);
   }
 
   set storingName(v: string) {
-    _.set(this._cachedOptions, C_PROP_NAME, v);
+    this.setOption(C_PROP_NAME, v);
   }
 
   /**
    * Check if name is passed by options
    */
   hasName() {
-    return _.has(this._cachedOptions, C_PROP_NAME);
+    return this.hasOption(C_PROP_NAME);
   }
 
   /**
@@ -317,10 +283,14 @@ export class ClassRef implements IClassRef {
 
 
   getEntityRef(): IEntityRef {
-    if (!this._cacheEntity) {
-      this._cacheEntity = this.getRegistry().find(METATYPE_ENTITY, (x: IEntityRef) => x.getClassRef().id() === this.id());
+    if (_.isUndefined(this._cacheEntity)) {
+      this._cacheEntity = this.getRegistry().find(METATYPE_ENTITY, (x: IEntityRef) => x.getClassRef() === this);
     }
     return this._cacheEntity;
+  }
+
+  hasEntityRef(){
+    return !!this.getEntityRef();
   }
 
 

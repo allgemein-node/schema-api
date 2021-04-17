@@ -4,7 +4,6 @@ import {IBuildOptions} from '../../api/IBuildOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {DEFAULT_NAMESPACE, METATYPE_ENTITY, XS_ID_SEPARATOR} from '../Constants';
 import {IEntityOptions} from '../options/IEntityOptions';
-import {SchemaUtils} from '../SchemaUtils';
 
 export class DefaultEntityRef extends AbstractRef<IEntityOptions> implements IEntityRef {
 
@@ -16,7 +15,7 @@ export class DefaultEntityRef extends AbstractRef<IEntityOptions> implements IEn
 
 
   build<T>(instance: any, options?: IBuildOptions): T {
-    return SchemaUtils.transform(this, instance, options);
+    return this.getClassRef().build(instance, options);
   }
 
   create<T>(): T {

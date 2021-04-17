@@ -1,11 +1,10 @@
-//
-// export * from './decorators/Entity';
-// export * from './decorators/Property';
-// export * from './decorators/Object';
-// export * from './decorators/PropertyOf';
-// export * from './decorators/Schema';
-//
-//
+export {Entity} from './decorators/Entity';
+export {Property} from './decorators/Property';
+export {Object} from './decorators/Object';
+export {PropertyOf} from './decorators/PropertyOf';
+export {Schema} from './decorators/Schema';
+
+
 // export * from './lib/AbstractRef';
 // export * from './lib/AnnotationsHelper';
 // export * from './lib/Binding';
