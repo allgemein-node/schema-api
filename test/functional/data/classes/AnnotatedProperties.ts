@@ -1,5 +1,4 @@
 import {Property} from '../../../../src/decorators/Property';
-import {PlainObject} from './PlainObject';
 
 export class AnnotatedProperties {
 

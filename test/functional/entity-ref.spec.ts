@@ -10,15 +10,13 @@ import {IEntityOptions} from '../../src/lib/options/IEntityOptions';
 import {DynamicObjectSec} from './data/classes/DynamicObjectSec';
 import {IEntityRef} from '../../src/api/IEntityRef';
 import {IClassRef} from '../../src/api/IClassRef';
+import {TestClass} from './data/classes/TestClass';
 
 
 @suite('functional/entity-ref')
 class EntityRefSpec {
 
 
-  /**
-   * Lookup registry for simple annotated class
-   */
   @test
   async 'lookup registry for simple annotated class'() {
     const registry = RegistryFactory.get();
@@ -29,9 +27,7 @@ class EntityRefSpec {
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
   }
 
-  /**
-   * Lookup registry for simple annotated class
-   */
+
   @test
   async 'lookup registry for annotated class with properties'() {
     const registry = RegistryFactory.get();
@@ -43,9 +39,6 @@ class EntityRefSpec {
   }
 
 
-  /**
-   * Dynamically add entity options and check that entity ref is created
-   */
   @test
   async 'dynamically add entity options and check that entity ref is created'() {
     const registry = RegistryFactory.get();
@@ -74,6 +67,70 @@ class EntityRefSpec {
       false
     );
   }
+
+
+  @test
+  async 'create new object of given simple class'() {
+    const registry = RegistryFactory.get();
+    const entityRef = registry.getEntityRefFor(TestClass);
+    const namespace = entityRef.getClassRef().getNamespace();
+    const refs = entityRef.getPropertyRefs();
+    expect(refs).to.have.length(5);
+    expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
+
+    const object = entityRef.create<TestClass>();
+    expect(object).to.instanceOf(TestClass);
+
+    const entityRef2 = registry.getEntityRefFor(object);
+    expect(entityRef).to.be.eq(entityRef2);
+  }
+
+
+  @test
+  async 'build class from plain object'() {
+    const registry = RegistryFactory.get();
+    const entityRef = registry.getEntityRefFor(TestClass);
+    const namespace = entityRef.getClassRef().getNamespace();
+    const refs = entityRef.getPropertyRefs();
+    expect(refs).to.have.length(5);
+    expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
+
+    const obj = {
+      str: 'present',
+      str2: 'nopresent',
+      nr: 100,
+      nr2: -100,
+    };
+
+    let object = entityRef.build<TestClass>(obj);
+    expect(object).to.instanceOf(TestClass);
+    expect(object).to.be.deep.eq({
+      str: 'present',
+      nr: 100
+    });
+
+    object = entityRef.build<TestClass>(obj, {
+      createAndCopy: true
+    });
+    expect(object).to.instanceOf(TestClass);
+    expect(object).to.be.deep.eq({
+      str: 'present',
+      str2: 'nopresent',
+      nr: 100,
+      nr2: -100,
+    });
+  }
+
+
+  @test
+  async 'build class from object with embedded entities'() {
+  }
+
+
+  @test.skip
+  async 'validate'() {
+  }
+
 
 }
 

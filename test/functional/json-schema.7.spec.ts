@@ -1,18 +1,18 @@
 import * as _ from 'lodash';
-import {suite, test} from '@testdeck/mocha';
 import 'reflect-metadata';
+import {suite, test} from '@testdeck/mocha';
 import {expect} from 'chai';
 import {JsonSchema} from '../../src/lib/json-schema/JsonSchema';
-import {IJsonSchema7} from '../../src/lib/metadata/JsonSchema7';
 import {IClassRef, isClassRef} from '../../src/api/IClassRef';
 import {DEFAULT_NAMESPACE, METATYPE_CLASS_REF} from '../../src/lib/Constants';
 import {IEntityRef, isEntityRef} from '../../src/api/IEntityRef';
-import {inspect} from 'util';
 import {PlainObject} from './data/classes/PlainObject';
 import {ExtendedObject} from './data/classes/ExtendedObject';
 import {ObjectWithInitProp} from './data/classes/ObjectWithInitProp';
 import {ClassRef} from '../../src/lib/ClassRef';
 import {AnnotatedPrimatives2} from './data/classes/AnnotatedPrimatives';
+import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
+
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -671,7 +671,7 @@ class JsonSchemaDraft07SerializationSpec {
           }
         }
       }
-    }
+    };
     const entityRef = await JsonSchema.unserialize(schema);
     expect(entityRef.name).to.be.eq('PrimativeClass');
     const properties = entityRef.getPropertyRefs();
@@ -683,8 +683,6 @@ class JsonSchemaDraft07SerializationSpec {
     const generatedSchema = JsonSchema.serialize(entityRef);
     expect(generatedSchema).to.be.deep.eq(schema);
   }
-
-
 
 
 }
