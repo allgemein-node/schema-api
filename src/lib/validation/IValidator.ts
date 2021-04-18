@@ -2,12 +2,10 @@ export interface IValidator {
 
   name: string;
 
-  fn: (value: any) => boolean;
+  fn: (value: any, options: any) => boolean;
 
-  options?: {
-
+  defaultOptions?: {
     message?: string
-
   };
 
   involveOnOptionKey?: string

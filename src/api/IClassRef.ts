@@ -2,11 +2,12 @@ import {IPropertyRef} from './IPropertyRef';
 import {IBuildOptions} from './IBuildOptions';
 import {IBaseRef} from './IBaseRef';
 import {ILookupRegistry} from './ILookupRegistry';
+import {METATYPE_CLASS_REF} from '../lib/Constants';
 
 
 export function isClassRef(x: any): x is IClassRef {
-  if (x !== undefined) {
-    return (x as IClassRef).getClass !== undefined && (x as IClassRef).getPropertyRefs !== undefined && x.getClassRef === undefined;
+  if (x !== undefined && x.metaType === METATYPE_CLASS_REF) {
+    return true;
   }
   return false;
 }

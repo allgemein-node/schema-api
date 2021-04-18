@@ -80,10 +80,15 @@ export class AnnotationsHelper {
           case 'merge':
             for (const k of _.keys(addOn.options)) {
               if (_.isUndefined(options[k]) || _.isEmpty(options[k])) {
+                // create if not present
                 options[k] = addOn.options[k];
               } else if (_.isArray(options[k])) {
+                // add to array
                 options[k].push(addOn.options[k]);
+              } else if(_.isObjectLike(options[k]) && _.isObjectLike(addOn.options[k])) {
+                _.merge(options[k], addOn.options[k]);
               } else {
+                // create array
                 options[k] = [options[k], addOn.options[k]];
               }
             }

@@ -20,9 +20,7 @@ export abstract class AbstractRef<OPTS> implements IBaseRef {
 
   namespace: string = DEFAULT_NAMESPACE;
 
-  // options: OPTS = <any>{};
   private _cachedOptions: any;
-
 
   readonly name: string;
 
@@ -72,14 +70,14 @@ export abstract class AbstractRef<OPTS> implements IBaseRef {
       if(this.metaType === 'property'){
         this._cachedOptions = MetadataRegistry.$().find(this.metaType, (x: any) => x.target === this.getClass(true) && x.propertyName === this.name);
         if (!this._cachedOptions) {
-          this._cachedOptions = {target: this.getClass(true)};
-          MetadataRegistry.$().add(this.metaType, this._cachedOptions);
+          this._cachedOptions = {target: this.getClass(true), propertyName: this.name};
+          MetadataRegistry.$().add(this.metaType, this._cachedOptions, false);
         }
       }else{
         this._cachedOptions = MetadataRegistry.$().find(this.metaType, (x: any) => x.target === this.getClass(true));
         if (!this._cachedOptions) {
           this._cachedOptions = {target: this.getClass(true)};
-          MetadataRegistry.$().add(this.metaType, this._cachedOptions);
+          MetadataRegistry.$().add(this.metaType, this._cachedOptions, false);
         }
       }
     }
@@ -96,10 +94,13 @@ export abstract class AbstractRef<OPTS> implements IBaseRef {
   setOptions(options: any) {
     if (options && !_.isEmpty(_.keys(options))) {
       const opts = this.getOptionsEntry();
-      for (const k of _.keys(opts)) {
-        delete opts[k];
+      // if same object cause taken from MetadataRegistry then ignore setting
+      if(opts !== options){
+        for (const k of _.keys(opts)) {
+          delete opts[k];
+        }
+        _.assign(opts, options);
       }
-      _.assign(opts, options);
     }
   }
 

@@ -15,7 +15,8 @@ import {IValidator} from './IValidator';
 export interface IValidatorEntry {
   target: Function,
   property?: string,
-  handles: IValidator[]
+  options?: any,
+  handles?: IValidator[]
 }
 
 
@@ -62,12 +63,19 @@ export class DefaultValidator {
       for (const handle of toValidateEntry.handles) {
         let value = null;
         let isPropertyCheck = toValidateEntry.property ? true : false;
+
         if (isPropertyCheck) {
           value = instance[toValidateEntry.property];
         } else {
           value = instance;
         }
-        if (!(await handle.fn(value))) {
+
+        let instanceOptions = toValidateEntry.options[handle.name];
+        if (handle.defaultOptions) {
+          _.defaults(instanceOptions, handle.defaultOptions);
+        }
+
+        if (!(await handle.fn(value, instanceOptions))) {
           const error: IValidationError = {
             metaType: toValidateEntry.property ? 'property' : 'entity',
             property: toValidateEntry.property,
@@ -75,17 +83,10 @@ export class DefaultValidator {
             constraints: {}
           };
           classErrors.push(error);
-          if (!isPropertyCheck) {
-            let msg = _.get(handle.options, 'message', null);
-            if (msg) {
-              error.constraints[handle.name] = msg.replace('%propertyName', error.property).replace('%value', value);
-            }
-          } else if (isPropertyCheck) {
-            let msg = _.get(handle.options, 'message', null);
 
-            if (msg) {
-              error.constraints[handle.name] = msg.replace('%propertyName', error.property).replace('%value', value);
-            }
+          let msg = _.get(instanceOptions, 'message', null);
+          if (msg) {
+            error.constraints[handle.name] = msg.replace('%propertyName', error.property).replace('%value', value);
           }
         }
 
@@ -136,23 +137,15 @@ export class DefaultValidator {
         x.object === fn && _.intersection(this.lookupKeys, _.keys(x.options)).length > 0
       );
     for (const e of entriesFirst) {
-      const intersect = _.intersection(this.lookupKeys, _.keys(e.options));
-      const handles = [];
-      for (const k of intersect) {
-        const valueForKey = _.get(e.options, k, null);
-        const handle = this.validators.find(x => x.name === valueForKey || x.involveOnOptionKey === k);
-        if (handle) {
-          handles.push(handle);
-        }
-      }
-      const entry: IValidatorEntry = {
+      const handlesAndOptions = this.extractValidationInfox(e.options);
+      const validationEntry: IValidatorEntry = {
         target: fn,
-        handles: handles
       };
+      _.assign(validationEntry, handlesAndOptions);
       if (e.property) {
-        entry.property = e.property;
+        validationEntry.property = e.property;
       }
-      entries.push(entry);
+      entries.push(validationEntry);
     }
 
     const entriesSecond = MetadataRegistry.$().getMetadata().filter(x =>
@@ -160,23 +153,46 @@ export class DefaultValidator {
     );
 
     for (const e of entriesSecond) {
-      const intersect = _.intersection(this.lookupKeys, _.keys(e));
-      const handles = [];
-      for (const k of intersect) {
-        const handle = this.validators.find(x => x.name === k || x.involveOnOptionKey === k);
-        handles.push(handle);
-      }
-      const entry: IValidatorEntry = {
+      const handlesAndOptions = this.extractValidationInfox(e);
+      const validationEntry: IValidatorEntry = {
         target: fn,
-        handles: handles
       };
+      _.assign(validationEntry, handlesAndOptions);
       if (e.property) {
-        entry.property = e.property;
+        validationEntry.property = e.property;
       }
-      entries.push(entry);
+      entries.push(validationEntry);
     }
 
     return entries;
+  }
+
+
+  private static extractValidationInfox(entryOptions: any) {
+    const intersect = _.intersection(this.lookupKeys, _.keys(entryOptions));
+    const handles = [];
+    const options = {};
+    for (const k of intersect) {
+      const isLookupKey = ['validate', 'format'].includes(k);
+      const valueForKey = _.get(entryOptions, k, null);
+      const handle = this.validators.find(x => x.name === valueForKey || x.involveOnOptionKey === k);
+      if (handle) {
+        handles.push(handle);
+        let v = _.get(entryOptions, 'validateOptions.' + handle.name, {});
+        if (!isLookupKey) {
+          // pass additional value
+          v[handle.involveOnOptionKey] = _.get(entryOptions, handle.involveOnOptionKey, null);
+        }
+
+        if (v) {
+          options[handle.name] = v;
+        }
+      }
+    }
+    return {
+      handles: handles,
+      options: options
+    };
   }
 
   //

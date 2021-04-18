@@ -6,7 +6,7 @@ import {IBaseRef} from './IBaseRef';
 // import {IEntityRefMetadata} from "./metadata/IEntityRefMetadata";
 
 export function isEntityRef(x: any): x is IEntityRef {
-  return (x as IEntityRef)?.getClassRef !== undefined;
+  return (x as IEntityRef)?.metaType === 'entity';
 }
 
 export interface IEntityRef extends IBaseRef {

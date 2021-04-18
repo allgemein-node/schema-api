@@ -180,7 +180,7 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    */
   createPropertiesForRef(clsRef: IClassRef): DefaultPropertyRef[] {
     const cls = clsRef.getClass(true);
-    const jsonSchema = JsonSchema.serialize(cls);
+    const jsonSchema = JsonSchema.serialize(cls, {appendTarget: true});
     const propOptions: IPropertyOptions[] = [];
     const metaPropOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_PROPERTY, cls) as IPropertyOptions[];
     if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
@@ -205,9 +205,9 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
       }
     }
 
-    return propOptions
-      .concat(metaPropOptions)
-      .map(opts => this.createPropertyForOptions(opts));
+    const propertyOptions = propOptions.concat(metaPropOptions);
+
+    return propertyOptions.map(opts => this.createPropertyForOptions(opts));
   }
 
   /**
@@ -216,6 +216,9 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    * @param options
    */
   createPropertyForOptions(options: IPropertyOptions): DefaultPropertyRef {
+    if(_.keys(options).length === 0){
+      throw new Error('cant create property for emtpy options')
+    }
     options.namespace = this.namespace;
     const prop = new DefaultPropertyRef(options);
     return this.add(prop.metaType, prop);
