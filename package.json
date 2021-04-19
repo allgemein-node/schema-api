@@ -63,22 +63,5 @@
   "peerDependencies": {
     "reflect-metadata": "^0.1.13"
   },
-  "private": true,
-  "nyc": {
-    "extension": [
-      ".ts",
-      ".tsx"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "tmp/",
-      "build/"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "sourceMap": true,
-    "instrument": true,
-    "cache": false
-  }
+  "private": true
 }
