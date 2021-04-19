@@ -9,7 +9,7 @@ import {ClassRef} from '../ClassRef';
 import {NotYetImplementedError} from '@allgemein/base/browser';
 
 
-export class DefaultPropertyRef extends AbstractRef<IPropertyOptions> implements IPropertyRef {
+export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
   cardinality: IMinMax | number = 1;
 

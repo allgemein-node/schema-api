@@ -31,7 +31,7 @@ import {AbstractRef} from './AbstractRef';
 
  class can be in different namespaces
  */
-export class ClassRef extends AbstractRef<any> implements IClassRef {
+export class ClassRef extends AbstractRef implements IClassRef {
 
   static __inc: number = 0;
 
@@ -143,8 +143,6 @@ export class ClassRef extends AbstractRef<any> implements IClassRef {
         this.originalValue = SchemaUtils.clazz(this.originalValue);
         return this.originalValue;
       }
-      // } else if (_.isObjectLike(this.originalValue) && this.isPlaceholder) {
-      //   return this.originalValue as Function;
     }
     throw new NotYetImplementedError('getClass for ' + this.originalValue);
   }

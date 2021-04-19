@@ -14,7 +14,7 @@ import {RegistryFactory} from './registry/RegistryFactory';
 import {MetadataRegistry} from './registry/MetadataRegistry';
 
 
-export abstract class AbstractRef<OPTS> implements IBaseRef {
+export abstract class AbstractRef implements IBaseRef {
 
   readonly metaType: METADATA_TYPE;
 

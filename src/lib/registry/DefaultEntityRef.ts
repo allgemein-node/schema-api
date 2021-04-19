@@ -5,7 +5,7 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {DEFAULT_NAMESPACE, METATYPE_ENTITY, XS_ID_SEPARATOR} from '../Constants';
 import {IEntityOptions} from '../options/IEntityOptions';
 
-export class DefaultEntityRef extends AbstractRef<IEntityOptions> implements IEntityRef {
+export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
 
   constructor(options: IEntityOptions = {}) {
