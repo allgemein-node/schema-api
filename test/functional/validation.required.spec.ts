@@ -2,7 +2,19 @@ import 'reflect-metadata';
 import {expect} from 'chai';
 import {suite, test} from '@testdeck/mocha';
 import {Validator} from './../../src/lib/validation/Validator';
-import {ValidRequired} from './data/classes/ValidateRequired';
+import {Required} from '../../src/decorators/validate/Required';
+
+export class ValidRequired {
+
+  notReq: string;
+
+  @Required()
+  someValue: string;
+
+  @Required({message: 'something else should happen for field %propertyName'})
+  someValueReq: string;
+
+}
 
 
 @suite('functional/validations - required')
