@@ -6,7 +6,7 @@ import {METATYPE_CLASS_REF} from '../lib/Constants';
 
 
 export function isClassRef(x: any): x is IClassRef {
-  if (x !== undefined && x.metaType === METATYPE_CLASS_REF) {
+  if (x !== undefined && x && x.metaType === METATYPE_CLASS_REF) {
     return true;
   }
   return false;

@@ -12,7 +12,8 @@ import {ObjectWithInitProp} from './data/classes/ObjectWithInitProp';
 import {ClassRef} from '../../src/lib/ClassRef';
 import {AnnotatedPrimatives2} from './data/classes/AnnotatedPrimatives';
 import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
-
+import {Validator} from '../../src/lib/validation/Validator';
+import '../../src/decorators/validate';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -684,5 +685,135 @@ class JsonSchemaDraft07SerializationSpec {
     expect(generatedSchema).to.be.deep.eq(schema);
   }
 
+
+  @test
+  async 'parse json schema with validation settings'() {
+    const json: IJsonSchema7 & any = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      title: 'PersonData',
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email'
+        }
+      }
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {forceClassRefCreation: true}) as IClassRef;
+    expect(isEntityRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+
+    const properties = classRefFirst.getPropertyRefs();
+    expect(properties).to.have.length(1);
+    const options = properties.map(x => x.getOptions()).shift();
+    expect(options).to.be.deep.include({
+      'format': 'email',
+      'metaType': 'property',
+      'namespace': 'default',
+      'propertyName': 'email',
+      'type': 'string'
+    });
+
+    const entry = classRefFirst.create<any>();
+    entry.email = 'test';
+    let validate = await Validator.validate(entry, classRefFirst);
+    expect(validate).to.have.length(1);
+    expect(validate).to.be.deep.eq([
+        {
+          metaType: 'property',
+          property: 'email',
+          value: 'test',
+          constraints: {
+            'email': 'Value of property "email" must be a valid email.'
+          }
+        }
+      ]
+    );
+
+
+    entry.email = 'test@test.com';
+    validate = await Validator.validate(entry, classRefFirst);
+    expect(validate).to.have.length(0);
+
+  }
+
+
+  @test
+  async 'parse json schema with validation settings and additional options'() {
+    const json: IJsonSchema7 & any = {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      title: 'PersonDataReg',
+      properties: {
+        name: {
+          type: 'string',
+          validate: 'regex',
+          pattern: 'Rob[a-z]+'
+        }
+      }
+    };
+    const classRefFirst = await JsonSchema.unserialize(json, {forceClassRefCreation: true}) as IClassRef;
+    expect(isEntityRef(classRefFirst)).to.be.true;
+    expect(classRefFirst.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
+
+    const properties = classRefFirst.getPropertyRefs();
+    expect(properties).to.have.length(1);
+    const options = properties.map(x => x.getOptions()).shift();
+    expect(options).to.be.deep.eq({
+      'metaType': 'property',
+      'namespace': 'default',
+      'propertyName': 'name',
+      'type': 'string',
+      target: classRefFirst.getClass(),
+      'validate': 'regex',
+      'pattern': 'Rob[a-z]+'
+    });
+
+    const entry = classRefFirst.create<any>();
+    entry.name = 'test';
+    let validate = await Validator.validate(entry, classRefFirst);
+    expect(validate).to.have.length(1);
+    expect(validate).to.be.deep.eq([
+        {
+          'constraints': {
+            'regex': 'Value of property "name" doesn\'t match the regular expression "Rob[a-z]+".',
+          },
+          'metaType': 'property',
+          'property': 'name',
+          'value': 'test'
+        }
+      ]
+    );
+
+    entry.name = 'Robocop';
+    validate = await Validator.validate(entry, classRefFirst);
+    expect(validate).to.have.length(0);
+
+    const schema = JsonSchema.serialize(classRefFirst);
+    // console.log(inspect(schema, false, 10));
+
+    expect(schema).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        PersonDataReg: {
+          title: 'PersonDataReg',
+          type: 'object',
+          properties: {
+            name: {
+              pattern: 'Rob[a-z]+',
+              type: 'string',
+              validate: 'regex'
+            }
+          }
+        }
+      },
+      '$ref': '#/definitions/PersonDataReg'
+    });
+
+    const initialSchemaCopy = _.cloneDeep(json);
+    delete initialSchemaCopy['$schema'];
+    expect(schema.definitions['PersonDataReg']).to.be.deep.eq(initialSchemaCopy);
+
+  }
 
 }

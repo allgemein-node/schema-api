@@ -3,10 +3,13 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
-import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METATYPE_PROPERTY} from '../Constants';
+import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METADATA_AND_BIND_TYPE, METATYPE_PROPERTY} from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {ClassRef} from '../ClassRef';
 import {NotYetImplementedError} from '@allgemein/base/browser';
+import {AnnotationsHelper} from '../AnnotationsHelper';
+import {ILookupRegistry} from '../../api/ILookupRegistry';
+import {RegistryFactory} from './RegistryFactory';
 
 
 export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
@@ -19,15 +22,22 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
   constructor(options: IPropertyOptions = {}) {
     super(METATYPE_PROPERTY, options.propertyName, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
+    AnnotationsHelper.merge(this.object, this.getOptionsEntry(), this.name);
     this.setOptions(options);
     this.cardinality = _.has(options, 'cardinality') ? options.cardinality : 1;
+
+  }
+
+
+  getRegistry(): ILookupRegistry {
+    return RegistryFactory.get(this.namespace);
   }
 
   /**
    * TODO
    */
   convert(data: any, options?: IBuildOptions): any {
-    const sourceType = this.getType()
+    const sourceType = this.getType();
     if (!sourceType || !_.isString(sourceType)) {
       return data;
     }
@@ -165,6 +175,10 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
       }
     }
     return this.reference;
+  }
+
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef {
+    return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 
 

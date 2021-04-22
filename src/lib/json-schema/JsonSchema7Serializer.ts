@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
-import {REFLECT_DESIGN_TYPE} from '../Constants';
+import {METATYPE_PROPERTY, REFLECT_DESIGN_TYPE} from '../Constants';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {SchemaUtils} from '../SchemaUtils';
 import {IPropertyRef} from '../../api/IPropertyRef';
@@ -10,6 +10,7 @@ import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IJsonSchemaSerializeOptions} from './IJsonSchemaSerializeOptions';
 import {IJsonSchemaUnserializeOptions} from './IJsonSchemaUnserializeOptions';
 import {DRAFT_07} from './Constants';
+import {MetadataRegistry} from '../registry/MetadataRegistry';
 
 
 export class JsonSchema7Serializer implements IJsonSchemaSerializer {
@@ -291,7 +292,24 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
     this.propertyPostproces(propMeta);
 
+    const data = MetadataRegistry.$().find(METATYPE_PROPERTY, (x: any) => x.target === clazz && x.propertyName === propertyName);
+    this.appendAdditionalOptions(propMeta, data);
+
     return propMeta;
+  }
+
+  appendAdditionalOptions(propMeta: any, data: object) {
+    if (data && _.keys(data).length > 0) {
+      const keys = _.keys(data);
+      for (const k of keys) {
+        if (['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace'].includes(k)) {
+          continue;
+        }
+        if (!propMeta[k]) {
+          propMeta[k] = data[k];
+        }
+      }
+    }
   }
 
 
@@ -335,6 +353,9 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
         this.propertyPostproces(propMeta);
       }
     }
+
+    const data = property.getOptions();
+    this.appendAdditionalOptions(propMeta, data);
     return propMeta;
   }
 

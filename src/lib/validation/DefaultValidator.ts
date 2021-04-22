@@ -30,7 +30,7 @@ export class DefaultValidator {
   static define(validator: IValidator) {
     this.validators.push(validator);
     if (validator.involveOnOptionKey) {
-      this.lookupKeys.push(validator.involveOnOptionKey);
+      this.lookupKeys.unshift(validator.involveOnOptionKey);
       this.lookupKeys = _.uniq(this.lookupKeys);
     }
   }
@@ -70,7 +70,7 @@ export class DefaultValidator {
           value = instance;
         }
 
-        let instanceOptions = toValidateEntry.options[handle.name];
+        let instanceOptions = _.clone(toValidateEntry.options[handle.name]);
         if (handle.defaultOptions) {
           _.defaults(instanceOptions, handle.defaultOptions);
         }
@@ -86,7 +86,15 @@ export class DefaultValidator {
 
           let msg = _.get(instanceOptions, 'message', null);
           if (msg) {
-            error.constraints[handle.name] = msg.replace('%propertyName', error.property).replace('%value', value);
+            msg = msg.replace('%propertyName', error.property).replace('%value', value);
+            _.keys(instanceOptions).forEach(k => {
+              let v = instanceOptions[k];
+              if (_.isObjectLike(v) || _.isArray(v)) {
+                v = JSON.stringify(v);
+              }
+              msg = msg.replace('%options.' + k, v);
+            });
+            error.constraints[handle.name] = msg;
           }
         }
 
@@ -131,12 +139,34 @@ export class DefaultValidator {
 
   static getValidationHandlesForFn(fn: Function) {
     const entries: IValidatorEntry[] = [];
+    const entriesSecond = MetadataRegistry.$().getMetadata().filter(x =>
+      x.target === fn && _.intersection(this.lookupKeys, _.keys(x)).length > 0
+    );
+
+    for (const e of entriesSecond) {
+      const handlesAndOptions = this.extractValidationInfox(e);
+      const validationEntry: IValidatorEntry = {
+        target: fn,
+      };
+      _.assign(validationEntry, handlesAndOptions);
+      if (e.propertyName) {
+        validationEntry.property = e.propertyName;
+      }
+      entries.push(validationEntry);
+    }
+
+
     const entriesFirst: IPropertyExtentions[] = MetadataStorage
       .key(XS_ANNOTATION_OPTIONS_CACHE)
       .filter((x: IPropertyExtentions) =>
         x.object === fn && _.intersection(this.lookupKeys, _.keys(x.options)).length > 0
       );
+
     for (const e of entriesFirst) {
+      const alreadyAsProperty = entries.find(x => x.property === e.property);
+      if (alreadyAsProperty) {
+        continue;
+      }
       const handlesAndOptions = this.extractValidationInfox(e.options);
       const validationEntry: IValidatorEntry = {
         target: fn,
@@ -148,21 +178,6 @@ export class DefaultValidator {
       entries.push(validationEntry);
     }
 
-    const entriesSecond = MetadataRegistry.$().getMetadata().filter(x =>
-      x.target === fn && _.intersection(this.lookupKeys, _.keys(x)).length > 0
-    );
-
-    for (const e of entriesSecond) {
-      const handlesAndOptions = this.extractValidationInfox(e);
-      const validationEntry: IValidatorEntry = {
-        target: fn,
-      };
-      _.assign(validationEntry, handlesAndOptions);
-      if (e.property) {
-        validationEntry.property = e.property;
-      }
-      entries.push(validationEntry);
-    }
 
     return entries;
   }
@@ -170,22 +185,30 @@ export class DefaultValidator {
 
   private static extractValidationInfox(entryOptions: any) {
     const intersect = _.intersection(this.lookupKeys, _.keys(entryOptions));
-    const handles = [];
+    const handles: any[] = [];
     const options = {};
     for (const k of intersect) {
       const isLookupKey = ['validate', 'format'].includes(k);
       const valueForKey = _.get(entryOptions, k, null);
       const handle = this.validators.find(x => x.name === valueForKey || x.involveOnOptionKey === k);
       if (handle) {
-        handles.push(handle);
-        let v = _.get(entryOptions, 'validateOptions.' + handle.name, {});
+        const handleAlreadySet = handles.find(x => x.name === handle.name);
+        if (!handleAlreadySet) {
+          handles.push(handle);
+        }
+
+        let v = _.clone(_.get(entryOptions, 'validateOptions.' + handle.name, {}));
         if (!isLookupKey) {
           // pass additional value
           v[handle.involveOnOptionKey] = _.get(entryOptions, handle.involveOnOptionKey, null);
         }
 
         if (v) {
-          options[handle.name] = v;
+          if (!options[handle.name]) {
+            options[handle.name] = {};
+          }
+          _.merge(options[handle.name], v);
+
         }
       }
     }
@@ -195,26 +218,4 @@ export class DefaultValidator {
     };
   }
 
-  //
-  //
-  // static getHandleKeys(ref: IBaseRef) {
-  //   const format = ref.getOptions('format');
-  //   const validate = ref.getOptions('validate');
-  //   return this.extractHandleKeys([format, validate]);
-  // }
-  //
-  // static extractHandleKeys(arr: any[]): string[] {
-  //   const handles: string[] = [];
-  //   for (const entry of arr) {
-  //     if (entry) {
-  //       if (_.isString(entry)) {
-  //         handles.push(entry);
-  //       } else if (_.isArray(entry)) {
-  //         handles.push(...entry);
-  //       }
-  //     }
-  //   }
-  //   return handles;
-  //
-  // }
 }

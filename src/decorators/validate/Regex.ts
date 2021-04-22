@@ -4,7 +4,7 @@ import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
 export interface IRegexOptions extends IValidateOptions {
-  source?: string;
+  pattern?: string;
   message?: string;
   flags?: string;
 }
@@ -12,14 +12,20 @@ export interface IRegexOptions extends IValidateOptions {
 export function Regex(regex: string | RegExp, options?: IRegexOptions) {
   return function (source: any, propertyName: string) {
     const opts: any = {
-      format: 'regex',
-      validateOptions: {
-        regex: {
-          source: _.isString(regex) ? regex : regex.source,
-          flags: _.isString(regex) ? regex : regex.flags,
-        }
-      }
+      pattern: _.isString(regex) ? regex : regex.source,
+      // validateOptions: {
+      //   regex: {
+      //     flags: _.isString(regex) ? regex : regex.flags,
+      //   }
+      // }
     };
+    if (!_.isString(regex) && !_.isEmpty(regex.flags)) {
+      opts.validateOptions = {
+        regex: {
+          flags: regex.flags,
+        }
+      };
+    }
     if (options) {
       _.assign(opts.validateOptions.regex, options);
     }
@@ -36,11 +42,11 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
 DefaultValidator.define({
     name: 'regex',
     fn: (value: string, options: IRegexOptions) => {
-      if (_.isUndefined(value)) {
+      if (_.isUndefined(value) || _.isNull(value)) {
         return true;
       }
       if (_.isString(value)) {
-        const r = new RegExp(options.source, options.flags);
+        const r = new RegExp(options.pattern, options.flags);
         if (r.test(value)) {
           return true;
         }
@@ -48,7 +54,8 @@ DefaultValidator.define({
       return false;
     },
     defaultOptions: {
-      message: 'Value of property "%propertyName" doesn\'t match the regular expression "%options.source".'
-    }
+      message: 'Value of property "%propertyName" doesn\'t match the regular expression "%options.pattern".'
+    },
+    involveOnOptionKey: 'pattern'
   }
 );

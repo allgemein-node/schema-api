@@ -1,16 +1,16 @@
 import * as _ from 'lodash';
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
+import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
-export interface IIsEmailOptions {
+export interface IIsEmailOptions extends IValidateOptions {
   required?: boolean;
-  message?: string
 }
 
 export function IsEmail(options: IIsEmailOptions = null) {
   return function (source: any, propertyName: string) {
     const opts: any = {
-      validate: 'email',
+      format: 'email',
       validateOptions: {email: {}}
     };
     if (options) {
@@ -31,8 +31,8 @@ const MAIL_REGEX = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}
 DefaultValidator.define({
     name: 'email',
     fn: (value: string, options: IIsEmailOptions) => {
-      if (_.isUndefined(value)) {
-        if(!_.get(options, 'required', false)){
+      if (_.isUndefined(value) || _.isNull(value)) {
+        if (!_.get(options, 'required', false)) {
           return true;
         }
         return false;
@@ -40,7 +40,7 @@ DefaultValidator.define({
       return MAIL_REGEX.test(value);
     },
     defaultOptions: {
-      message: 'E-mail field "%propertyName" with value "%value" in not valid.'
+      message: 'Value of property "%propertyName" must be a valid email.'
     }
   }
 );

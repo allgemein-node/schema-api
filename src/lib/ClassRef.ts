@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {ClassUtils, NotYetImplementedError} from '@allgemein/base/browser';
+import {ClassUtils, NotYetImplementedError} from '@allgemein/base';
 import {SchemaUtils} from './SchemaUtils';
 import {
   __CLASS__,
@@ -7,8 +7,10 @@ import {
   C_PROP_NAME,
   DEFAULT_NAMESPACE,
   GLOBAL_NAMESPACE,
+  METADATA_AND_BIND_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
+  METATYPE_PROPERTY,
   XS_ID_SEPARATOR
 } from './Constants';
 import {LookupRegistry} from './LookupRegistry';
@@ -76,6 +78,9 @@ export class ClassRef extends AbstractRef implements IClassRef {
     return this._isAnonymous;
   }
 
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef {
+    return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
+  }
 
   static getClassName(k: any) {
     if (k[__CLASS__]) {
@@ -287,7 +292,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
     return this._cacheEntity;
   }
 
-  hasEntityRef(){
+  hasEntityRef() {
     return !!this.getEntityRef();
   }
 
@@ -301,8 +306,6 @@ export class ClassRef extends AbstractRef implements IClassRef {
     let klass = this.getClass();
     let instance = Reflect.construct(klass, []);
     if (addinfo) {
-      Reflect.defineProperty(instance, 'xs:namespace', {value: this.namespace});
-      Reflect.defineProperty(instance, 'xs:name', {value: this.className});
       Reflect.defineProperty(instance, __NS__, {value: this.namespace});
       Reflect.defineProperty(instance, __CLASS__, {value: this.className});
     }
@@ -375,5 +378,6 @@ export class ClassRef extends AbstractRef implements IClassRef {
     this.extends.push(ref);
     return ref;
   }
+
 
 }

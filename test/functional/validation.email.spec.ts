@@ -28,7 +28,9 @@ class ValidationEmailSpec {
           metaType: 'property',
           property: 'mail',
           value: '',
-          constraints: { email: 'E-mail field "mail" with value "" in not valid.' }
+          constraints: {
+            'email': 'Value of property "mail" must be a valid email.'
+          }
         }
       ]
     );
@@ -47,7 +49,7 @@ class ValidationEmailSpec {
           property: 'mail',
           value: 'mailaddress',
           constraints: {
-            email: 'E-mail field "mail" with value "mailaddress" in not valid.'
+            'email': 'Value of property "mail" must be a valid email.'
           }
         }
       ]
@@ -66,7 +68,7 @@ class ValidationEmailSpec {
           property: 'mail',
           value: 'mailaddress@addedd',
           constraints: {
-            email: 'E-mail field "mail" with value "mailaddress@addedd" in not valid.'
+            'email': 'Value of property "mail" must be a valid email.'
           }
         }
       ]
@@ -94,7 +96,7 @@ class ValidationEmailSpec {
           property: 'mailOtherMessage',
           value: undefined,
           constraints: {
-            email: 'E-mail field "mailOtherMessage" with value "undefined" in not valid.'
+            'email': 'Value of property "mailOtherMessage" must be a valid email.'
           }
         }
       ]
