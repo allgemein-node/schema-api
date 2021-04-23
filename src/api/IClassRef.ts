@@ -3,6 +3,7 @@ import {IBuildOptions} from './IBuildOptions';
 import {IBaseRef} from './IBaseRef';
 import {ILookupRegistry} from './ILookupRegistry';
 import {METATYPE_CLASS_REF} from '../lib/Constants';
+import {IEntityRef} from './IEntityRef';
 
 
 export function isClassRef(x: any): x is IClassRef {
@@ -24,6 +25,10 @@ export interface IClassRef extends IBaseRef {
   getPropertyRef(name: string): IPropertyRef;
 
   getPropertyRefs(): IPropertyRef[];
+
+  getEntityRef(): IEntityRef;
+
+  hasEntityRef(): boolean;
 
   create<T>(addinfo?: boolean): T;
 

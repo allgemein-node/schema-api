@@ -46,9 +46,6 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
   private _cacheEntity: IEntityRef;
 
-  //
-  // isEntity: boolean = false;
-  //
   private _isPlaceholder: boolean = false;
 
   private _isAnonymous: boolean = false;
@@ -96,10 +93,6 @@ export class ClassRef extends AbstractRef implements IClassRef {
   }
 
 
-  // get name() {
-  //   return this.className;
-  // }
-
   get className() {
     return this.name;
   }
@@ -127,11 +120,15 @@ export class ClassRef extends AbstractRef implements IClassRef {
     return this.namespace;
   }
 
-
+  /**
+   * TODO implement
+   *
+   * @param namespace
+   */
   switchNamespace(namespace: string) {
-    this.getRegistry().remove(METATYPE_CLASS_REF, (x: IClassRef) => x.getClass() === this.getClass());
-    this.namespace = namespace;
-    this.getRegistry().add(METATYPE_CLASS_REF, this);
+    // this.getRegistry().remove(METATYPE_CLASS_REF, (x: IClassRef) => x.getClass() === this.getClass());
+    // this.namespace = namespace;
+    // this.getRegistry().add(METATYPE_CLASS_REF, this);
   }
 
 
@@ -175,14 +172,16 @@ export class ClassRef extends AbstractRef implements IClassRef {
   }
 
 
+
+
   /**
    * get all class refs for some class name
    *
    * @param klass
    */
-  static getAllByClassName(klass: any): ClassRef[] {
+  static getAllByClassName(klass: any): IClassRef[] {
     let name = ClassRef.getClassName(klass);
-    return LookupRegistry.filter<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className == name);
+    return LookupRegistry.filter<ClassRef>(METATYPE_CLASS_REF, (c: IClassRef) => c.name == name);
   }
 
 
@@ -191,8 +190,8 @@ export class ClassRef extends AbstractRef implements IClassRef {
    *
    * @param klass
    */
-  static filter(fn: (c: ClassRef) => boolean): ClassRef[] {
-    return LookupRegistry.filter<ClassRef>(METATYPE_CLASS_REF, fn);
+  static filter(fn: (c: IClassRef) => boolean): IClassRef[] {
+    return LookupRegistry.filter<IClassRef>(METATYPE_CLASS_REF, fn);
   }
 
 

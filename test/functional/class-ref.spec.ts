@@ -170,6 +170,19 @@ class ClassRefSpec {
     expect(refs).to.have.length(1);
   }
 
+
+  /**
+   * Create class ref dynamically for imported and named class.
+   */
+  @test
+  async 'create class ref anonymous'() {
+    const classRef = ClassRef.get('PlainObjectAnonymous');
+    const classRef2 = ClassRef.get('PlainObjectAnonymous');
+    expect(classRef).to.be.eq(classRef2);
+  }
+
+
+
   @test
   async 'property declared over annotation'() {
     const classRef = ClassRef.get(AnnotatedProperties);

@@ -10,10 +10,10 @@ export interface IIsEmailOptions extends IValidateOptions {
 export function IsEmail(options: IIsEmailOptions = null) {
   return function (source: any, propertyName: string) {
     const opts: any = {
-      format: 'email',
-      validateOptions: {email: {}}
+      format: 'email'
     };
     if (options) {
+      _.assign(opts, {validateOptions: {email: {}}});
       opts.validateOptions = {email: options};
     }
     AnnotationsHelper.forPropertyOn(

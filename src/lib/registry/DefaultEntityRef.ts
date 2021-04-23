@@ -15,6 +15,7 @@ import {ClassRef} from '../ClassRef';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
+import {ISchemaRef} from '../../api/ISchemaRef';
 
 export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
@@ -23,7 +24,11 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
     super(METATYPE_ENTITY, options.name, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
     AnnotationsHelper.merge(this.object, this.getOptionsEntry());
     this.setOptions(options);
+  }
 
+
+  getSchemaRefs(): ISchemaRef[] {
+    return this.getRegistry().getSchemaRefsFor(this);
   }
 
   getRegistry(): ILookupRegistry {

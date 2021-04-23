@@ -3,6 +3,7 @@
  * We want use one api for use and accessing objects. The registry handle for a namespace can be
  * registered here.
  */
+import {keys} from 'lodash';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {DEFAULT_NAMESPACE} from '../Constants';
 import {DefaultNamespacedRegistry} from './DefaultNamespacedRegistry';
@@ -38,4 +39,11 @@ export class RegistryFactory {
   static register(namespace: string, registry: ILookupRegistry) {
     this.$handles[namespace] = registry;
   }
+
+
+  static getNamespaces() {
+    return keys(this.$handles);
+  }
+
+
 }

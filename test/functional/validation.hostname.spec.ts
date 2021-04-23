@@ -78,7 +78,6 @@ class ValidationHostnameSpec {
           'metaType': 'property',
           'property': 'hostname',
           "value": "1.m.i.ladd.re.ss"
-
         }
       ]
     );

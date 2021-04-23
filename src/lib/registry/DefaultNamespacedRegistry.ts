@@ -11,7 +11,8 @@ import {
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
-  METATYPE_PROPERTY
+  METATYPE_PROPERTY,
+  METATYPE_SCHEMA
 } from './../Constants';
 import {IPropertyOptions} from './../options/IPropertyOptions';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
@@ -27,8 +28,10 @@ import {DefaultEntityRef} from './DefaultEntityRef';
 import {hasClassPropertiesInDefinition, IJsonSchema7} from '../json-schema/JsonSchema7';
 import {ISchemaOptions} from '../options/ISchemaOptions';
 import {IObjectOptions} from '../options/IObjectOptions';
-import {ClassUtils} from '@allgemein/base/browser';
+import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
 import {JsonSchema} from '../json-schema/JsonSchema';
+import {ISchemaRef} from '../../api/ISchemaRef';
+import {SchemaRef} from '../SchemaRef';
 
 
 /**
@@ -61,20 +64,56 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    * @param context
    * @param entries
    */
-  onAdd(context: METADATA_TYPE, options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
-    if (context === 'property') {
-      const find = this.getLookupRegistry().find(context, (c: IPropertyRef) => c.getClassRef().getClass() === options.target && c.name === options.name);
+  onAdd(context: METADATA_TYPE,
+        options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
+    if (context === METATYPE_PROPERTY) {
+      const find = this.find(context, (c: IPropertyRef) => c.getClassRef().getClass() === options.target && c.name === options.name);
       if (find) {
         // update
       } else {
         this.create(context, options);
       }
-    } else if (context === 'entity') {
-      const find = this.getLookupRegistry().find(context, (c: IEntityRef) => c.getClassRef().getClass() === options.target);
+    } else if (context === METATYPE_ENTITY) {
+      const find = this.find(context, (c: IEntityRef) => c.getClassRef().getClass() === options.target);
       if (!find) {
         this.create(context, options);
       }
+    } else if (context === METATYPE_SCHEMA) {
+      let find: ISchemaRef = this
+        .find(context,
+          (c: ISchemaRef) => c.name === (<ISchemaOptions>options).name
+        );
+      if (!find) {
+        find = this.create(context, options);
+      }
+
+      let entityRef: IEntityRef = this
+        .find(METATYPE_ENTITY,
+          (c: IEntityRef) => c.getClass() === options.target
+        );
+
+
+      if (entityRef) {
+        this.addSchemaToEntityRef(find, entityRef);
+      }
+
     }
+  }
+
+
+  addSchemaToEntityRef(schemaRef: string | ISchemaRef, entityRef: IEntityRef) {
+    const name = _.isString(schemaRef) ? schemaRef : schemaRef.name;
+    let entry = entityRef.getOptions('schema');
+    if (entry) {
+      if (_.isArray(entry)) {
+        entry.push(name);
+      } else {
+        entry = [entry, name];
+      }
+    } else {
+      entry = [name];
+    }
+    entityRef.setOption('schema', _.uniq(entry));
   }
 
 
@@ -86,16 +125,17 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    */
   onRemove(context: METADATA_TYPE, entries: (IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions)[]) {
 
-    if (context === 'entity' || context === 'class_ref') {
+    if (context === METATYPE_ENTITY || context === METATYPE_CLASS_REF) {
       const targets = entries.map(x => x.target);
       this.getLookupRegistry().remove('class_ref', (x: any) => targets.includes(x.target));
       this.getLookupRegistry().remove('entity', (x: any) => targets.includes(x.target));
       this.getLookupRegistry().remove('property', (x: any) => targets.includes(x.target));
-    }
-
-    if (context === 'property') {
+    } else if (context === METATYPE_PROPERTY) {
       const targets = entries.map(x => [x.target, x.propertyName]);
       this.getLookupRegistry().remove(context, (x: any) => targets.includes([x.target, x.name]));
+    } else if (context === METATYPE_SCHEMA) {
+      // TODO remove schema ref
+      // TODO remove schema options entries
     }
   }
 
@@ -109,6 +149,40 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
   onUpdate() {
   }
 
+
+  /**
+   * Return all registered schema references
+   *
+   * @param ref
+   * @return ISchemaRef[]
+   */
+  getSchemaRefs(filter?: (x: ISchemaRef) => boolean): ISchemaRef[] {
+    return this.filter(METATYPE_SCHEMA, filter);
+  }
+
+  /**
+   * Return schema references for an given entity or class reference
+   *
+   * @param ref
+   * @return ISchemaRef[]
+   */
+  getSchemaRefsFor(ref: IEntityRef | IClassRef): ISchemaRef[] {
+    let lookup = [];
+    if (isEntityRef(ref) || isClassRef(ref)) {
+      const schemas = ref.getOptions('schema');
+      for (const schema of schemas) {
+        let schemaRef = this.find(METATYPE_SCHEMA, (x: ISchemaRef) => x.name === schema);
+        if (!schemaRef) {
+          schemaRef = this.create(METATYPE_SCHEMA, {name: schema, target: ref.getClass()});
+        }
+        lookup.push(schemaRef);
+      }
+      lookup = this.getSchemaRefs((x: ISchemaRef) => schemas.includes(x.name));
+    } else {
+      throw new NotSupportedError('passed value is not supported');
+    }
+    return lookup ? _.uniq(lookup) : null;
+  }
 
   /**
    * TODO
@@ -130,7 +204,7 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
       lookup = ClassUtils.getFunction(fn as any);
     }
     const clsRef = ClassRef.get(lookup, this.namespace);
-    let lookupFn = (x: IEntityRef) => x.getClassRef().name === clsRef.name;
+    let lookupFn = (x: IEntityRef) => x.getClassRef() === clsRef;
     const entityRefExists = this.find<IEntityRef>(METATYPE_ENTITY, lookupFn);
     if (entityRefExists) {
       return entityRefExists;
@@ -158,7 +232,7 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
 
 
   /**
-   * Returns all properties for given class or entity ref. If
+   * Returns all properties for given class or entity ref
    *
    * @param ref
    */
@@ -206,9 +280,9 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
     }
 
     const propertyOptions = propOptions.concat(metaPropOptions);
-
     return propertyOptions.map(opts => this.createPropertyForOptions(opts));
   }
+
 
   /**
    * Create default property reference
@@ -216,13 +290,14 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
    * @param options
    */
   createPropertyForOptions(options: IPropertyOptions): DefaultPropertyRef {
-    if(_.keys(options).length === 0){
-      throw new Error('cant create property for emtpy options')
+    if (_.keys(options).length === 0) {
+      throw new Error('cant create property for emtpy options');
     }
     options.namespace = this.namespace;
     const prop = new DefaultPropertyRef(options);
     return this.add(prop.metaType, prop);
   }
+
 
   /**
    * Create default entity reference
@@ -236,20 +311,43 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
   }
 
   /**
-   * Create default entity reference for passed reference
+   * Create default schema reference
+   *
+   * @param options
+   */
+  createSchemaForOptions(options: ISchemaOptions): SchemaRef {
+    options.namespace = this.namespace;
+    const schemaRef = new SchemaRef(options);
+    return this.add(schemaRef.metaType, schemaRef);
+  }
+
+  /**
+   * Create default entity reference for passed reference. The options are taken from metadata registry.
+   * Also the schema is looked up.
    *
    * @param options
    */
   createEntityForRef(ref: IClassRef | IEntityRef): DefaultEntityRef {
     const metaEntityOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_ENTITY, ref.getClass()) as IEntityOptions[];
-    let metaEntityOption = metaEntityOptions.shift();
-    if (!metaEntityOption) {
-      metaEntityOption = {
-        target: ref.getClass(),
-        name: ref.getClass().name
-      };
+    let metaEntityOption: IEntityOptions = {};
+    if (metaEntityOptions.length > 1) {
+      metaEntityOption = _.merge(metaEntityOption, ...metaEntityOptions);
+    } else if (metaEntityOptions.length === 1) {
+      metaEntityOption = metaEntityOptions.shift();
     }
-    return this.createEntityForOptions(metaEntityOption);
+    _.defaults(metaEntityOption, {
+      target: ref.getClass(),
+      name: ref.getClass().name
+    });
+    const entityRef = this.createEntityForOptions(metaEntityOption);
+    const metaSchemaOptionsForEntity = MetadataRegistry.$()
+      .getByContextAndTarget(METATYPE_SCHEMA, ref.getClass()) as ISchemaOptions[];
+    if (metaSchemaOptionsForEntity.length > 0) {
+      for (const schemaOptions of metaSchemaOptionsForEntity) {
+        this.addSchemaToEntityRef(schemaOptions.name, entityRef);
+      }
+    }
+    return entityRef;
   }
 
 
@@ -277,16 +375,18 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
 
   create<T>(context: string, options: any): T {
     switch (context as METADATA_TYPE) {
-      case 'class_ref':
+      case METATYPE_CLASS_REF:
         break;
-      case 'entity':
+      case METATYPE_ENTITY:
         if (isClassRef(options)) {
           return <any>this.createEntityForRef(options);
         } else {
           return <any>this.createEntityForOptions(options);
         }
-      case 'property':
+      case METATYPE_PROPERTY:
         return <any>this.createPropertyForOptions(options);
+      case METATYPE_SCHEMA:
+        return <any>this.createSchemaForOptions(options);
     }
 
     return null;

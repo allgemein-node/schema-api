@@ -13,11 +13,6 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
   return function (source: any, propertyName: string) {
     const opts: any = {
       pattern: _.isString(regex) ? regex : regex.source,
-      // validateOptions: {
-      //   regex: {
-      //     flags: _.isString(regex) ? regex : regex.flags,
-      //   }
-      // }
     };
     if (!_.isString(regex) && !_.isEmpty(regex.flags)) {
       opts.validateOptions = {

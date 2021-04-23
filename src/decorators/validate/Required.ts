@@ -9,10 +9,10 @@ export interface IRequiredOptions {
 export function Required(options?: IRequiredOptions) {
   return function (source: any, propertyName: string) {
     const opts: any = {
-      required: true,
-      validateOptions: {required: {}}
+      required: true
     };
     if (options) {
+      _.assign(opts, {validateOptions: {required: {}}});
       _.assign(opts.validateOptions.required, options);
     }
 

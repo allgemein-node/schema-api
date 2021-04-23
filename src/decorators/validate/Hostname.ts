@@ -11,10 +11,12 @@ export function Hostname(options?: IHostnameOptions) {
   return function (source: any, propertyName: string) {
     const opts: any = {
       format: 'hostname',
-      validateOptions: {hostname: {}}
+
     };
+
     if (options) {
-      _.assign(opts.validateOptions.required, options);
+      _.assign(opts, {validateOptions: {hostname: {}}});
+      _.assign(opts.validateOptions.hostname, options);
     }
 
     AnnotationsHelper.forPropertyOn(

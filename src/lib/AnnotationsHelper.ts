@@ -11,7 +11,7 @@ export class AnnotationsHelper {
 
   static forPropertyOn(object: Function, property: string, options: any, merge?: MERGE_TYPE) {
     const source = ClassUtils.getFunction(object);
-    const classRefs: ClassRef[] = ClassRef.filter(c => c.originalValue === source);
+    const classRefs: IClassRef[] = ClassRef.filter(c => c.getClass() === source);
 
     for (const ref of classRefs) {
       let prop = ref.getPropertyRef(property);
@@ -37,7 +37,7 @@ export class AnnotationsHelper {
 
   static forEntityOn(object: Function, options: any, merge?: MERGE_TYPE) {
     const source = ClassUtils.getFunction(object);
-    const classRefs: ClassRef[] = ClassRef.filter(c => c.originalValue === source);
+    const classRefs: IClassRef[] = ClassRef.filter(c => c.getClass() === source);
 
     for (const ref of classRefs) {
       if (ref) {

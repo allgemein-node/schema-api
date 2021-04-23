@@ -4,6 +4,7 @@ import {METADATA_AND_BIND_TYPE} from '../lib/Constants';
 import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
 import {IBaseRef} from './IBaseRef';
+import {ISchemaRef} from './ISchemaRef';
 
 /**
  *
@@ -12,6 +13,9 @@ export interface ILookupRegistry {
 
   prepare?(): void;
 
+  getSchemaRefs(filter?: (x: ISchemaRef) => boolean): ISchemaRef[];
+
+  getSchemaRefsFor(ref: IEntityRef): ISchemaRef[];
 
   getEntityRefFor(fn: string | object | Function): IEntityRef;
 
