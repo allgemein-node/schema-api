@@ -1,10 +1,10 @@
 // import {METADATA_AND_BIND_TYPE} from './Constants';
 
-import {MERGE_TYPE, METADATA_AND_BIND_TYPE} from '../lib/Constants';
+import {MERGE_TYPE, METADATA_TYPE} from '../lib/Constants';
 
 export interface IPropertyExtentions {
 
-  type: METADATA_AND_BIND_TYPE,
+  type: METADATA_TYPE,
 
   object: Function,
 

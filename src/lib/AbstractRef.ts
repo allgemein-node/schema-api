@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {DEFAULT_NAMESPACE, METADATA_AND_BIND_TYPE, METADATA_TYPE,} from './Constants';
+import {DEFAULT_NAMESPACE, METADATA_TYPE,} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {MetadataRegistry} from './registry/MetadataRegistry';
@@ -33,7 +33,7 @@ export abstract class AbstractRef implements IBaseRef {
     }
   }
 
-  abstract getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef;
+  abstract getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
 
   getNamespace() {
     return this.namespace;

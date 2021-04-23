@@ -1,10 +1,9 @@
 import {IEntityRef} from './IEntityRef';
 import {IPropertyRef} from './IPropertyRef';
-import {METADATA_AND_BIND_TYPE} from '../lib/Constants';
 import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
-import {IBaseRef} from './IBaseRef';
 import {ISchemaRef} from './ISchemaRef';
+import {METADATA_TYPE} from '../lib/Constants';
 
 /**
  *
@@ -25,7 +24,7 @@ export interface ILookupRegistry {
 
   getLookupRegistry(): LookupRegistry;
 
-  list<X>(type: METADATA_AND_BIND_TYPE, filter?: (x: any) => boolean): X[];
+  list<X>(type: METADATA_TYPE, filter?: (x: any) => boolean): X[];
 
   listEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[];
 

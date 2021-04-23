@@ -3,7 +3,10 @@
   "version": "1.2.0",
   "description": "Library for schema api",
   "main": "index.js",
-  "browser": "browser.js",
+  "private": true,
+  "browser": {
+    "./index.js": "./browser.js"
+  },
   "directories": {
     "doc": "docs/de"
   },
@@ -61,6 +64,5 @@
   },
   "peerDependencies": {
     "reflect-metadata": "^0.1.13"
-  },
-  "private": true
+  }
 }

@@ -1,4 +1,4 @@
-import {METADATA_AND_BIND_TYPE} from '../lib/Constants';
+import {METADATA_TYPE} from '../lib/Constants';
 
 
 export interface IBaseRef {
@@ -21,7 +21,7 @@ export interface IBaseRef {
   /**
    * meta data tpye
    */
-  metaType: METADATA_AND_BIND_TYPE;
+  metaType: METADATA_TYPE;
 
   /**
    * Unique identifier

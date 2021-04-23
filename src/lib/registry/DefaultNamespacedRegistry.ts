@@ -7,7 +7,6 @@ import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
   C_EVENT_UPDATE,
-  METADATA_AND_BIND_TYPE,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
@@ -358,7 +357,7 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
   }
 
 
-  list<X>(type: METADATA_AND_BIND_TYPE, filter?: (x: any) => boolean): X[] {
+  list<X>(type: METADATA_TYPE, filter?: (x: any) => boolean): X[] {
     return this.filter(type, filter);
   }
 

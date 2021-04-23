@@ -3,7 +3,7 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
-import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METADATA_AND_BIND_TYPE, METATYPE_PROPERTY} from '../Constants';
+import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METADATA_TYPE, METATYPE_PROPERTY} from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {ClassRef} from '../ClassRef';
 import {NotYetImplementedError} from '@allgemein/base/browser';
@@ -177,7 +177,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     return this.reference;
   }
 
-  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef {
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 

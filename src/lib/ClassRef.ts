@@ -6,8 +6,7 @@ import {
   __NS__,
   C_PROP_NAME,
   DEFAULT_NAMESPACE,
-  GLOBAL_NAMESPACE,
-  METADATA_AND_BIND_TYPE,
+  GLOBAL_NAMESPACE, METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
   METATYPE_PROPERTY,
@@ -75,7 +74,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
     return this._isAnonymous;
   }
 
-  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef {
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 

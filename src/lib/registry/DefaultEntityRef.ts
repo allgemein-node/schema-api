@@ -3,8 +3,7 @@ import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {
-  DEFAULT_NAMESPACE,
-  METADATA_AND_BIND_TYPE,
+  DEFAULT_NAMESPACE, METADATA_TYPE,
   METATYPE_ENTITY,
   METATYPE_PROPERTY,
   XS_ID_SEPARATOR
@@ -55,7 +54,7 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
     return [METATYPE_ENTITY, this.getClassRef().id()].join(XS_ID_SEPARATOR);
   }
 
-  getClassRefFor(object: string | Function | IClassRef, type: METADATA_AND_BIND_TYPE): IClassRef {
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
   }
 

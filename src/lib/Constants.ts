@@ -10,8 +10,6 @@ export const METATYPE_ENTITY = 'entity';
 export const METATYPE_CLASS_REF = 'class_ref';
 export const METATYPE_PROPERTY = 'property';
 export const METATYPE_OBJECT = 'object';
-export const BINDING_SCHEMA_ENTITY = 'schema_entity';
-export const BINDING_SCHEMA_CLASS_REF = 'schema_class_ref';
 
 export type METADATA_TYPE =
   'schema'
@@ -21,11 +19,6 @@ export type METADATA_TYPE =
   | 'class_ref';
 
 
-export type METADATA_AND_BIND_TYPE = METADATA_TYPE
-  | 'schema_entity'
-  | 'entity_property'
-  | 'property_entity'
-  | 'schema_class_ref';
 
 export type XS_DATA_TYPES = 'string' | 'number' | 'boolean' | 'entity' | 'array' | 'any' ;
 export const XS_ID_SEPARATOR = '--';
