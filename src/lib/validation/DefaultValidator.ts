@@ -15,7 +15,7 @@ import {IValidator} from './IValidator';
 export interface IValidatorEntry {
   target: Function,
   property?: string,
-  options?: any,
+  options?: any[],
   handles?: IValidator[]
 }
 
@@ -163,22 +163,29 @@ export class DefaultValidator {
       );
 
     for (const e of entriesFirst) {
-      const alreadyAsProperty = entries.find(x => x.property === e.property);
-      if (alreadyAsProperty) {
-        continue;
-      }
+      const alreadyAsProperty = entries.find(x => x.property === e.property) as IValidatorEntry;
       const handlesAndOptions = this.extractValidationInfox(e.options);
-      const validationEntry: IValidatorEntry = {
-        target: fn,
-      };
-      _.assign(validationEntry, handlesAndOptions);
-      if (e.property) {
-        validationEntry.property = e.property;
+      if (alreadyAsProperty) {
+        for (let i = 0; i < handlesAndOptions.handles.length; i++) {
+          const handle = handlesAndOptions.handles[i];
+          if (alreadyAsProperty.handles.find(x => x.name === handle.name)) {
+            // ignore double declarations
+            continue;
+          }
+          alreadyAsProperty.handles.push(handle);
+          _.set(alreadyAsProperty.options, handle.name, _.get(handlesAndOptions.options, handle.name, {}));
+        }
+      } else {
+        const validationEntry: IValidatorEntry = {
+          target: fn,
+        };
+        _.assign(validationEntry, handlesAndOptions);
+        if (e.property) {
+          validationEntry.property = e.property;
+        }
+        entries.push(validationEntry);
       }
-      entries.push(validationEntry);
     }
-
-
     return entries;
   }
 
@@ -208,7 +215,6 @@ export class DefaultValidator {
             options[handle.name] = {};
           }
           _.merge(options[handle.name], v);
-
         }
       }
     }
