@@ -32,7 +32,7 @@ export interface IBaseRef {
   /**
    * Return some options
    */
-  getOptions(key?: string): any;
+  getOptions(key?: string, defaultValue?: any): any;
 
   /**
    * Set some option

@@ -26,6 +26,9 @@ export {Ip6, IP6_REGEX, IIp6Options} from './decorators/validate/Ip6';
 export {IsEmail, MAIL_REGEX, IIsEmailOptions} from './decorators/validate/IsEmail';
 export {Regex, IRegexOptions} from './decorators/validate/Regex';
 export {Required, IRequiredOptions} from './decorators/validate/Required';
+export {MinLength, IMinLengthOptions} from './decorators/validate/MinLength';
+export {MaxLength, IMaxLengthOptions} from './decorators/validate/MaxLength';
+export {IsNotEmpty, IIsNotEmptyOptions} from './decorators/validate/IsNotEmpty';
 
 export {AbstractRef} from './lib/AbstractRef';
 export {AnnotationsHelper} from './lib/AnnotationsHelper';

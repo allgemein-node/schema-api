@@ -69,5 +69,9 @@ export interface ILookupRegistry {
    */
   find<T>(context: string, search: any): T;
 
+  /**
+   * Reset registry data
+   */
+  reset(): void;
 
 }

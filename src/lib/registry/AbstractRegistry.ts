@@ -18,15 +18,17 @@ import {ISchemaRef} from '../../api/ISchemaRef';
  */
 export abstract class AbstractRegistry extends EventEmitter implements ILookupRegistry {
 
-  readonly namespace: string;
+  protected readonly namespace: string;
 
-  readonly registry: LookupRegistry;
+  protected registry: LookupRegistry;
 
   constructor(namespace: string) {
     super();
     this.namespace = namespace;
     this.registry = LookupRegistry.$(this.namespace);
   }
+
+
 
   // /**
   //  * Initialize events for metadata changes on runtime
@@ -156,6 +158,11 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    */
   remove<T>(context: string, search: any): T[] {
     return this.getLookupRegistry().remove(context, search);
+  }
+
+  reset() {
+    LookupRegistry.reset(this.namespace);
+    this.registry = LookupRegistry.$(this.namespace);
   }
 
 }
