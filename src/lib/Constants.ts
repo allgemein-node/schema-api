@@ -19,6 +19,14 @@ export type METADATA_TYPE =
   | 'class_ref';
 
 
+export const BINDING_SCHEMA_ENTITY = 'schema_entity';
+export const BINDING_SCHEMA_CLASS_REF = 'schema_class_ref';
+
+export type METADATA_AND_BIND_TYPE = METADATA_TYPE
+  | 'schema_entity'
+  | 'entity_property'
+  | 'property_entity'
+  | 'schema_class_ref';
 
 export type XS_DATA_TYPES = 'string' | 'number' | 'boolean' | 'entity' | 'array' | 'any' ;
 export const XS_ID_SEPARATOR = '--';

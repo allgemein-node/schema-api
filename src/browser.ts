@@ -10,7 +10,7 @@ export {ISchemaRef} from './api/ISchemaRef';
 
 export {Entity} from './decorators/Entity';
 export {Property} from './decorators/Property';
-export {Object} from './decorators/Object';
+export {Embeddable} from './decorators/Embeddable';
 export {PropertyOf} from './decorators/PropertyOf';
 export {Schema} from './decorators/Schema';
 
@@ -45,7 +45,9 @@ export {
   METADATA_REGISTRY, METATYPE_OBJECT,
   OPT_CREAT_AND_COPY, REFLECT_DESIGN_TYPE, STATE_KEY,
   T_STRING, XS_DATA_TYPES,
-  XS_DEFAULT_CLASSES, XS_DEFAULT_SCHEMA, XS_ID_SEPARATOR
+  XS_DEFAULT_CLASSES, XS_DEFAULT_SCHEMA,
+  METADATA_AND_BIND_TYPE,
+  XS_ID_SEPARATOR, BINDING_SCHEMA_ENTITY, BINDING_SCHEMA_CLASS_REF
 } from './lib/Constants';
 
 export {DataContainer} from './lib/DataContainer';
