@@ -13,7 +13,7 @@ import {DefaultNamespacedRegistry} from '../../src/lib/registry/DefaultNamespace
 class RegistrySpec {
 
   static before() {
-    RegistryFactory.register('test', new TestRegistry('test'));
+    RegistryFactory.register('test', TestRegistry);
   }
 
 
