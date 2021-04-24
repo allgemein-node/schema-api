@@ -31,22 +31,14 @@ import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
 import {JsonSchema} from '../json-schema/JsonSchema';
 import {ISchemaRef} from '../../api/ISchemaRef';
 import {SchemaRef} from '../SchemaRef';
+import {AbstractRegistry} from './AbstractRegistry';
 
 
 /**
  * Registry for metadata of classes and there properties
  */
-export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRegistry {
+export class DefaultNamespacedRegistry extends AbstractRegistry {
 
-  readonly namespace: string;
-
-  readonly registry: LookupRegistry;
-
-  constructor(namespace: string) {
-    super();
-    this.namespace = namespace;
-    this.registry = LookupRegistry.$(this.namespace);
-  }
 
   /**
    * Initialize events for metadata changes on runtime
@@ -213,14 +205,6 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
 
 
   /**
-   * Returns the used instance of lookup registry handler
-   */
-  getLookupRegistry(): LookupRegistry {
-    return this.registry;
-  }
-
-
-  /**
    * Returns property by name for a given class or entity ref
    *
    * @param filter
@@ -357,20 +341,6 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
   }
 
 
-  list<X>(type: METADATA_TYPE, filter?: (x: any) => boolean): X[] {
-    return this.filter(type, filter);
-  }
-
-
-  listEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[] {
-    return this.getEntities(filter);
-  }
-
-
-  listProperties(filter?: (x: IPropertyRef) => boolean): IPropertyRef[] {
-    return this.filter(METATYPE_PROPERTY, filter);
-  }
-
 
   create<T>(context: string, options: any): T {
     switch (context as METADATA_TYPE) {
@@ -412,25 +382,5 @@ export class DefaultNamespacedRegistry extends EventEmitter implements ILookupRe
     return addedClassRef;
   }
 
-  /**
-   * TODO
-   */
-  filter<T>(context: string, search: any): T[] {
-    return this.getLookupRegistry().filter(context, search);
-  }
-
-  /**
-   * TODO
-   */
-  find<T>(context: string, search: any): T {
-    return this.getLookupRegistry().find(context, search);
-  }
-
-  /**
-   * TODO
-   */
-  remove<T>(context: string, search: any): T[] {
-    return this.getLookupRegistry().remove(context, search);
-  }
 
 }

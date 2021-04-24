@@ -46,6 +46,7 @@ export interface IClassRef extends IBaseRef {
 
   addExtend(ref: IClassRef): IClassRef;
 
+  isOf(instance: any): boolean;
   // toJson(withProperties?: boolean): IClassRefMetadata;
 
 }

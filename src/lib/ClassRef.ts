@@ -130,6 +130,21 @@ export class ClassRef extends AbstractRef implements IClassRef {
     // this.getRegistry().add(METATYPE_CLASS_REF, this);
   }
 
+  isOf(instance: any): boolean {
+    const name = ClassRef.getClassName(instance);
+    // if(name)
+    if (name && name === this.name) {
+      return true;
+    } else if (_.has(instance, __CLASS__) && instance[__CLASS__] === this.name) {
+      return true;
+    } else {
+      return this.getPropertyRefs()
+        .map(x => _.has(instance, x.name))
+        .reduce((previousValue, currentValue) => previousValue && currentValue, true);
+    }
+    return false;
+  }
+
 
   get machineName() {
     return _.snakeCase(this.className);

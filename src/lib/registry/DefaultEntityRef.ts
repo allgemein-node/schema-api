@@ -2,12 +2,7 @@ import {IEntityRef} from '../../api/IEntityRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
-import {
-  DEFAULT_NAMESPACE, METADATA_TYPE,
-  METATYPE_ENTITY,
-  METATYPE_PROPERTY,
-  XS_ID_SEPARATOR
-} from '../Constants';
+import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY, XS_ID_SEPARATOR} from '../Constants';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {IClassRef} from '../../api/IClassRef';
 import {ClassRef} from '../ClassRef';
@@ -56,6 +51,10 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
   getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
+  }
+
+  isOf(instance: any): boolean {
+    return this.getClassRef().isOf(instance);
   }
 
 

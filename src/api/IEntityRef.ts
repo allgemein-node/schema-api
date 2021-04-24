@@ -28,6 +28,8 @@ export interface IEntityRef extends IBaseRef {
 
   build<T>(instance: any, options?: IBuildOptions): T;
 
+  isOf(instance: any): boolean;
+
   // toJson(follow?:boolean): IEntityRefMetadata;
 
 }
