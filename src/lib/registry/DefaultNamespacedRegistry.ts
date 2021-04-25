@@ -2,7 +2,6 @@
  * Handler for metadata
  */
 import * as _ from 'lodash';
-import {EventEmitter} from 'events';
 import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
@@ -14,11 +13,9 @@ import {
   METATYPE_SCHEMA
 } from './../Constants';
 import {IPropertyOptions} from './../options/IPropertyOptions';
-import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {IPropertyRef} from '../../api/IPropertyRef';
-import {LookupRegistry} from '../LookupRegistry';
 import {MetadataRegistry} from './MetadataRegistry';
 import {DefaultPropertyRef} from './DefaultPropertyRef';
 import {ClassRef} from '../ClassRef';
@@ -339,7 +336,6 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     const clsRef = ClassRef.get(clsName, this.namespace);
     return this.getPropertyRefs(clsRef);
   }
-
 
 
   create<T>(context: string, options: any): T {

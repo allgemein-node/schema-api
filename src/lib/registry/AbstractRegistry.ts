@@ -20,12 +20,9 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
 
   protected readonly namespace: string;
 
-  protected registry: LookupRegistry;
-
   constructor(namespace: string) {
     super();
     this.namespace = namespace;
-    this.registry = LookupRegistry.$(this.namespace);
   }
 
 
@@ -83,7 +80,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * Returns the used instance of lookup registry handler
    */
   getLookupRegistry(): LookupRegistry {
-    return this.registry;
+    return LookupRegistry.$(this.namespace);
   }
 
 
@@ -160,9 +157,11 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
     return this.getLookupRegistry().remove(context, search);
   }
 
+  /**
+   * reset current registry
+   */
   reset() {
     LookupRegistry.reset(this.namespace);
-    this.registry = LookupRegistry.$(this.namespace);
   }
 
 }

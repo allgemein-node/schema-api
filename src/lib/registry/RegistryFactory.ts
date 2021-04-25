@@ -54,6 +54,14 @@ export class RegistryFactory {
     return this.$handles[namespace];
   }
 
+  /**
+   * Remove registry from handles list
+   *
+   * @param namespace
+   */
+  static remove(namespace: string) {
+    delete this.$handles[namespace];
+  }
 
   /**
    * Register a special registry for a given namespace or pattern, remove previous if existed
