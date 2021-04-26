@@ -1,9 +1,23 @@
+import {isFunction} from 'lodash';
 import {IEntityRef} from './IEntityRef';
 import {IPropertyRef} from './IPropertyRef';
 import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
 import {ISchemaRef} from './ISchemaRef';
-import {METADATA_TYPE} from '../lib/Constants';
+import {METADATA_TYPE, METATYPE_CLASS_REF} from '../lib/Constants';
+
+
+export function isLookupRegistry(x: any): x is ILookupRegistry {
+  if (x !== undefined && x &&
+    isFunction(x['getLookupRegistry']) &&
+    isFunction(x['getEntityRefFor']) &&
+    isFunction(x['getPropertyRefs']) &&
+    isFunction(x['getEntities'])
+  ) {
+    return true;
+  }
+  return false;
+}
 
 /**
  *

@@ -31,7 +31,7 @@ export class JsonSchema {
   }
 
 
-  private static getSerializer(options: IJsonSchemaSerializeOptions) {
+  static getSerializer(options: IJsonSchemaSerializeOptions = {version: DRAFT_07}) {
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Serializer(options);
@@ -39,7 +39,7 @@ export class JsonSchema {
     return null;
   }
 
-  private static getUnserializer(options: IJsonSchemaUnserializeOptions) {
+  static getUnserializer(options: IJsonSchemaUnserializeOptions = {version: DRAFT_07}) {
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Unserializer(options);
@@ -55,7 +55,7 @@ export class JsonSchema {
   }
 
 
-  static unserialize(data: any, options?: IJsonSchemaUnserializeOptions): Promise<IClassRef | IEntityRef> {
+  static unserialize(data: any, options?: IJsonSchemaUnserializeOptions): Promise<IClassRef | IEntityRef | (IClassRef | IEntityRef)[]> {
     options = options ? options : {};
     const schema = this.detectSchemaVersion(data);
     options.version = schema;

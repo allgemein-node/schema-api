@@ -16,6 +16,7 @@ import {IParseOptions, PARSE_OPTIONS_KEYS} from './IParseOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {IAbstractOptions} from '../options/IAbstractOptions';
 import {SchemaUtils} from '../SchemaUtils';
+import {any} from 'codelyzer/util/function';
 
 const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema'];
 
@@ -38,7 +39,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   }
 
 
-  async unserialize(data: any): Promise<IClassRef | IEntityRef> {
+  async unserialize(data: any): Promise<IClassRef | IEntityRef | (IClassRef | IEntityRef)[]> {
     this.data = data;
     const isRoot = _.get(this.options, 'rootAsEntity', true);
     const opts: any = {isRoot: isRoot};
@@ -97,8 +98,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   }
 
 
-  async parse(data: IJsonSchema7, options: IParseOptions = null): Promise<IClassRef | IEntityRef> {
-    let ret: IClassRef | IEntityRef = null;
+  async parse(data: IJsonSchema7, options: IParseOptions = null): Promise<IClassRef | IEntityRef | (IClassRef | IEntityRef)[]> {
+    let ret: IClassRef | IEntityRef | (IClassRef | IEntityRef)[] = null;
     if (data.type) {
 
       if (data.type === 'object') {
@@ -118,6 +119,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         opts.className = this.getClassNameFromRef(data.$ref);
       }
       ret = await this.parse(res, opts);
+    } else if (data.anyOf && options.isRoot) {
+      // loading multi schema
+      ret = [] ;
+      for(const anyEntry of data.anyOf){
+        ret.push(await this.parse(anyEntry as any, options) as (IClassRef | IEntityRef));
+      }
     } else {
       throw new Error('no valid schema element for further parse, key with name type or $ref must be present.');
     }

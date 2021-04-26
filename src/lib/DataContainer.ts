@@ -4,8 +4,11 @@ import {IValidationError} from './validation/IValidationError';
 import {IValidationResult} from './validation/IValidationResult';
 import {ILookupRegistry} from '../api/ILookupRegistry';
 import {IEntityRef} from '../api/IEntityRef';
+import {IClassRef} from '../api/IClassRef';
 import {IValidationMessage} from './validation/IValidationMessage';
 import {Validator} from './validation/Validator';
+import {ClassRef} from './ClassRef';
+import {ClassUtils} from '@allgemein/base/browser';
 
 /**
  * Container for validation of object
@@ -31,22 +34,32 @@ export class DataContainer<T> {
 
   instance: T;
 
+  ref: IEntityRef | IClassRef;
 
-  constructor(instance: T, registry: ILookupRegistry | IEntityRef) {
+
+  constructor(instance: T, registry?: ILookupRegistry | IEntityRef | IClassRef) {
     this.instance = instance;
-    const entityDef: IEntityRef = _.isFunction((<ILookupRegistry>registry).getEntityRefFor) ?
-      (<ILookupRegistry>registry).getEntityRefFor(instance as any) : registry as IEntityRef;
-    if (!entityDef) {
+    if (registry) {
+      this.ref = _.isFunction((<ILookupRegistry>registry).getEntityRefFor) ?
+        (<ILookupRegistry>registry).getEntityRefFor(instance as any) : registry as IEntityRef;
+    } else {
+      const clazz = ClassUtils.getFunction(instance as any);
+      this.ref = ClassRef.get(clazz) as IClassRef;
+    }
+    if (!this.ref) {
       throw new Error('none definition found for instance ' + JSON.stringify(instance));
     }
-    entityDef.getPropertyRefs().forEach(propDef => {
-      this.validation[propDef.name] = {
-        key: propDef.name,
+
+    const properties = this.ref.getPropertyRefs();
+    for (const property of properties) {
+      this.validation[property.name] = {
+        key: property.name,
         valid: false,
         checked: false,
         messages: []
       };
-    });
+    }
+    ;
   }
 
 
@@ -107,12 +120,9 @@ export class DataContainer<T> {
     _.remove(this.errors, error => error.type === 'validate');
     let results: IValidationError[] = [];
     try {
-//      const validator = await import('class-validator');
-
-      // results = <IValidationError[]>await validate(this.instance as any, {validationError: {target: false}});
-      results = <IValidationError[]>await Validator.validate(this.instance as any);
+      results = <IValidationError[]>await Validator.validate(this.instance as any, this.ref);
     } catch (e) {
-      // TODO log no validator
+      console.error(e);
     }
 
     results.map(r => this.errors.push({
@@ -132,7 +142,6 @@ export class DataContainer<T> {
           Object.keys(found.constraints).forEach(c => {
             valid.messages.push({type: c, content: found.constraints[c]});
           });
-
         } else {
           valid.valid = true;
         }

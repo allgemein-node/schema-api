@@ -90,8 +90,6 @@ export {DefaultValidator, IValidatorEntry} from './lib/validation/DefaultValidat
 export {IValidateOptions} from './lib/validation/IValidateOptions';
 export {IValidationError} from './lib/validation/IValidationError';
 export {IValidationMessage} from './lib/validation/IValidationMessage';
-export {IValidationMetadataArgs} from './lib/validation/IValidationMetadataArgs';
-export {IValidationOptions} from './lib/validation/IValidationOptions';
 export {IValidationResult} from './lib/validation/IValidationResult';
 export {IValidator} from './lib/validation/IValidator';
 export {Validator, validate_function} from './lib/validation/Validator';
