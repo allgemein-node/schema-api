@@ -12,11 +12,19 @@ import {IEntityRef} from '../../src/api/IEntityRef';
 import {IClassRef} from '../../src/api/IClassRef';
 import {TestClass} from './data/classes/TestClass';
 import {TestClassWithEmbedded} from './data/classes/TestClassWithEmbedded';
+import {isLineBreak} from 'codelyzer/angular/sourceMappingVisitor';
+import {isLookupRegistry} from '../../src/api/ILookupRegistry';
 
 
 @suite('functional/entity-ref')
 class EntityRefSpec {
 
+  @test
+  async 'lookup registry typed method'() {
+    const registry = RegistryFactory.get();
+    expect(isLookupRegistry(registry)).to.be.true;
+    expect(isLookupRegistry({})).to.be.false;
+  }
 
   @test
   async 'lookup registry for simple annotated class'() {

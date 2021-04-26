@@ -6,6 +6,7 @@ import {Regex} from '../../src/decorators/validate/Regex';
 import {JsonSchema} from '../../src/lib/json-schema/JsonSchema';
 import {Property} from '../../src/decorators/Property';
 import {ClassRef} from '../../src/lib/ClassRef';
+import {IClassRef} from '../../src';
 
 export class ValidRegex {
 
@@ -95,7 +96,7 @@ class ValidationRegexSpec {
       '$ref': '#/definitions/ValidRegexUn'
     };
 
-    const ref = await JsonSchema.unserialize(json, {rootAsEntity: false});
+    const ref = await JsonSchema.unserialize(json, {rootAsEntity: false}) as IClassRef;
     const property = ref.getPropertyRef('onlyString');
     expect(property.getOptions()).to.be.deep.eq({
       'metaType': 'property',

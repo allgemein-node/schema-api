@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {suite, test} from '@testdeck/mocha';
 import {Validator} from './../../src/lib/validation/Validator';
 import {MaxLength, MinLength} from '../../src/decorators/validate';
-import {ClassRef, JsonSchema, Property} from '../../src';
+import {ClassRef, IClassRef, JsonSchema, Property} from '../../src';
 import {inspect} from 'util';
 
 export class ValidStrLength {
@@ -177,7 +177,7 @@ class ValidationRequiredSpec {
       '$ref': '#/definitions/ValidStrLengthUnSer'
     };
 
-    const ref = await JsonSchema.unserialize(json, {rootAsEntity: false});
+    const ref = await JsonSchema.unserialize(json, {rootAsEntity: false}) as IClassRef;
     const property = ref.getPropertyRef('minValue');
     expect(property.getOptions()).to.be.deep.eq({
       'metaType': 'property',

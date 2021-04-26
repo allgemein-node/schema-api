@@ -14,6 +14,8 @@ import {AnnotatedPrimatives2} from './data/classes/AnnotatedPrimatives';
 import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
 import {Validator} from '../../src/lib/validation/Validator';
 import '../../src/decorators/validate';
+import {ExtendedObject2} from './data/classes/ExtendedObject2';
+import {RegistryFactory} from '../../src';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -406,7 +408,10 @@ class JsonSchemaDraft07SerializationSpec {
     let classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
     expect(classRefs).to.have.length(1);
 
-    const classRefSecond = await JsonSchema.unserialize(json, {rootAsEntity: false, forceClassRefCreation: false});
+    const classRefSecond = await JsonSchema.unserialize(json, {
+      rootAsEntity: false,
+      forceClassRefCreation: false
+    }) as IClassRef;
     expect(isClassRef(classRefSecond)).to.be.true;
     expect(classRefSecond.name).to.be.eq(json.title);
     expect(classRefSecond.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
@@ -414,7 +419,10 @@ class JsonSchemaDraft07SerializationSpec {
     classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
     expect(classRefs).to.have.length(1);
 
-    const classRefThird = await JsonSchema.unserialize(json, {rootAsEntity: false, forceClassRefCreation: true});
+    const classRefThird = await JsonSchema.unserialize(json, {
+      rootAsEntity: false,
+      forceClassRefCreation: true
+    }) as IClassRef;
     expect(isClassRef(classRefThird)).to.be.true;
     expect(classRefThird.name).to.be.eq(json.title);
     expect(classRefThird.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
@@ -673,7 +681,7 @@ class JsonSchemaDraft07SerializationSpec {
         }
       }
     };
-    const entityRef = await JsonSchema.unserialize(schema);
+    const entityRef = await JsonSchema.unserialize(schema) as IEntityRef;
     expect(entityRef.name).to.be.eq('PrimativeClass');
     const properties = entityRef.getPropertyRefs();
     expect(properties).to.have.length(5);
@@ -813,6 +821,190 @@ class JsonSchemaDraft07SerializationSpec {
     const initialSchemaCopy = _.cloneDeep(json);
     delete initialSchemaCopy['$schema'];
     expect(schema.definitions['PersonDataReg']).to.be.deep.eq(initialSchemaCopy);
+
+  }
+
+
+  @test
+  async 'generate schema for multiple classes'() {
+    const serializer = JsonSchema.getSerializer();
+    let first = serializer.serialize(ClassRef.get(AnnotatedPrimatives2));
+    expect(first).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        AnnotatedPrimatives2: {
+          title: 'AnnotatedPrimatives2',
+          type: 'object',
+          properties: {
+            strValue: {type: 'string'},
+            numberValue: {type: 'number'},
+            dateValue: {type: 'string', format: 'date-time'},
+            boolValue: {type: 'boolean'},
+            nullValue: {type: 'string'}
+          }
+        }
+      },
+      '$ref': '#/definitions/AnnotatedPrimatives2'
+    });
+    first = serializer.serialize(ClassRef.get(PlainObject));
+    expect(first).to.be.deep.eq({
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          AnnotatedPrimatives2: {
+            title: 'AnnotatedPrimatives2',
+            type: 'object',
+            properties: {
+              strValue: {type: 'string'},
+              numberValue: {type: 'number'},
+              dateValue: {type: 'string', format: 'date-time'},
+              boolValue: {type: 'boolean'},
+              nullValue: {type: 'string'}
+            }
+          },
+          PlainObject: {title: 'PlainObject', type: 'object', properties: {}}
+        },
+        anyOf: [
+          {'$ref': '#/definitions/AnnotatedPrimatives2'},
+          {'$ref': '#/definitions/PlainObject'}
+        ]
+      }
+    );
+    first = serializer.serialize(ClassRef.get(ExtendedObject));
+    expect(first).to.be.deep.eq({
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          AnnotatedPrimatives2: {
+            title: 'AnnotatedPrimatives2',
+            type: 'object',
+            properties: {
+              strValue: {type: 'string'},
+              numberValue: {type: 'number'},
+              dateValue: {type: 'string', format: 'date-time'},
+              boolValue: {type: 'boolean'},
+              nullValue: {type: 'string'}
+            }
+          },
+          PlainObject: {title: 'PlainObject', type: 'object', properties: {}},
+          ExtendedObject: {
+            title: 'ExtendedObject',
+            type: 'object',
+            properties: {},
+            allOf: [{'$ref': '#/definitions/PlainObject'}]
+          }
+        },
+        anyOf: [
+          {'$ref': '#/definitions/AnnotatedPrimatives2'},
+          {'$ref': '#/definitions/PlainObject'},
+          {'$ref': '#/definitions/ExtendedObject'}
+        ]
+      }
+    );
+    first = serializer.serialize(ClassRef.get(ExtendedObject2));
+    expect(first).to.be.deep.eq({
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          AnnotatedPrimatives2: {
+            title: 'AnnotatedPrimatives2',
+            type: 'object',
+            properties: {
+              strValue: {type: 'string'},
+              numberValue: {type: 'number'},
+              dateValue: {type: 'string', format: 'date-time'},
+              boolValue: {type: 'boolean'},
+              nullValue: {type: 'string'}
+            }
+          },
+          PlainObject: {title: 'PlainObject', type: 'object', properties: {}},
+          ExtendedObject: {
+            title: 'ExtendedObject',
+            type: 'object',
+            properties: {},
+            allOf: [{'$ref': '#/definitions/PlainObject'}]
+          },
+          ExtendedObject2: {
+            title: 'ExtendedObject2',
+            type: 'object',
+            properties: {extValue: {type: 'string'}},
+            allOf: [{'$ref': '#/definitions/PlainObject02'}]
+          },
+          PlainObject02: {title: 'PlainObject02', type: 'object', properties: {}}
+        },
+        anyOf: [
+          {'$ref': '#/definitions/AnnotatedPrimatives2'},
+          {'$ref': '#/definitions/PlainObject'},
+          {'$ref': '#/definitions/ExtendedObject'},
+          {'$ref': '#/definitions/ExtendedObject2'}
+        ]
+      }
+    );
+  }
+
+  @test
+  async 'parse multiple classes from single schema'() {
+    const jsonSchema = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        ParseTAnnotatedPrimatives2: {
+          title: 'ParseTAnnotatedPrimatives2',
+          type: 'object',
+          properties: {
+            strValue: {type: 'string'},
+            numberValue: {type: 'number'},
+            dateValue: {type: 'string', format: 'date-time'},
+            boolValue: {type: 'boolean'},
+            nullValue: {type: 'string'}
+          }
+        },
+        ParseTPlainObject: {title: 'ParseTPlainObject', type: 'object', properties: {}},
+        ParseTExtendedObject: {
+          title: 'ParseTExtendedObject',
+          type: 'object',
+          properties: {},
+          allOf: [{'$ref': '#/definitions/ParseTPlainObject'}]
+        },
+        ParseTExtendedObject2: {
+          title: 'ParseTExtendedObject2',
+          type: 'object',
+          properties: {extValue: {type: 'string'}},
+          allOf: [{'$ref': '#/definitions/ParseTPlainObject02'}]
+        },
+        ParseTPlainObject02: {title: 'ParseTPlainObject02', type: 'object', properties: {}}
+      },
+      anyOf: [
+        {'$ref': '#/definitions/ParseTAnnotatedPrimatives2'},
+        {'$ref': '#/definitions/ParseTPlainObject'},
+        {'$ref': '#/definitions/ParseTExtendedObject'},
+        {'$ref': '#/definitions/ParseTExtendedObject2'}
+      ]
+    };
+
+    const serializer = JsonSchema.getUnserializer();
+    let first = await serializer.unserialize(jsonSchema) as IEntityRef[];
+
+    expect(first).to.have.length(4);
+    const res = RegistryFactory.get().filter(METATYPE_CLASS_REF, (x: IClassRef) => /^ParseT.*/.test(x.name));
+    expect(res).to.have.length(5);
+
+    const r = first.find(x => x.name === 'ParseTAnnotatedPrimatives2');
+    const prop = r.getPropertyRefs();
+    expect(prop).to.have.length(5);
+    expect(prop.map(x => x.name)).to.be.deep.eq([
+      'strValue',
+      'numberValue',
+      'dateValue',
+      'boolValue',
+      'nullValue'
+    ]);
+
+    const r2 = first.find(x => x.name === 'ParseTExtendedObject2') as IEntityRef;
+    const prop2 = r2.getPropertyRefs();
+    expect(prop2).to.have.length(1);
+    expect(prop2.map(x => x.name)).to.be.deep.eq([
+      'extValue'
+    ]);
+
+    const extend = r2.getClassRef().getExtend();
+    expect(extend.name).to.be.eq('ParseTPlainObject02');
 
   }
 
