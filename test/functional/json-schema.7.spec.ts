@@ -16,6 +16,7 @@ import {Validator} from '../../src/lib/validation/Validator';
 import '../../src/decorators/validate';
 import {ExtendedObject2} from './data/classes/ExtendedObject2';
 import {RegistryFactory} from '../../src';
+import {PlainObject04} from './data/classes/PlainObject04';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -846,7 +847,7 @@ class JsonSchemaDraft07SerializationSpec {
       },
       '$ref': '#/definitions/AnnotatedPrimatives2'
     });
-    first = serializer.serialize(ClassRef.get(PlainObject));
+    first = serializer.serialize(ClassRef.get(PlainObject04));
     expect(first).to.be.deep.eq({
         '$schema': 'http://json-schema.org/draft-07/schema#',
         definitions: {
@@ -861,41 +862,11 @@ class JsonSchemaDraft07SerializationSpec {
               nullValue: {type: 'string'}
             }
           },
-          PlainObject: {title: 'PlainObject', type: 'object', properties: {}}
+          PlainObject04: {title: 'PlainObject04', type: 'object', properties: {}}
         },
         anyOf: [
           {'$ref': '#/definitions/AnnotatedPrimatives2'},
-          {'$ref': '#/definitions/PlainObject'}
-        ]
-      }
-    );
-    first = serializer.serialize(ClassRef.get(ExtendedObject));
-    expect(first).to.be.deep.eq({
-        '$schema': 'http://json-schema.org/draft-07/schema#',
-        definitions: {
-          AnnotatedPrimatives2: {
-            title: 'AnnotatedPrimatives2',
-            type: 'object',
-            properties: {
-              strValue: {type: 'string'},
-              numberValue: {type: 'number'},
-              dateValue: {type: 'string', format: 'date-time'},
-              boolValue: {type: 'boolean'},
-              nullValue: {type: 'string'}
-            }
-          },
-          PlainObject: {title: 'PlainObject', type: 'object', properties: {}},
-          ExtendedObject: {
-            title: 'ExtendedObject',
-            type: 'object',
-            properties: {},
-            allOf: [{'$ref': '#/definitions/PlainObject'}]
-          }
-        },
-        anyOf: [
-          {'$ref': '#/definitions/AnnotatedPrimatives2'},
-          {'$ref': '#/definitions/PlainObject'},
-          {'$ref': '#/definitions/ExtendedObject'}
+          {'$ref': '#/definitions/PlainObject04'}
         ]
       }
     );
@@ -914,25 +885,53 @@ class JsonSchemaDraft07SerializationSpec {
               nullValue: {type: 'string'}
             }
           },
-          PlainObject: {title: 'PlainObject', type: 'object', properties: {}},
-          ExtendedObject: {
-            title: 'ExtendedObject',
+          PlainObject04: {title: 'PlainObject04', type: 'object', properties: {}},
+          PlainObject03: {title: 'PlainObject03', type: 'object', properties: {}},
+          ExtendedObject2: {
+            title: 'ExtendedObject2',
             type: 'object',
-            properties: {},
-            allOf: [{'$ref': '#/definitions/PlainObject'}]
+            'properties': {
+              'extValue': {
+                'type': 'string'
+              }
+            },
+            allOf: [{'$ref': '#/definitions/PlainObject03'}]
+          }
+        },
+        anyOf: [
+          {'$ref': '#/definitions/AnnotatedPrimatives2'},
+          {'$ref': '#/definitions/PlainObject04'},
+          {'$ref': '#/definitions/ExtendedObject2'}
+        ]
+      }
+    );
+    first = serializer.serialize(ClassRef.get(ExtendedObject2));
+    expect(first).to.be.deep.eq({
+        '$schema': 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          AnnotatedPrimatives2: {
+            title: 'AnnotatedPrimatives2',
+            type: 'object',
+            properties: {
+              strValue: {type: 'string'},
+              numberValue: {type: 'number'},
+              dateValue: {type: 'string', format: 'date-time'},
+              boolValue: {type: 'boolean'},
+              nullValue: {type: 'string'}
+            }
           },
+          PlainObject04: {title: 'PlainObject04', type: 'object', properties: {}},
           ExtendedObject2: {
             title: 'ExtendedObject2',
             type: 'object',
             properties: {extValue: {type: 'string'}},
-            allOf: [{'$ref': '#/definitions/PlainObject02'}]
+            allOf: [{'$ref': '#/definitions/PlainObject03'}]
           },
-          PlainObject02: {title: 'PlainObject02', type: 'object', properties: {}}
+          PlainObject03: {title: 'PlainObject03', type: 'object', properties: {}}
         },
         anyOf: [
           {'$ref': '#/definitions/AnnotatedPrimatives2'},
-          {'$ref': '#/definitions/PlainObject'},
-          {'$ref': '#/definitions/ExtendedObject'},
+          {'$ref': '#/definitions/PlainObject04'},
           {'$ref': '#/definitions/ExtendedObject2'}
         ]
       }
