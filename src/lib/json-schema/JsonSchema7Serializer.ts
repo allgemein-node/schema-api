@@ -123,7 +123,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     if (this.data.anyOf) {
-      _.uniqBy(this.data.anyOf, x => JSON.stringify(x));
+      this.data.anyOf = _.uniqBy(this.data.anyOf, x => JSON.stringify(x));
     }
   }
 
