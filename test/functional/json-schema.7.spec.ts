@@ -15,7 +15,7 @@ import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
 import {Validator} from '../../src/lib/validation/Validator';
 import '../../src/decorators/validate';
 import {ExtendedObject2} from './data/classes/ExtendedObject2';
-import {RegistryFactory} from '../../src';
+import {Property, RegistryFactory} from '../../src';
 import {PlainObject04} from './data/classes/PlainObject04';
 
 @suite('functional/json-schema-draft-07')
@@ -450,6 +450,7 @@ class JsonSchemaDraft07SerializationSpec {
     expect(opts.hidden).to.be.eq('data');
   }
 
+
   @test
   async 'parse json schema with unknown options for entity ref'() {
     const json: IJsonSchema7 & any = {
@@ -508,6 +509,154 @@ class JsonSchemaDraft07SerializationSpec {
         }
       }
     });
+  }
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'generate json schema for class ref with additional class options'() {
+    class SerializeWithClassRefOptions {
+
+      @Property()
+      value: null;
+    }
+
+    const ref = ClassRef.get(SerializeWithClassRefOptions);
+    ref.setOption('hallo', {hidden: 'prop'});
+
+
+    const schema = JsonSchema.serialize(ref);
+    expect(schema).to.be.deep.eq({
+      $ref: '#/definitions/SerializeWithClassRefOptions',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        SerializeWithClassRefOptions: {
+          'hallo': {
+            'hidden': 'prop'
+          },
+          'properties': {
+            'value': {
+              'type': 'string'
+            }
+          },
+          type: 'object',
+          title: 'SerializeWithClassRefOptions',
+        }
+      }
+    });
+  }
+
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'parse json schema for class ref with additional class options'() {
+    const json = {
+      $ref: '#/definitions/SerializeWithClassRefOptions2',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        SerializeWithClassRefOptions2: {
+          'hallo': {
+            'hidden': 'prop'
+          },
+          'properties': {
+            'value': {
+              'type': 'string'
+            }
+          },
+          type: 'object',
+          title: 'SerializeWithClassRefOptions2',
+        }
+      }
+    };
+    const ref = await JsonSchema.unserialize(json) as IEntityRef;
+    expect(ref.getOptions()).to.be.deep.eq({
+      "hallo": {
+        "hidden": "prop"
+      },
+      "metaType": "entity",
+      "name": "SerializeWithClassRefOptions2",
+      "namespace": "default",
+      "target": ref.getClass()
+    });
+  }
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'generate json schema for class ref with additional property options'() {
+    class SerializeWithClassRefPropOptions {
+
+      @Property()
+      value: null;
+    }
+
+    const ref = ClassRef.get(SerializeWithClassRefPropOptions);
+    ref.getPropertyRef('value').setOption('hidden', {great: 'value'});
+
+
+    const schema = JsonSchema.serialize(ref);
+    expect(schema).to.be.deep.eq({
+      $ref: '#/definitions/SerializeWithClassRefPropOptions',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        SerializeWithClassRefPropOptions: {
+          'properties': {
+            'value': {
+              'type': 'string',
+              'hidden': {
+                'great': 'value'
+              }
+            }
+          },
+          type: 'object',
+          title: 'SerializeWithClassRefPropOptions',
+        }
+      }
+    });
+  }
+
+
+  /**
+   * Generate json schema for simple plain object without properties.
+   */
+  @test
+  async 'parse json schema for class ref with additional property options'() {
+    const json = {
+      $ref: '#/definitions/SerializeWithClassRefPropOptions2',
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        SerializeWithClassRefPropOptions2: {
+          'properties': {
+            'value': {
+              'type': 'string',
+              'hidden': {
+                'great': 'value'
+              }
+            }
+          },
+          type: 'object',
+          title: 'SerializeWithClassRefPropOptions2',
+        }
+      }
+    };
+
+
+    const ref = await JsonSchema.unserialize(json) as IEntityRef;
+    expect(ref.getPropertyRef('value').getOptions()).to.be.deep.eq({
+      "hidden": {
+        "great": "value"
+      },
+      "metaType": "property",
+      "namespace": "default",
+      "propertyName": "value",
+      "target": ref.getClass(),
+      "type": "string"
+    });
+
   }
 
   /**
@@ -907,7 +1056,7 @@ class JsonSchemaDraft07SerializationSpec {
     );
     first = serializer.serialize(ClassRef.get(ExtendedObject2));
     expect(first).to.be.deep.eq({
-        '$schema': 'http://json-schema.org/draft-07/schema#',
+        $schema: 'http://json-schema.org/draft-07/schema#',
         definitions: {
           AnnotatedPrimatives2: {
             title: 'AnnotatedPrimatives2',
