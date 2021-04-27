@@ -434,9 +434,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
                     skipKeys: string[],
                     collectorOptions: IParseOptions
   ) {
-    const _keys = keys(data).filter(k => !skipKeys.includes(k));
+    const _keys = keys(data);
     for (const key of _keys) {
       const entry = this.collectOptions(key, data, collectorOptions);
+      if (skipKeys.includes(key)) {
+        continue;
+      }
       if (entry && isObjectLike(entry)) {
         assign(collectingObject, entry);
       }
