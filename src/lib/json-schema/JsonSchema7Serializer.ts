@@ -72,7 +72,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
 
   private getOrCreateRoot(className: string, klass: Function | IClassRef | IEntityRef) {
-
     if (this.data.definitions[className]) {
       // definition is present and
       this.applyRef(className);
@@ -86,7 +85,8 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     };
 
     if (isEntityRef(klass) || isClassRef(klass)) {
-      this.attachOptions(klass, root);
+      const data = klass.getOptions();
+      this.appendAdditionalOptions(root, data);
     }
 
     if (appendTarget) {
@@ -127,10 +127,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
   }
 
-
-  attachOptions(from: IClassRef | IEntityRef | IPropertyRef, to: IJsonSchema7) {
-
-  }
 
   describeEntityRef(klass: IEntityRef): IJsonSchema7 {
     const className = klass.name;
@@ -354,7 +350,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     if (data && _.keys(data).length > 0) {
       const keys = _.keys(data);
       for (const k of keys) {
-        if (['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace'].includes(k)) {
+        if (['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace', 'name'].includes(k)) {
           continue;
         }
         if (!propMeta[k]) {

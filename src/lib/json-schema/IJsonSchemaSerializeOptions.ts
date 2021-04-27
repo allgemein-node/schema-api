@@ -12,6 +12,11 @@ export interface IJsonSchemaSerializeOptions {
 
 
   /**
+   * Namespace of the registry
+   */
+  namespace?: string;
+
+  /**
    * If set then on entries with type object the class function will be passed under key $target
    *
    * {
@@ -21,4 +26,7 @@ export interface IJsonSchemaSerializeOptions {
    * }
    */
   appendTarget?: boolean;
+
+
+
 }

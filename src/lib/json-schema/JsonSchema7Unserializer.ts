@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {assign, camelCase, clone, get, has, isArray, isEmpty, isObjectLike, isString, keys, upperFirst} from 'lodash';
 import {IJsonSchema7, IJsonSchema7Definition} from './JsonSchema7';
 import {IClassRef} from '../../api/IClassRef';
 import {IJsonSchemaUnserializeOptions} from './IJsonSchemaUnserializeOptions';
@@ -16,7 +16,6 @@ import {IParseOptions, PARSE_OPTIONS_KEYS} from './IParseOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {IAbstractOptions} from '../options/IAbstractOptions';
 import {SchemaUtils} from '../SchemaUtils';
-import {any} from 'codelyzer/util/function';
 
 const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema'];
 
@@ -41,10 +40,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   async unserialize(data: any): Promise<IClassRef | IEntityRef | (IClassRef | IEntityRef)[]> {
     this.data = data;
-    const isRoot = _.get(this.options, 'rootAsEntity', true);
+    const isRoot = get(this.options, 'rootAsEntity', true);
     const opts: any = {isRoot: isRoot};
     PARSE_OPTIONS_KEYS.forEach(x => {
-      if (_.has(this.options, x)) {
+      if (has(this.options, x)) {
         opts[x] = this.options[x];
       }
     });
@@ -56,7 +55,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
    * If no match return default namespace
    */
   getNamespace() {
-    return _.get(this.options, 'namespace', _.get(this.data, 'namespace', DEFAULT_NAMESPACE));
+    return get(this.options, 'namespace', get(this.data, 'namespace', DEFAULT_NAMESPACE));
   }
 
   getRegistry() {
@@ -75,16 +74,16 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
    * @private
    */
   private collectOptions(key: string, data: IJsonSchema7, options: IParseOptions = {}) {
-    const type = _.get(options, 'metaType', METATYPE_ENTITY);
+    const type = get(options, 'metaType', METATYPE_ENTITY);
     let ret: any = null;
     if (data[key]) {
       ret = {};
       ret[key] = data[key];
     }
 
-    if (_.has(this.options, 'collector')) {
+    if (has(this.options, 'collector')) {
       const methods = this.options.collector.filter(x => x.type === type && x.key === key);
-      ret = _.assign(ret, ...methods.map(e => e.fn(key, data, options)));
+      ret = assign(ret, ...methods.map(e => e.fn(key, data, options)));
     }
     return ret;
   }
@@ -114,15 +113,15 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     } else if (data.$ref) {
       // refers
       const res = await this.followRef(data.$ref, this.data);
-      const opts = _.clone(options);
+      const opts = clone(options);
       if (!opts.className) {
         opts.className = this.getClassNameFromRef(data.$ref);
       }
       ret = await this.parse(res, opts);
     } else if (data.anyOf && options.isRoot) {
       // loading multi schema
-      ret = [] ;
-      for(const anyEntry of data.anyOf){
+      ret = [];
+      for (const anyEntry of data.anyOf) {
         ret.push(await this.parse(anyEntry as any, options) as (IClassRef | IEntityRef));
       }
     } else {
@@ -133,9 +132,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
 
   getDefinitionsKey(data: object) {
-    for (const k of _.keys(data)) {
-      if (k !== 'properties' && _.isObjectLike(data[k])) {
-        const exists = _.keys(data[k]).find(x => _.has(data[k][x], 'type'));
+    for (const k of keys(data)) {
+      if (k !== 'properties' && isObjectLike(data[k])) {
+        const exists = keys(data[k]).find(x => has(data[k][x], 'type'));
         if (exists) {
           return k;
         }
@@ -152,14 +151,14 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       anchor = '';
     }
 
-    if (_.isEmpty(addr)) {
+    if (isEmpty(addr)) {
       //  local
-      if (_.isEmpty(anchor)) {
+      if (isEmpty(anchor)) {
         return data;
       } else if (/^\//.test(anchor)) {
         // starts with path
         const dottedPath = anchor.substr(1).replace(/\//, '.');
-        const entry = _.get(data, dottedPath, null);
+        const entry = get(data, dottedPath, null);
         if (entry) {
           return entry;
         }
@@ -171,7 +170,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         } else {
           const defKey = this.getDefinitionsKey(data);
           if (data[defKey]) {
-            for (const k of _.keys(data[defKey])) {
+            for (const k of keys(data[defKey])) {
               const x = data[defKey][k] as IJsonSchema7;
               if (x && x.$id && x.$id === refHashed) {
                 return x;
@@ -194,7 +193,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   async parseProperties(classRef: IClassRef | IEntityRef, properties: { [propertyName: string]: IJsonSchema7Definition }, options: IParseOptions = null) {
     const _classRef = isEntityRef(classRef) ? classRef.getClassRef() : classRef;
-    const propertyNames = _.keys(properties);
+    const propertyNames = keys(properties);
     for (const propertyName of propertyNames) {
       await this.parseProperty(_classRef, propertyName, properties[propertyName], options);
     }
@@ -211,7 +210,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       type: 'object' // default type is object
     };
 
-    if (_.isObjectLike(data)) {
+    if (isObjectLike(data)) {
       const parseOptions: IParseOptions = {
         isProperty: true,
         sourceRef: _classRef,
@@ -223,7 +222,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       const collectOptions = {};
 
       this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema'], parseOptions);
-      _.assign(propOptions, collectOptions);
+      assign(propOptions, collectOptions);
       if (dataPointer.$ref) {
         const ref = await this.parse(dataPointer, parseOptions);
         propOptions.type = ref;
@@ -240,16 +239,20 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
 
   hasProperties(datapointer: any) {
-    return _.has(datapointer, 'properties');
+    return has(datapointer, 'properties');
   }
 
 
   async onTypes(dataPointer: IJsonSchema7, propOptions: any, options: any) {
     const hasProps = this.hasProperties(dataPointer);
+    let type = dataPointer.type as string;
+    if (isString(type)) {
+      type = type.toLowerCase();
+    }
     switch (dataPointer.type) {
       case 'string':
         const res = this.onTypeString(dataPointer);
-        _.assign(propOptions, res);
+        assign(propOptions, res);
         break;
       case 'boolean':
         propOptions.type = 'boolean';
@@ -270,17 +273,17 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         // check items
         if (dataPointer.minItems || dataPointer.maxItems) {
           propOptions.cardinality = {
-            min: _.get(dataPointer, 'minItems', 0),
-            max: _.get(dataPointer, 'maxItems', 0),
+            min: get(dataPointer, 'minItems', 0),
+            max: get(dataPointer, 'maxItems', 0),
           };
         } else {
           propOptions.cardinality = 0;
         }
 
         if (dataPointer.items) {
-          if (_.isArray(dataPointer.items)) {
+          if (isArray(dataPointer.items)) {
             throw new NotSupportedError('tuple values for array is not supported');
-          } else if (_.isObjectLike(dataPointer.items)) {
+          } else if (isObjectLike(dataPointer.items)) {
             const items = dataPointer.items as IJsonSchema7;
             if (items.$ref) {
               propOptions.type = await this.parse(items as IJsonSchema7, {isRoot: false});
@@ -323,9 +326,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
 
   async parseInherits(classRef: IClassRef, data: IJsonSchema7, key: 'allOf' | 'anyOf') {
-    if (_.has(data, key)) {
+    if (has(data, key)) {
       const values = data[key];
-      if (_.isArray(values)) {
+      if (isArray(values)) {
         for (const inheritEntry of values) {
           const extend = await this.parse(inheritEntry as IJsonSchema7, {isRoot: false}) as IClassRef;
           classRef.addExtend(extend);
@@ -340,12 +343,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   async parseTypeObject(data: IJsonSchema7, options: IParseOptions = null) {
     let ret: IClassRef | IEntityRef = null;
 
-    const id = _.get(data, '$id', _.get(data, 'id', null));
-    let metaType: METADATA_TYPE = options.isRoot || !_.isEmpty(id) ? METATYPE_ENTITY : METATYPE_CLASS_REF;
+    const id = get(data, '$id', get(data, 'id', null));
+    let metaType: METADATA_TYPE = options.isRoot || !isEmpty(id) ? METATYPE_ENTITY : METATYPE_CLASS_REF;
 
-    const title = _.get(data, 'title', null);
+    const title = get(data, 'title', null);
     // get namespace or override
-    const namespace = _.get(data, 'namespace', this.getNamespace());
+    const namespace = get(data, 'namespace', this.getNamespace());
     // check if class ref exists else create one or recreate if parse options are set
     let classRef: IClassRef = null;
     let className = null;
@@ -361,17 +364,17 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     // title data override passed className
     if (title) {
-      if (!className || !_.get(this.options, 'ignoreDeclared', false)) {
-        className = _.upperFirst(_.camelCase(title));
+      if (!className || !get(this.options, 'ignoreDeclared', false)) {
+        className = upperFirst(camelCase(title));
       }
     }
 
     if (!className && options?.isProperty && options.propertyName) {
-      className = _.upperFirst(_.camelCase(options.sourceRef.name + options.propertyName));
+      className = upperFirst(camelCase(options.sourceRef.name + options.propertyName));
     }
 
     if (className && !classRef) {
-      const fn = _.get(this.options, 'forceClassRefCreation', false) ? SchemaUtils.clazz(className) : className;
+      const fn = get(this.options, 'forceClassRefCreation', false) ? SchemaUtils.clazz(className) : className;
       classRef = this.getClassRef(fn, namespace);
     }
 
@@ -382,7 +385,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     // TODO check extentions!
     for (const inheritsKey of ['allOf', 'anyOf']) {
-      if (_.has(data, inheritsKey)) {
+      if (has(data, inheritsKey)) {
         await this.parseInherits(classRef, data, inheritsKey as any);
       }
     }
@@ -397,24 +400,24 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         target: clazz
       };
 
-      const collectorOptions = _.clone(options);
+      const collectorOptions = clone(options);
       collectorOptions.metaType = metaType;
       collectorOptions.ref = classRef;
       this.collectAndProcess(data, refOptions, skipKeys, collectorOptions);
 
       metaType = collectorOptions.metaType;
 
-      const entityOptions = MetadataRegistry.$().find(metaType, (x: IAbstractOptions) => x.target === clazz);
+      let entityOptions = MetadataRegistry.$().find(metaType, (x: IAbstractOptions) => x.target === clazz);
       if (entityOptions) {
         // merge existing
-        _.assign(entityOptions, refOptions);
+        assign(entityOptions, refOptions);
       } else {
-        // create new one
+        entityOptions = refOptions;
         MetadataRegistry.$().add(metaType, refOptions);
       }
 
       if (metaType === METATYPE_ENTITY) {
-        ret = this.getRegistry().getEntityRefFor(clazz);
+        ret = this.getRegistry().create(metaType, entityOptions);
       } else {
         ret = classRef;
       }
@@ -431,11 +434,11 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
                     skipKeys: string[],
                     collectorOptions: IParseOptions
   ) {
-    const keys = _.keys(data).filter(k => !skipKeys.includes(k));
-    for (const key of keys) {
+    const _keys = keys(data).filter(k => !skipKeys.includes(k));
+    for (const key of _keys) {
       const entry = this.collectOptions(key, data, collectorOptions);
-      if (entry && _.isObjectLike(entry)) {
-        _.assign(collectingObject, entry);
+      if (entry && isObjectLike(entry)) {
+        assign(collectingObject, entry);
       }
     }
   }
