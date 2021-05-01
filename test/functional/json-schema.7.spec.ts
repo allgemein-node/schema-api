@@ -17,6 +17,7 @@ import '../../src/decorators/validate';
 import {ExtendedObject2} from './data/classes/ExtendedObject2';
 import {Property, RegistryFactory} from '../../src';
 import {PlainObject04} from './data/classes/PlainObject04';
+import {isPropertyRef} from '../../src/api/IPropertyRef';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -573,13 +574,13 @@ class JsonSchemaDraft07SerializationSpec {
     };
     const ref = await JsonSchema.unserialize(json) as IEntityRef;
     expect(ref.getOptions()).to.be.deep.eq({
-      "hallo": {
-        "hidden": "prop"
+      'hallo': {
+        'hidden': 'prop'
       },
-      "metaType": "entity",
-      "name": "SerializeWithClassRefOptions2",
-      "namespace": "default",
-      "target": ref.getClass()
+      'metaType': 'entity',
+      'name': 'SerializeWithClassRefOptions2',
+      'namespace': 'default',
+      'target': ref.getClass()
     });
   }
 
@@ -647,14 +648,14 @@ class JsonSchemaDraft07SerializationSpec {
 
     const ref = await JsonSchema.unserialize(json) as IEntityRef;
     expect(ref.getPropertyRef('value').getOptions()).to.be.deep.eq({
-      "hidden": {
-        "great": "value"
+      'hidden': {
+        'great': 'value'
       },
-      "metaType": "property",
-      "namespace": "default",
-      "propertyName": "value",
-      "target": ref.getClass(),
-      "type": "string"
+      'metaType': 'property',
+      'namespace': 'default',
+      'propertyName': 'value',
+      'target': ref.getClass(),
+      'type': 'string'
     });
 
   }
@@ -713,52 +714,61 @@ class JsonSchemaDraft07SerializationSpec {
       '$ref': '#/definitions/ObjectWithInitProp',
       '$schema': 'http://json-schema.org/draft-07/schema#',
       'definitions': {
-        'PlainObject': {
-          'type': 'object',
-          title: 'PlainObject',
-          properties: {},
-        },
         'ObjectWithInitProp': {
-          title: 'ObjectWithInitProp',
           'properties': {
             'arrValue': {
-              'type': 'array',
+              'default': [],
               'items': {
                 'type': 'object'
-              }
+              },
+              'type': 'array'
             },
             'boolValue': {
-              'type': 'boolean',
+              'default': false,
+              'type': 'boolean'
             },
             'dateValue': {
+              'default': '2021-02-01T00:01:01.000Z',
               'format': 'date-time',
               'type': 'string'
             },
             'numericValue': {
+              'default': 123,
               'type': 'number'
             },
             'objArrValue': {
-              'type': 'array',
+              'default': [],
               'items': {
-                type: 'object'
-              }
+                'type': 'object'
+              },
+              'type': 'array'
             },
             'objValue': {
+              'default': {},
               'type': 'object'
             },
             'plainObjArrValue': {
-              'type': 'array',
+              'default': [],
               'items': {
-                type: 'object'
-              }
+                'type': 'object'
+              },
+              'type': 'array'
             },
             'plainObjValue': {
-              $ref: '#/definitions/PlainObject'
+              '$ref': '#/definitions/PlainObject',
+              'default': {},
             },
             'stringValue': {
+              'default': 'string',
               'type': 'string'
-            },
+            }
           },
+          'title': 'ObjectWithInitProp',
+          'type': 'object'
+        },
+        'PlainObject': {
+          'properties': {},
+          'title': 'PlainObject',
           'type': 'object'
         }
       }
@@ -800,6 +810,54 @@ class JsonSchemaDraft07SerializationSpec {
     });
   }
 
+
+  @test
+  async 'generate schema for annotated class ref with post process'() {
+    const ref = ClassRef.get(AnnotatedPrimatives2);
+    const schema = JsonSchema.serialize(ref, {
+      postProcess: (src, dst, serializer) => {
+        if (isPropertyRef(src)) {
+          dst.checked = true;
+        } else {
+          dst.passing = true;
+        }
+      }
+    });
+    expect(schema).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      '$ref': '#/definitions/AnnotatedPrimatives2',
+      'definitions': {
+        'AnnotatedPrimatives2': {
+          'title': 'AnnotatedPrimatives2',
+          'properties': {
+            'boolValue': {
+              'type': 'boolean',
+              checked: true
+            },
+            'dateValue': {
+              'format': 'date-time',
+              'type': 'string',
+              checked: true
+            },
+            'nullValue': {
+              'type': 'string',
+              checked: true
+            },
+            'numberValue': {
+              'type': 'number',
+              checked: true
+            },
+            'strValue': {
+              'type': 'string',
+              checked: true
+            }
+          },
+          passing: true,
+          'type': 'object'
+        }
+      }
+    });
+  }
 
   @test
   async 'parse and generate schema for primative properties'() {
@@ -1035,12 +1093,24 @@ class JsonSchemaDraft07SerializationSpec {
             }
           },
           PlainObject04: {title: 'PlainObject04', type: 'object', properties: {}},
-          PlainObject03: {title: 'PlainObject03', type: 'object', properties: {}},
+          PlainObject03: {
+            title: 'PlainObject03', type: 'object',
+            properties: {
+              'internValue': {
+                'default': 'local',
+                'type': 'string'
+              }
+            }
+          },
           ExtendedObject2: {
             title: 'ExtendedObject2',
             type: 'object',
             'properties': {
               'extValue': {
+                'type': 'string'
+              },
+              'internValue': {
+                'default': 'local',
                 'type': 'string'
               }
             },
@@ -1073,10 +1143,23 @@ class JsonSchemaDraft07SerializationSpec {
           ExtendedObject2: {
             title: 'ExtendedObject2',
             type: 'object',
-            properties: {extValue: {type: 'string'}},
+            properties: {
+              extValue: {type: 'string'},
+              'internValue': {
+                'default': 'local',
+                'type': 'string'
+              }
+            },
             allOf: [{'$ref': '#/definitions/PlainObject03'}]
           },
-          PlainObject03: {title: 'PlainObject03', type: 'object', properties: {}}
+          PlainObject03: {
+            title: 'PlainObject03', type: 'object', properties: {
+              'internValue': {
+                'default': 'local',
+                'type': 'string'
+              }
+            }
+          }
         },
         anyOf: [
           {'$ref': '#/definitions/AnnotatedPrimatives2'},

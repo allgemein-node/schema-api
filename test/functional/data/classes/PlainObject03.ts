@@ -4,4 +4,6 @@ export class PlainObject03 {
 
   numericValue: number;
 
+  internValue: string = 'local';
+
 }

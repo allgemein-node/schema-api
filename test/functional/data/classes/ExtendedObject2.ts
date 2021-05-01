@@ -6,4 +6,5 @@ export class ExtendedObject2 extends PlainObject03 {
   @Property()
   extValue: string;
 
+
 }

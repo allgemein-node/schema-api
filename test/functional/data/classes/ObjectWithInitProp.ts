@@ -8,7 +8,7 @@ export class ObjectWithInitProp {
 
   boolValue: boolean = false;
 
-  dateValue: Date = new Date();
+  dateValue: Date = new Date(2021, 1, 1, 1, 1, 1, 0);
 
   arrValue: string[] = [];
 
