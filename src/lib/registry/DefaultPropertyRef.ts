@@ -25,7 +25,6 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     AnnotationsHelper.merge(this.object, this.getOptionsEntry(), this.name);
     this.setOptions(options);
     this.cardinality = _.has(options, 'cardinality') ? options.cardinality : 1;
-
   }
 
 

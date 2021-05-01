@@ -1,4 +1,18 @@
-import {assign, camelCase, clone, get, has, isArray, isEmpty, isObjectLike, isString, keys, upperFirst} from 'lodash';
+import {
+  assign,
+  camelCase,
+  clone,
+  get,
+  has,
+  isArray,
+  isEmpty,
+  isNull,
+  isObjectLike,
+  isString,
+  isUndefined,
+  keys,
+  upperFirst
+} from 'lodash';
 import {IJsonSchema7, IJsonSchema7Definition} from './JsonSchema7';
 import {IClassRef} from '../../api/IClassRef';
 import {IJsonSchemaUnserializeOptions} from './IJsonSchemaUnserializeOptions';
@@ -79,7 +93,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   private collectOptions(key: string, data: IJsonSchema7, options: IParseOptions = {}) {
     const type = get(options, 'metaType', METATYPE_ENTITY);
     let ret: any = null;
-    if (data[key]) {
+    if (!isUndefined(data[key]) || !isNull(data[key])) {
       ret = {};
       ret[key] = data[key];
     }
