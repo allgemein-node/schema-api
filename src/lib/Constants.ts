@@ -105,3 +105,5 @@ export interface IMinMax {
   max: number;
 }
 
+
+export const DEFAULT_KEY_TO_SKIP = ['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace', 'name'];

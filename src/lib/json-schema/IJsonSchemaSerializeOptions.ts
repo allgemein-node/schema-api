@@ -35,4 +35,17 @@ export interface IJsonSchemaSerializeOptions {
    */
   postProcess?: (src: any, dst: any, serializer?: IJsonSchemaSerializer) => void;
 
+  /**
+   * Allow override of existing standard properties
+   */
+  allowKeyOverride?: boolean;
+
+  /**
+   * Property keys where information can be skipped
+   * Default if not set: ['type', '$ref', 'target', '$target','propertyName', 'metaType', 'namespace', 'name']
+   * See constant DEFAULT_KEY_TO_SKIP
+   */
+  keysToSkip?: string[];
+
+
 }

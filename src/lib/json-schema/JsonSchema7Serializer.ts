@@ -1,7 +1,7 @@
-import {assign, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy} from 'lodash';
+import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
-import {METATYPE_PROPERTY, REFLECT_DESIGN_TYPE} from '../Constants';
+import {DEFAULT_KEY_TO_SKIP, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE} from '../Constants';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {SchemaUtils} from '../SchemaUtils';
 import {IPropertyRef} from '../../api/IPropertyRef';
@@ -21,7 +21,8 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   current: string;
 
   constructor(opts: IJsonSchemaSerializeOptions) {
-    this.options = opts;
+    this.options = opts || {};
+    defaults(this.options, <IJsonSchemaSerializeOptions>{keysToSkip: DEFAULT_KEY_TO_SKIP});
     this.data = this.getOrCreateSchemaDefinitions();
   }
 
@@ -348,10 +349,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     if (data && keys(data).length > 0) {
       const _keys = keys(data);
       for (const k of _keys) {
-        if (['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace', 'name'].includes(k)) {
+        if (this.options.keysToSkip.includes(k)) {
           continue;
         }
-        if (!propMeta[k]) {
+        if (!propMeta[k] || get(this.options, 'allowKeyOverride', false)) {
           propMeta[k] = data[k];
         }
       }
