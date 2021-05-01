@@ -1,3 +1,5 @@
+import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
+
 export interface IJsonSchemaSerializeOptions {
 
   /**
@@ -28,5 +30,9 @@ export interface IJsonSchemaSerializeOptions {
   appendTarget?: boolean;
 
 
+  /**
+   * Callback for postprocess
+   */
+  postProcess?: (src: any, dst: any, serializer?: IJsonSchemaSerializer) => void;
 
 }

@@ -58,6 +58,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     return get(this.options, 'namespace', get(this.data, 'namespace', DEFAULT_NAMESPACE));
   }
 
+  /**
+   * Get registry containing elements
+   */
   getRegistry() {
     return RegistryFactory.get(this.getNamespace());
   }

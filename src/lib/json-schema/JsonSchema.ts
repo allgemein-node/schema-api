@@ -32,6 +32,8 @@ export class JsonSchema {
 
 
   static getSerializer(options: IJsonSchemaSerializeOptions = {version: DRAFT_07}) {
+    options = options || {};
+    _.defaults(options, {version: DRAFT_07});
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Serializer(options);
@@ -40,6 +42,8 @@ export class JsonSchema {
   }
 
   static getUnserializer(options: IJsonSchemaUnserializeOptions = {version: DRAFT_07}) {
+    options = options || {};
+    _.defaults(options, {version: DRAFT_07});
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Unserializer(options);
@@ -48,8 +52,6 @@ export class JsonSchema {
   }
 
   static serialize(klass: IClassRef | IEntityRef | Function | object, options?: IJsonSchemaSerializeOptions) {
-    options = options ? options : {version: DRAFT_07};
-    _.defaults(options, {version: DRAFT_07});
     const serializer = JsonSchema.getSerializer(options);
     return serializer.serialize(klass);
   }

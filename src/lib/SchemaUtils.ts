@@ -1,8 +1,9 @@
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
+import {assign, get, isArray, isEmpty, isFunction, isNull, isSet, isUndefined} from 'lodash';
 import {NotYetImplementedError} from '@allgemein/base/browser';
 import {C_PROP_NAME, OPT_CREAT_AND_COPY} from './Constants';
-import {IClassRef} from '../api/IClassRef';
-import {IEntityRef} from '../api/IEntityRef';
+import {IClassRef, isClassRef} from '../api/IClassRef';
+import {IEntityRef, isEntityRef} from '../api/IEntityRef';
 import {IBuildOptions} from '../api/IBuildOptions';
 
 export class SchemaUtils {
@@ -26,16 +27,16 @@ export class SchemaUtils {
       options.beforeBuild(entityRef, data, object, options);
     }
 
-    if (!_.get(options, OPT_CREAT_AND_COPY, false)) {
+    if (!get(options, OPT_CREAT_AND_COPY, false)) {
 
       for (let p of entityRef.getPropertyRefs()) {
-        if ((_.isNull(data[p.name]) || _.isUndefined(data[p.name]))) {
+        if ((isNull(data[p.name]) || isUndefined(data[p.name]))) {
           //object[p.name] = null;
           continue;
         }
         if (p.isReference()) {
           let ref = p.getTargetRef();
-          if (p.isCollection() || _.isArray(data[p.name])) {
+          if (p.isCollection() || isArray(data[p.name])) {
             object[p.name] = [];
             for (let i = 0; i < data[p.name].length; i++) {
               object[p.name][i] = ref.build(data[p.name][i], options);
@@ -44,7 +45,7 @@ export class SchemaUtils {
             object[p.name] = ref.build(data[p.name], options);
           }
         } else {
-          if (p.isCollection() && (_.isArray(data[p.name]) || _.isSet(data[p.name]))) {
+          if (p.isCollection() && (isArray(data[p.name]) || isSet(data[p.name]))) {
             object[p.name] = [];
             for (let i = 0; i < data[p.name].length; i++) {
               let v = data[p.name][i];
@@ -54,7 +55,7 @@ export class SchemaUtils {
                 object[p.name][i] = null;
               }
             }
-          } else if (p.isCollection() && !(_.isArray(data[p.name]) || _.isSet(data[p.name]))) {
+          } else if (p.isCollection() && !(isArray(data[p.name]) || isSet(data[p.name]))) {
             throw new NotYetImplementedError();
           } else {
             object[p.name] = p.convert(data[p.name], options);
@@ -62,7 +63,7 @@ export class SchemaUtils {
         }
       }
     } else {
-      _.assign(object, data);
+      assign(object, data);
     }
 
     if (options.afterBuild) {
@@ -88,10 +89,27 @@ export class SchemaUtils {
 
   static getInherited(klass: Function) {
     const proto = Reflect.getPrototypeOf(klass) as any;
-    if (proto.name && !_.isEmpty(proto.name) && proto.name !== Object.name && proto.name !== klass.name) {
+    if (proto.name && !isEmpty(proto.name) && proto.name !== Object.name && proto.name !== klass.name) {
       return proto;
     }
     return null;
+  }
+
+
+  static getFunction(klass: any) {
+    if (isEntityRef(klass)) {
+      return klass.getClassRef().getClass(true);
+    } else if (isClassRef(klass)) {
+      return klass.getClass(true);
+    } else if (isFunction(klass)) {
+      return klass;
+    }
+    throw new Error('no class found in ' + klass);
+  }
+
+
+  static normValue(value: any) {
+    return JSON.parse(JSON.stringify(value));
   }
 
   //
