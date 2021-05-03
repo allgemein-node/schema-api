@@ -16,6 +16,26 @@ export class ValidNotEmpty {
 }
 
 
+
+export class ValidNotEmptyWithNumbers {
+
+
+  @IsNotEmpty()
+  someValue: number;
+
+}
+
+
+export class ValidNotEmptyWithBoolean {
+
+
+  @IsNotEmpty()
+  someValue: boolean;
+
+}
+
+
+
 @suite('functional/validations - is not mepty')
 class ValidationRequiredSpec {
 
@@ -68,6 +88,27 @@ class ValidationRequiredSpec {
     let newClass = new ValidNotEmpty();
     newClass.someValueReq = 'some thing';
     newClass.someValue = 'ds ds';
+
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(0);
+  }
+
+
+
+  @test
+  async 'validate both correctly with numbers'() {
+    let newClass = new ValidNotEmptyWithNumbers();
+    newClass.someValue = 1;
+
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(0);
+  }
+
+
+  @test
+  async 'validate both correctly with boolean'() {
+    let newClass = new ValidNotEmptyWithBoolean();
+    newClass.someValue = false;
 
     const res = await Validator.validate(newClass);
     expect(res).to.have.length(0);
