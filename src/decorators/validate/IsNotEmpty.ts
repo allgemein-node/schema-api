@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {assign, isArray, isEmpty, isNull, isString, isUndefined} from 'lodash';
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 
@@ -12,8 +12,8 @@ export function IsNotEmpty(options?: IIsNotEmptyOptions) {
       validate: 'isNotEmpty'
     };
     if (options) {
-      _.assign(opts, {validateOptions: {isNotEmpty: {}}});
-      _.assign(opts.validateOptions.isNotEmpty, options);
+      assign(opts, {validateOptions: {isNotEmpty: {}}});
+      assign(opts.validateOptions.isNotEmpty, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -27,8 +27,14 @@ export function IsNotEmpty(options?: IIsNotEmptyOptions) {
 
 DefaultValidator.define({
     name: 'isNotEmpty',
-    fn: (value: string, opts?: any) => {
-      return !_.isEmpty(value);
+    fn: (value: any, opts?: any) => {
+      let res = !(isUndefined(value) || isNull(value));
+      if (res) {
+        if (isString(value) || isArray(value)) {
+          return !isEmpty(value);
+        }
+      }
+      return res;
     },
     defaultOptions: {
       message: 'Property "%propertyName" must be set and be not empty.'
