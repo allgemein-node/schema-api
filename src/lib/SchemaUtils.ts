@@ -22,7 +22,7 @@ export class SchemaUtils {
    *
    */
   static transform<T>(entityRef: IEntityRef | IClassRef, data: any, options: IBuildOptions = {}): T {
-    let object: T = entityRef.create();
+    let object: T = entityRef.create(!isUndefined(options.skipClassNamespaceInfo) ? options.skipClassNamespaceInfo : true);
     if (options.beforeBuild) {
       options.beforeBuild(entityRef, data, object, options);
     }

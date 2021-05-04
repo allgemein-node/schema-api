@@ -6,6 +6,12 @@ import {IClassRef} from "./IClassRef";
  */
 export interface IBuildOptions {
 
+
+  /**
+   * Do not add __CLASS__ and __NS__ in build
+   */
+  skipClassNamespaceInfo?: boolean;
+
   /**
    * If set only the object instance will be created and all object members will be copied
    */

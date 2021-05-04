@@ -35,6 +35,7 @@ export class MetadataRegistry extends EventEmitter {
 
   constructor() {
     super();
+    this.setMaxListeners(1000);
     this.targets = [];
     this.schemas = [];
     this.metadata = MetadataStorage.key(METADATA_REGISTRY);
@@ -60,7 +61,9 @@ export class MetadataRegistry extends EventEmitter {
    * @param context
    * @param options
    */
-  add(context: METADATA_TYPE, options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions, trigger: boolean = true) {
+  add(context: METADATA_TYPE,
+      options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions,
+      trigger: boolean = true) {
     options.metaType = context;
     // find?
     this.metadata.push(options);
