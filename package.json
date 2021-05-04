@@ -1,6 +1,6 @@
 {
   "name": "@allgemein/schema-api",
-  "version": "1.2.12",
+  "version": "1.2.13",
   "description": "Library for schema api",
   "main": "index.js",
   "private": true,
