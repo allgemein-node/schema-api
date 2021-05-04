@@ -319,8 +319,8 @@ export class ClassRef extends AbstractRef implements IClassRef {
     let klass = this.getClass();
     let instance = Reflect.construct(klass, []);
     if (addinfo) {
-      Reflect.defineProperty(instance, __NS__, {value: this.namespace});
-      Reflect.defineProperty(instance, __CLASS__, {value: this.className});
+      Reflect.defineProperty(instance, __NS__, {value: this.namespace, enumerable: true});
+      Reflect.defineProperty(instance, __CLASS__, {value: this.className, enumerable: true});
     }
     return instance;
   }

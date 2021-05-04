@@ -3,7 +3,7 @@
  */
 import * as _ from 'lodash';
 import {EventEmitter} from 'events';
-import {METADATA_TYPE, METATYPE_PROPERTY} from './../Constants';
+import {METADATA_TYPE, METATYPE_PROPERTY, METATYPE_ENTITY} from './../Constants';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {IEntityRef} from '../../api/IEntityRef';
 import {IClassRef} from '../../api/IClassRef';
@@ -63,7 +63,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * @param filter
    */
   getEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[] {
-    throw new NotSupportedError('');
+    return this.filter(METATYPE_ENTITY, filter);
   }
 
   /**
