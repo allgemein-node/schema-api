@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import {assign, isFunction, isObjectLike, isString} from 'lodash';
 import {ClassUtils} from '@allgemein/base/browser';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
