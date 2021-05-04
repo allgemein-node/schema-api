@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {defaults, get, isString} from 'lodash';
+
 import {IClassRef} from '../../api/IClassRef';
 import {IEntityRef} from '../../api/IEntityRef';
 import {JsonSchema7Serializer} from './JsonSchema7Serializer';
@@ -16,7 +17,7 @@ export class JsonSchema {
     try {
       if (addr.startsWith('file:///')) {
         const buffer = await PlatformUtils.readFile(addr.replace('file://', ''));
-        const strValue = buffer.toString(_.get(opts, 'encoding', 'utf8'));
+        const strValue = buffer.toString(get(opts, 'encoding', 'utf8'));
         return JSON.parse(strValue);
       } else {
         const got = PlatformUtils.load('got');
@@ -33,7 +34,7 @@ export class JsonSchema {
 
   static getSerializer(options: IJsonSchemaSerializeOptions = {version: DRAFT_07}) {
     options = options || {};
-    _.defaults(options, {version: DRAFT_07});
+    defaults(options, {version: DRAFT_07});
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Serializer(options);
@@ -43,7 +44,7 @@ export class JsonSchema {
 
   static getUnserializer(options: IJsonSchemaUnserializeOptions = {version: DRAFT_07}) {
     options = options || {};
-    _.defaults(options, {version: DRAFT_07});
+    defaults(options, {version: DRAFT_07});
     switch (options.version) {
       case DRAFT_07:
         return new JsonSchema7Unserializer(options);
@@ -68,7 +69,7 @@ export class JsonSchema {
 
   static detectSchemaVersion(schema: object, fallback: string = DRAFT_07) {
     if (schema['$schema']) {
-      if (_.isString(schema['$schema'])) {
+      if (isString(schema['$schema'])) {
         const match = schema['$schema'].match(/json-schema.org\/(.*)\/schema/);
         if (match && match[1]) {
           return match[1];

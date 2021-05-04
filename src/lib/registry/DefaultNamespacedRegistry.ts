@@ -1,7 +1,21 @@
 /**
  * Handler for metadata
  */
-import * as _ from 'lodash';
+import {
+  assign,
+  defaults,
+  isArray,
+  isEmpty,
+  isFunction,
+  isObjectLike,
+  isString,
+  keys,
+  merge,
+  remove,
+  snakeCase,
+  uniq
+} from 'lodash';
+
 import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
@@ -90,10 +104,10 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
 
   addSchemaToEntityRef(schemaRef: string | ISchemaRef, entityRef: IEntityRef) {
-    const name = _.isString(schemaRef) ? schemaRef : schemaRef.name;
+    const name = isString(schemaRef) ? schemaRef : schemaRef.name;
     let entry = entityRef.getOptions('schema');
     if (entry) {
-      if (_.isArray(entry)) {
+      if (isArray(entry)) {
         entry.push(name);
       } else {
         entry = [entry, name];
@@ -101,7 +115,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     } else {
       entry = [name];
     }
-    entityRef.setOption('schema', _.uniq(entry));
+    entityRef.setOption('schema', uniq(entry));
   }
 
 
@@ -169,7 +183,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     } else {
       throw new NotSupportedError('passed value is not supported');
     }
-    return lookup ? _.uniq(lookup) : null;
+    return lookup ? uniq(lookup) : null;
   }
 
   /**
@@ -188,7 +202,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   getEntityRefFor(fn: string | object | Function): IEntityRef {
     let lookup = <string | Function>fn;
-    if (!_.isFunction(fn) && !_.isString(fn) && _.isObjectLike(fn)) {
+    if (!isFunction(fn) && !isString(fn) && isObjectLike(fn)) {
       lookup = ClassUtils.getFunction(fn as any);
     }
     const clsRef = ClassRef.get(lookup, this.namespace);
@@ -207,7 +221,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    * @param filter
    */
   getPropertyRef(ref: IClassRef | IEntityRef, name: string): IPropertyRef {
-    return this.getPropertyRefs(ref).find(x => _.snakeCase(x.name) === _.snakeCase(name));
+    return this.getPropertyRefs(ref).find(x => snakeCase(x.name) === snakeCase(name));
   }
 
 
@@ -239,7 +253,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     const metaPropOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_PROPERTY, cls) as IPropertyOptions[];
     if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
       const properties = (jsonSchema.definitions[clsRef.name] as IJsonSchema7).properties;
-      for (const k of _.keys(properties)) {
+      for (const k of keys(properties)) {
         const property: IJsonSchema7 = properties[k] as IJsonSchema7;
         const opts: IPropertyOptions = {
           metaType: METATYPE_PROPERTY,
@@ -249,10 +263,10 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
           target: cls
         };
 
-        const propMetadata = _.remove(metaPropOptions, x => x.propertyName === k);
-        if (!_.isEmpty(propMetadata)) {
+        const propMetadata = remove(metaPropOptions, x => x.propertyName === k);
+        if (!isEmpty(propMetadata)) {
           for (const p of propMetadata) {
-            _.assign(opts, p);
+            assign(opts, p);
           }
         }
         propOptions.push(opts);
@@ -270,7 +284,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    * @param options
    */
   createPropertyForOptions(options: IPropertyOptions): DefaultPropertyRef {
-    if (_.keys(options).length === 0) {
+    if (keys(options).length === 0) {
       throw new Error('cant create property for emtpy options');
     }
     options.namespace = this.namespace;
@@ -311,11 +325,11 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     const metaEntityOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_ENTITY, ref.getClass()) as IEntityOptions[];
     let metaEntityOption: IEntityOptions = {};
     if (metaEntityOptions.length > 1) {
-      metaEntityOption = _.merge(metaEntityOption, ...metaEntityOptions);
+      metaEntityOption = merge(metaEntityOption, ...metaEntityOptions);
     } else if (metaEntityOptions.length === 1) {
       metaEntityOption = metaEntityOptions.shift();
     }
-    _.defaults(metaEntityOption, {
+    defaults(metaEntityOption, {
       target: ref.getClass(),
       name: ref.getClass().name
     });

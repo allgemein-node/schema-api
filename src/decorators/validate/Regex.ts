@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, isEmpty, isNull, isString, isUndefined} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
@@ -12,9 +13,9 @@ export interface IRegexOptions extends IValidateOptions {
 export function Regex(regex: string | RegExp, options?: IRegexOptions) {
   return function (source: any, propertyName: string) {
     const opts: any = {
-      pattern: _.isString(regex) ? regex : regex.source,
+      pattern: isString(regex) ? regex : regex.source,
     };
-    if (!_.isString(regex) && !_.isEmpty(regex.flags)) {
+    if (!isString(regex) && !isEmpty(regex.flags)) {
       opts.validateOptions = {
         regex: {
           flags: regex.flags,
@@ -22,7 +23,7 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
       };
     }
     if (options) {
-      _.assign(opts.validateOptions.regex, options);
+      assign(opts.validateOptions.regex, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -37,10 +38,10 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
 DefaultValidator.define({
     name: 'regex',
     fn: (value: string, options: IRegexOptions) => {
-      if (_.isUndefined(value) || _.isNull(value)) {
+      if (isUndefined(value) || isNull(value)) {
         return true;
       }
-      if (_.isString(value)) {
+      if (isString(value)) {
         const r = new RegExp(options.pattern, options.flags);
         if (r.test(value)) {
           return true;

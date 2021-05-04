@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, get, isNull, isUndefined} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
@@ -13,7 +14,7 @@ export function IsEmail(options: IIsEmailOptions = null) {
       format: 'email'
     };
     if (options) {
-      _.assign(opts, {validateOptions: {email: {}}});
+      assign(opts, {validateOptions: {email: {}}});
       opts.validateOptions = {email: options};
     }
     AnnotationsHelper.forPropertyOn(
@@ -31,8 +32,8 @@ export const MAIL_REGEX = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 DefaultValidator.define({
     name: 'email',
     fn: (value: string, options: IIsEmailOptions) => {
-      if (_.isUndefined(value) || _.isNull(value)) {
-        if (!_.get(options, 'required', false)) {
+      if (isUndefined(value) || isNull(value)) {
+        if (!get(options, 'required', false)) {
           return true;
         }
         return false;

@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, isString} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
@@ -14,8 +15,8 @@ export function MaxLength(value: number, options?: IMaxLengthOptions) {
       maxLength: value
     };
     if (options) {
-      _.assign(opts, {validateOptions: {maxLength: {}}});
-      _.assign(opts.validateOptions.maxLength, options);
+      assign(opts, {validateOptions: {maxLength: {}}});
+      assign(opts.validateOptions.maxLength, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -30,7 +31,7 @@ export function MaxLength(value: number, options?: IMaxLengthOptions) {
 DefaultValidator.define({
     name: 'maxLength',
     fn: (value: string, opts?: IMaxLengthOptions) => {
-      if (_.isString(value)) {
+      if (isString(value)) {
         return value.length <= opts.maxLength;
       }
       return true;

@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, isString} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
@@ -14,8 +15,8 @@ export function MinLength(value: number, options?: IMinLengthOptions) {
       minLength: value
     };
     if (options) {
-      _.assign(opts, {validateOptions: {minLength: {}}});
-      _.assign(opts.validateOptions.minLength, options);
+      assign(opts, {validateOptions: {minLength: {}}});
+      assign(opts.validateOptions.minLength, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -30,7 +31,7 @@ export function MinLength(value: number, options?: IMinLengthOptions) {
 DefaultValidator.define({
     name: 'minLength',
     fn: (value: string, opts?: IMinLengthOptions) => {
-      if (_.isString(value)) {
+      if (isString(value)) {
         return value.length >= opts.minLength;
       }
       return true;

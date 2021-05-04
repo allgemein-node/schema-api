@@ -2,7 +2,7 @@ import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 import {assign, get, isNull, isUndefined} from 'lodash';
-import * as _ from 'lodash';
+
 
 export interface IIp4Options extends IValidateOptions {
   required?: boolean;
@@ -14,7 +14,7 @@ export function Ip4(options?: IIp4Options) {
       format: 'ip4'
     };
     if (options) {
-      _.assign(opts, {validateOptions: {ip4: {}}});
+      assign(opts, {validateOptions: {ip4: {}}});
       assign(opts.validateOptions.ip4, options);
     }
 

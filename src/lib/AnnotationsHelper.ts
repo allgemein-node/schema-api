@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {assign, defaults, filter, get, isArray, isEmpty, isObjectLike, isUndefined, keys, merge} from 'lodash';
 import {ClassRef} from './ClassRef';
 import {MERGE_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY, XS_ANNOTATION_OPTIONS_CACHE} from './Constants';
 import {ClassUtils} from '@allgemein/base';
@@ -17,10 +17,10 @@ export class AnnotationsHelper {
       let prop = ref.getPropertyRef(property);
       if (prop) {
         const pOptions = prop.getOptions();
-        _.defaults(pOptions, options);
+        defaults(pOptions, options);
         if (ref.hasEntityRef()) {
           const eOptions = ref.getEntityRef().getOptions();
-          _.defaults(eOptions, options);
+          defaults(eOptions, options);
         }
       }
     }
@@ -42,10 +42,10 @@ export class AnnotationsHelper {
     for (const ref of classRefs) {
       if (ref) {
         let pOptions = ref.getOptions();
-        _.defaults(pOptions, options);
+        defaults(pOptions, options);
         if (ref.hasEntityRef()) {
           const eOptions = ref.getEntityRef().getOptions();
-          _.defaults(eOptions, options);
+          defaults(eOptions, options);
         }
       }
     }
@@ -64,7 +64,7 @@ export class AnnotationsHelper {
     }
 
     const object = classRef.getClass(true);
-    const addOns: IPropertyExtentions[] = _.filter(MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
+    const addOns: IPropertyExtentions[] = filter(MetadataStorage.key(XS_ANNOTATION_OPTIONS_CACHE), (x: IPropertyExtentions) =>
       property ?
         (classRef.isPlaceholder ? ClassUtils.getClassName(x.object) === classRef.name : x.object === object) &&
         x.property === property &&
@@ -75,18 +75,18 @@ export class AnnotationsHelper {
 
     if (addOns) {
       addOns.forEach(addOn => {
-        const merge: MERGE_TYPE = _.get(addOn, 'merge', 'default');
-        switch (merge) {
+        const mergeType: MERGE_TYPE = get(addOn, 'merge', 'default');
+        switch (mergeType) {
           case 'merge':
-            for (const k of _.keys(addOn.options)) {
-              if (_.isUndefined(options[k]) || _.isEmpty(options[k])) {
+            for (const k of keys(addOn.options)) {
+              if (isUndefined(options[k]) || isEmpty(options[k])) {
                 // create if not present
                 options[k] = addOn.options[k];
-              } else if (_.isArray(options[k])) {
+              } else if (isArray(options[k])) {
                 // add to array
                 options[k].push(addOn.options[k]);
-              } else if(_.isObjectLike(options[k]) && _.isObjectLike(addOn.options[k])) {
-                _.merge(options[k], addOn.options[k]);
+              } else if (isObjectLike(options[k]) && isObjectLike(addOn.options[k])) {
+                merge(options[k], addOn.options[k]);
               } else {
                 // create array
                 options[k] = [options[k], addOn.options[k]];
@@ -94,10 +94,10 @@ export class AnnotationsHelper {
             }
             break;
           case 'assign':
-            _.assign(options, addOn.options);
+            assign(options, addOn.options);
             break;
           default:
-            _.defaults(options, addOn.options);
+            defaults(options, addOn.options);
         }
 
       });

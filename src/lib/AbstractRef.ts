@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
 import {DEFAULT_NAMESPACE, METADATA_TYPE,} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
@@ -66,45 +66,45 @@ export abstract class AbstractRef implements IBaseRef {
 
   getOptions(key?: string, defaultValue: any = null): any {
     if (key) {
-      return _.get(this.getOptionsEntry(), key, defaultValue);
+      return get(this.getOptionsEntry(), key, defaultValue);
     }
     return this.getOptionsEntry();
   }
 
   setOptions(options: any) {
-    if (options && !_.isEmpty(_.keys(options))) {
+    if (options && !isEmpty(keys(options))) {
       const opts = this.getOptionsEntry();
       // if same object cause taken from MetadataRegistry then ignore setting
       if (opts !== options) {
-        for (const k of _.keys(opts)) {
+        for (const k of keys(opts)) {
           delete opts[k];
         }
-        _.assign(opts, options);
+        assign(opts, options);
       }
     }
   }
 
   setOption(key: string, value: any) {
     const opts = this.getOptionsEntry();
-    _.set(opts, key, value);
+    set(opts, key, value);
   }
 
   hasOption(key: string) {
     const opts = this.getOptionsEntry();
-    return _.has(opts, key);
+    return has(opts, key);
   }
 
   // getOptions(key: string = null, defaultValue: any = null): any | OPTS {
   //   if (key) {
-  //     return _.get(this.options, key, defaultValue);
+  //     return get(this.options, key, defaultValue);
   //   }
   //   return this.options;
   // }
   //
   // setOptions(opts: any) {
-  //   if (opts && !_.isEmpty(_.keys(opts))) {
-  //     if (!_.isEmpty(_.keys(this.options))) {
-  //       this.options = _.merge(this.options, opts);
+  //   if (opts && !isEmpty(keys(opts))) {
+  //     if (!isEmpty(keys(this.options))) {
+  //       this.options = merge(this.options, opts);
   //     } else {
   //       this.options = opts;
   //     }
@@ -116,7 +116,7 @@ export abstract class AbstractRef implements IBaseRef {
   //   if (!this.options) {
   //     this.options = <any>{};
   //   }
-  //   _.set(<any>this.options, key, value);
+  //   set(<any>this.options, key, value);
   // }
 
 
@@ -131,14 +131,14 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   get machineName() {
-    return _.snakeCase(this.name);
+    return snakeCase(this.name);
   }
 
 
   get storingName() {
     let name = this.getOptions('name');
     if (!name) {
-      name = _.snakeCase(this.name);
+      name = snakeCase(this.name);
     }
     return name;
   }
@@ -148,7 +148,7 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   // toJson() {
-  //   let options = _.cloneDeep(this.getOptions());
+  //   let options = cloneDeep(this.getOptions());
   //   let o: any = {
   //     id: this.id(),
   //     name: this.name,

@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {get, has, isArray, isBoolean, isFunction, isNumber, isObjectLike, isString, isUndefined} from 'lodash';
+
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
@@ -24,7 +25,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     super(METATYPE_PROPERTY, options.propertyName, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
     AnnotationsHelper.merge(this.object, this.getOptionsEntry(), this.name);
     this.setOptions(options);
-    this.cardinality = _.has(options, 'cardinality') ? options.cardinality : 1;
+    this.cardinality = has(options, 'cardinality') ? options.cardinality : 1;
   }
 
 
@@ -37,7 +38,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
    */
   convert(data: any, options?: IBuildOptions): any {
     const sourceType = this.getType();
-    if (!sourceType || !_.isString(sourceType)) {
+    if (!sourceType || !isString(sourceType)) {
       return data;
     }
 
@@ -52,9 +53,9 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
       case 'time':
       case 'text':
       case 'string':
-        if (_.isString(data)) {
+        if (isString(data)) {
           return data;
-        } else if (_.isArray(data) && data.length === 1) {
+        } else if (isArray(data) && data.length === 1) {
           return data[0];
         } else if (data) {
           return JSON.stringify(data);
@@ -65,11 +66,11 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
       case 'boolean':
 
-        if (_.isBoolean(data)) {
+        if (isBoolean(data)) {
           return data;
-        } else if (_.isNumber(data)) {
+        } else if (isNumber(data)) {
           return data > 0;
-        } else if (_.isString(data)) {
+        } else if (isString(data)) {
           if (data.toLowerCase() === 'true' || data.toLowerCase() === '1') {
             return true;
           }
@@ -79,16 +80,16 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
       case 'double':
       case 'number':
-        if (_.isString(data)) {
+        if (isString(data)) {
           if (/^\d+\.|\,\d+$/.test(data)) {
             return parseFloat(data.replace(',', '.'));
           } else if (/^\d+$/.test(data)) {
             return parseInt(data, 0);
           } else {
           }
-        } else if (_.isNumber(data)) {
+        } else if (isNumber(data)) {
           return data;
-        } else if (_.isBoolean(data)) {
+        } else if (isBoolean(data)) {
           return data ? 1 : 0;
         } else {
           // Pass to exception
@@ -108,7 +109,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
 
   get(instance: any): any {
-    return _.get(instance, this.name);
+    return get(instance, this.name);
   }
 
 
@@ -133,7 +134,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
    * check if property parameter is an array
    */
   isCollection(): boolean {
-    if (_.isObjectLike(this.cardinality) &&
+    if (isObjectLike(this.cardinality) &&
       (<IMinMax>this.cardinality).min >= 0 &&
       (<IMinMax>this.cardinality).max >= 0) {
       return true;
@@ -157,14 +158,14 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
   }
 
   private checkReference() {
-    if (_.isUndefined(this.reference)) {
+    if (isUndefined(this.reference)) {
       this.reference = false;
       const type = this.getType();
-      if (!_.isString(type) && isClassRef(type)) {
+      if (!isString(type) && isClassRef(type)) {
         this.targetRef = type;
         this.reference = true;
-      } else if (_.isFunction(type) ||
-        (_.isString(type) && !JS_DATA_TYPES.includes(<any>type))) {
+      } else if (isFunction(type) ||
+        (isString(type) && !JS_DATA_TYPES.includes(<any>type))) {
         // try get existing
         const exists = ClassRef.get(type, this.getClassRef().getNamespace());
         if (exists) {

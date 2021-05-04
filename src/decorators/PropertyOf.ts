@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {isFunction, isString} from 'lodash';
+
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
 
 
@@ -8,7 +9,7 @@ export function PropertyOf(propertyName: string, entityOrOptions: IPropertyOptio
       options = {propertyName: null, sourceClass: null};
     }
 
-    if (_.isString(entityOrOptions) || _.isFunction(entityOrOptions)) {
+    if (isString(entityOrOptions) || isFunction(entityOrOptions)) {
       options.sourceClass = entityOrOptions;
     } else {
       options = <IPropertyOptions>entityOrOptions;

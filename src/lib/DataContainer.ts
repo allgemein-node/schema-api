@@ -1,4 +1,6 @@
-import * as _ from 'lodash';
+import {find, get, has, isBoolean, isEmpty, isFunction, keys, remove, set} from 'lodash';
+
+
 import {STATE_KEY} from './Constants';
 import {IValidationError} from './validation/IValidationError';
 import {IValidationResult} from './validation/IValidationResult';
@@ -40,7 +42,7 @@ export class DataContainer<T> {
   constructor(instance: T, registry?: ILookupRegistry | IEntityRef | IClassRef) {
     this.instance = instance;
     if (registry) {
-      this.ref = _.isFunction((<ILookupRegistry>registry).getEntityRefFor) ?
+      this.ref = isFunction((<ILookupRegistry>registry).getEntityRefFor) ?
         (<ILookupRegistry>registry).getEntityRefFor(instance as any) : registry as IEntityRef;
     } else {
       const clazz = ClassUtils.getFunction(instance as any);
@@ -64,7 +66,7 @@ export class DataContainer<T> {
 
 
   addError(e: IValidationError) {
-    if (!_.has(e, 'type')) {
+    if (!has(e, 'type')) {
       e.type = 'error';
     }
     this.errors.push(e);
@@ -117,7 +119,7 @@ export class DataContainer<T> {
 
   async validate(): Promise<boolean> {
     this.isValidated = true;
-    _.remove(this.errors, error => error.type === 'validate');
+    remove(this.errors, error => error.type === 'validate');
     let results: IValidationError[] = [];
     try {
       results = <IValidationError[]>await Validator.validate(this.instance as any, this.ref);
@@ -132,10 +134,10 @@ export class DataContainer<T> {
       type: 'validate'
     }));
     this.isSuccessValidated = true;
-    _.keys(this.validation).forEach(key => {
+    keys(this.validation).forEach(key => {
       if (this.validation[key]) {
         const valid = this.validation[key];
-        const found = _.find(this.errors, {property: key});
+        const found = find(this.errors, {property: key});
         valid.messages = [];
         if (found) {
           valid.valid = false;
@@ -157,14 +159,14 @@ export class DataContainer<T> {
   applyState() {
     const $state: any = {};
     DataContainer.keys.forEach(k => {
-      const value = _.get(this, k, null);
+      const value = get(this, k, null);
 
-      if (_.isBoolean(value) || !_.isEmpty(value)) {
-        _.set($state, k, value);
+      if (isBoolean(value) || !isEmpty(value)) {
+        set($state, k, value);
       }
     });
 
-    _.set(<any>this.instance, STATE_KEY, $state);
+    set(<any>this.instance, STATE_KEY, $state);
   }
 
 

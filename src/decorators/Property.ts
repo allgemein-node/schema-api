@@ -1,5 +1,4 @@
-import 'reflect-metadata';
-import * as _ from 'lodash';
+import {assign, isFunction, isObjectLike, isString} from 'lodash';
 import {ClassUtils} from '@allgemein/base/browser';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
 import {JS_DATA_TYPES, JS_PRIMATIVE_TYPES, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE, T_STRING} from '../lib/Constants';
@@ -13,18 +12,18 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
     };
 
 
-    if (_.isString(typeOrOptions)) {
+    if (isString(typeOrOptions)) {
       options.type = <JS_DATA_TYPES>typeOrOptions;
-    } else if (_.isFunction(typeOrOptions)) {
+    } else if (isFunction(typeOrOptions)) {
       const name = ClassUtils.getClassName(typeOrOptions);
       if ([Function.name, '', 'type'].includes(name)) {
         options.type = typeOrOptions();
       } else {
         options.type = typeOrOptions;
       }
-    } else if (typeOrOptions && _.isObjectLike(typeOrOptions)) {
-      _.assign(options, typeOrOptions);
-      if (options.type && _.isFunction(options.type)) {
+    } else if (typeOrOptions && isObjectLike(typeOrOptions)) {
+      assign(options, typeOrOptions);
+      if (options.type && isFunction(options.type)) {
         const name = ClassUtils.getClassName(options.type);
         if ([Function.name, '', 'type'].includes(name)) {
           options.type = options.type();
@@ -42,7 +41,7 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
         if (JS_PRIMATIVE_TYPES.includes(className.toLowerCase() as any)) {
           options.type = className.toLowerCase();
         } else if (className === Array.name) {
-          options.type = 'object'
+          options.type = 'object';
           options.cardinality = 0;
         } else {
           options.type = reflectMetadataType;

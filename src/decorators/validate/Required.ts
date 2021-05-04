@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, isNull, isUndefined} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 
@@ -12,8 +13,8 @@ export function Required(options?: IRequiredOptions) {
       required: true
     };
     if (options) {
-      _.assign(opts, {validateOptions: {required: {}}});
-      _.assign(opts.validateOptions.required, options);
+      assign(opts, {validateOptions: {required: {}}});
+      assign(opts.validateOptions.required, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -28,7 +29,7 @@ export function Required(options?: IRequiredOptions) {
 DefaultValidator.define({
     name: 'required',
     fn: (value: string, opts?: any) => {
-      if (_.isUndefined(value) || _.isNull(value)) {
+      if (isUndefined(value) || isNull(value)) {
         return false;
       }
       return true;

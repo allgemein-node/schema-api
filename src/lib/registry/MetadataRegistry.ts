@@ -1,7 +1,8 @@
+import {isEmpty, isFunction, keys, remove, uniq} from 'lodash';
+
 /**
  * Handler for metadata
  */
-import * as _ from 'lodash';
 import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
@@ -81,9 +82,9 @@ export class MetadataRegistry extends EventEmitter {
 
 
   remove(context: METADATA_TYPE, c: (x: any) => boolean, trigger: boolean = true) {
-    const remove = _.remove(this.metadata, x => x.metaType === context && c(x));
-    if (!_.isEmpty(remove) && trigger) {
-      this.emit(C_EVENT_REMOVE, context, remove);
+    const removed = remove(this.metadata, x => x.metaType === context && c(x));
+    if (!isEmpty(removed) && trigger) {
+      this.emit(C_EVENT_REMOVE, context, removed);
     }
   }
 
@@ -116,10 +117,10 @@ export class MetadataRegistry extends EventEmitter {
 
   private createSearchFunction(find: any) {
     let lookup = find;
-    if (!_.isFunction(find)) {
-      const keys = _.keys(find);
+    if (!isFunction(find)) {
+      const _keys = keys(find);
       lookup = (x: any) => {
-        return keys.map(k => find[k] === x[k]).reduce((previousValue, currentValue) => previousValue && currentValue);
+        return _keys.map(k => find[k] === x[k]).reduce((previousValue, currentValue) => previousValue && currentValue);
       };
     }
     return lookup;
@@ -141,7 +142,7 @@ export class MetadataRegistry extends EventEmitter {
   }
 
   getSchemas() {
-    return _.uniq(this.metadata.filter((x => x.context === METATYPE_SCHEMA)).map(x => x.name));
+    return uniq(this.metadata.filter((x => x.context === METATYPE_SCHEMA)).map(x => x.name));
   }
 
   getMetadatasForSchema(schema: string) {

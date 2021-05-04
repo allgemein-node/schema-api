@@ -1,9 +1,6 @@
-/**
- * Handler for metadata
- */
-import * as _ from 'lodash';
+import {snakeCase} from 'lodash';
 import {EventEmitter} from 'events';
-import {METADATA_TYPE, METATYPE_PROPERTY, METATYPE_ENTITY} from './../Constants';
+import {METADATA_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY} from './../Constants';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {IEntityRef} from '../../api/IEntityRef';
 import {IClassRef} from '../../api/IClassRef';
@@ -24,7 +21,6 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
     super();
     this.namespace = namespace;
   }
-
 
 
   // /**
@@ -90,7 +86,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * @param filter
    */
   getPropertyRef(ref: IClassRef | IEntityRef, name: string): IPropertyRef {
-    return this.getPropertyRefs(ref).find(x => _.snakeCase(x.name) === _.snakeCase(name));
+    return this.getPropertyRefs(ref).find(x => snakeCase(x.name) === snakeCase(name));
   }
 
 

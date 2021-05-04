@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {first, has, isEmpty, isFunction, isString, isUndefined, snakeCase} from 'lodash';
 import {ClassUtils, NotYetImplementedError} from '@allgemein/base';
 import {SchemaUtils} from './SchemaUtils';
 import {
@@ -6,7 +6,8 @@ import {
   __NS__,
   C_PROP_NAME,
   DEFAULT_NAMESPACE,
-  GLOBAL_NAMESPACE, METADATA_TYPE,
+  GLOBAL_NAMESPACE,
+  METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
   METATYPE_PROPERTY,
@@ -53,10 +54,10 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
   constructor(klass: string | Function, namespace: string = DEFAULT_NAMESPACE) {
     super(METATYPE_CLASS_REF, ClassRef.getClassName(klass), null, namespace);
-    this._isAnonymous = _.isFunction(klass) && klass.name === 'anonymous';
+    this._isAnonymous = isFunction(klass) && klass.name === 'anonymous';
 
     this.idx = ClassRef.__inc++;
-    if (_.isString(klass)) {
+    if (isString(klass)) {
       this.originalValue = klass;
       this._isPlaceholder = true;
     } else {
@@ -98,7 +99,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
   get storingName() {
     let name = this.getOptions(C_PROP_NAME, this.className);
-    return _.snakeCase(name);
+    return snakeCase(name);
   }
 
   set storingName(v: string) {
@@ -135,11 +136,11 @@ export class ClassRef extends AbstractRef implements IClassRef {
     // if(name)
     if (name && name === this.name) {
       return true;
-    } else if (_.has(instance, __CLASS__) && instance[__CLASS__] === this.name) {
+    } else if (has(instance, __CLASS__) && instance[__CLASS__] === this.name) {
       return true;
     } else {
       return this.getPropertyRefs()
-        .map(x => _.has(instance, x.name))
+        .map(x => has(instance, x.name))
         .reduce((previousValue, currentValue) => previousValue && currentValue, true);
     }
     return false;
@@ -147,14 +148,14 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   get machineName() {
-    return _.snakeCase(this.className);
+    return snakeCase(this.className);
   }
 
 
   getClass(create: boolean = false): Function {
-    if (_.isFunction(this.originalValue)) {
+    if (isFunction(this.originalValue)) {
       return this.originalValue;
-    } else if (_.isString(this.originalValue) && this.isPlaceholder) {
+    } else if (isString(this.originalValue) && this.isPlaceholder) {
       if (create) {
         this.originalValue = SchemaUtils.clazz(this.originalValue);
         return this.originalValue;
@@ -165,7 +166,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   static find(klass: string | Function, namespace: string = DEFAULT_NAMESPACE): ClassRef {
-    if (_.isString(klass)) {
+    if (isString(klass)) {
       let name = ClassRef.getClassName(klass);
       let classRef = null;
       if (namespace === GLOBAL_NAMESPACE) {
@@ -184,8 +185,6 @@ export class ClassRef extends AbstractRef implements IClassRef {
       return classRef;
     }
   }
-
-
 
 
   /**
@@ -210,11 +209,11 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   static checkIfFunctionCallback(klass: string | Function) {
-    if (_.isFunction(klass)) {
+    if (isFunction(klass)) {
       // maybe function which return type like () => type
       let name = ClassRef.getClassName(klass);
 
-      if (_.isEmpty(name)) {
+      if (isEmpty(name)) {
         let fn = null;
         try {
           //fn = klass();
@@ -223,7 +222,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
         }
         if (fn) {
           let name = ClassRef.getClassName(fn);
-          if (!_.isEmpty(name)) {
+          if (!isEmpty(name)) {
             klass = fn;
           }
         }
@@ -245,11 +244,11 @@ export class ClassRef extends AbstractRef implements IClassRef {
       klass = this.checkIfFunctionCallback(klass);
     }
 
-    const isAnonymous = _.isFunction(klass) && klass.name === 'anonymous';
+    const isAnonymous = isFunction(klass) && klass.name === 'anonymous';
 
     let classRef = this.find(klass, namespace);
     if (classRef) {
-      if (classRef.isPlaceholder && _.isFunction(klass) && !isAnonymous) {
+      if (classRef.isPlaceholder && isFunction(klass) && !isAnonymous) {
         classRef.updateClass(klass);
       }
       return classRef;
@@ -269,7 +268,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
    */
   static createRef(klass: Function | string, namespace: string = GLOBAL_NAMESPACE) {
     const classRef = new ClassRef(klass, namespace);
-    if (_.isFunction(klass)) {
+    if (isFunction(klass)) {
       const proto = SchemaUtils.getInherited(klass);
       if (proto) {
         // is extends
@@ -299,7 +298,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   getEntityRef(): IEntityRef {
-    if (_.isUndefined(this._cacheEntity)) {
+    if (isUndefined(this._cacheEntity)) {
       this._cacheEntity = this.getRegistry().find(METATYPE_ENTITY, (x: IEntityRef) => x.getClassRef() === this);
     }
     return this._cacheEntity;
@@ -355,7 +354,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   id() {
-    return [this.namespace, this.className].map(x => _.snakeCase(x)).join(XS_ID_SEPARATOR);
+    return [this.namespace, this.className].map(x => snakeCase(x)).join(XS_ID_SEPARATOR);
   }
 
 
@@ -372,7 +371,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
    *
    */
   getExtend(): IClassRef {
-    return !_.isEmpty(this.extends) ? _.first(this.extends) : null;
+    return !isEmpty(this.extends) ? first(this.extends) : null;
   }
 
   /**

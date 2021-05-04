@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import {assign, get, isNull, isUndefined} from 'lodash';
+
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
@@ -15,8 +16,8 @@ export function Hostname(options?: IHostnameOptions) {
     };
 
     if (options) {
-      _.assign(opts, {validateOptions: {hostname: {}}});
-      _.assign(opts.validateOptions.hostname, options);
+      assign(opts, {validateOptions: {hostname: {}}});
+      assign(opts.validateOptions.hostname, options);
     }
 
     AnnotationsHelper.forPropertyOn(
@@ -34,8 +35,8 @@ export const HOSTNAME_RFC1034_REGEX = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[
 DefaultValidator.define({
     name: 'hostname',
     fn: (value: string, options?: IHostnameOptions) => {
-      if (_.isUndefined(value) || _.isNull(value)) {
-        if (!_.get(options, 'required', false)) {
+      if (isUndefined(value) || isNull(value)) {
+        if (!get(options, 'required', false)) {
           return true;
         }
         return false;
