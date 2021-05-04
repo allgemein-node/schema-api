@@ -12,7 +12,6 @@ import {IEntityRef} from '../../src/api/IEntityRef';
 import {IClassRef} from '../../src/api/IClassRef';
 import {TestClass} from './data/classes/TestClass';
 import {TestClassWithEmbedded} from './data/classes/TestClassWithEmbedded';
-import {isLineBreak} from 'codelyzer/angular/sourceMappingVisitor';
 import {isLookupRegistry} from '../../src/api/ILookupRegistry';
 
 
@@ -115,7 +114,9 @@ class EntityRefSpec {
     expect(object).to.instanceOf(TestClass);
     expect(object).to.be.deep.eq({
       str: 'present',
-      nr: 100
+      nr: 100,
+      '__CLASS__': 'TestClass',
+      '__NS__': 'default'
     });
 
   }
@@ -141,6 +142,8 @@ class EntityRefSpec {
     });
     expect(object).to.instanceOf(TestClass);
     expect(object).to.be.deep.eq({
+      '__CLASS__': 'TestClass',
+      '__NS__': 'default',
       str: 'present',
       str2: 'nopresent',
       nr: 100,
@@ -168,9 +171,13 @@ class EntityRefSpec {
     const object = entityRef.build<TestClassWithEmbedded>(obj);
     expect(object).to.instanceOf(TestClassWithEmbedded);
     expect(object).to.be.deep.eq({
+      '__CLASS__': 'TestClassWithEmbedded',
+      '__NS__': 'default',
       single: {
         str: 'data',
-        nr: 100
+        nr: 100,
+        '__CLASS__': 'TestClass',
+        '__NS__': 'default'
       }
     });
     expect(object.single).to.instanceOf(TestClass);
@@ -187,14 +194,21 @@ class EntityRefSpec {
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
 
     const obj = {
+      '__CLASS__': 'TestClassWithEmbedded',
+      '__NS__': 'default',
       multiple: [
         {
           str: 'data',
-          nr: 100
+          nr: 100,
+          '__CLASS__': 'TestClass',
+          '__NS__': 'default'
         },
         {
           str: 'welt',
-          nr: 101
+          nr: 101,
+          '__CLASS__': 'TestClass',
+          '__NS__': 'default'
+
         }
       ]
     };
@@ -202,14 +216,20 @@ class EntityRefSpec {
     const object = entityRef.build<TestClassWithEmbedded>(obj);
     expect(object).to.instanceOf(TestClassWithEmbedded);
     expect(object).to.be.deep.eq({
-      multiple: [
+      '__CLASS__': 'TestClassWithEmbedded',
+      '__NS__': 'default',
+      'multiple': [
         {
-          str: 'data',
-          nr: 100
+          '__CLASS__': 'TestClass',
+          '__NS__': 'default',
+          'nr': 100,
+          'str': 'data'
         },
         {
-          str: 'welt',
-          nr: 101
+          '__CLASS__': 'TestClass',
+          '__NS__': 'default',
+          'nr': 101,
+          'str': 'welt'
         }
       ]
     });
