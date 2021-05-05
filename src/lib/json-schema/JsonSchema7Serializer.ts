@@ -376,11 +376,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     if (property.isCollection()) {
       this.setDefaultArray(propMeta);
       if (property.isReference()) {
-        const targetRef = property.getTargetRef();
-        propMeta.items = {$ref: '#/definitions/' + targetRef.name};
-        if (this.data && !this.data.definitions[targetRef.name]) {
-          this.describeClassRef(targetRef);
-        }
+        this.describeTargetRef(property, propMeta, 'collection');
       } else {
         propMeta.items = {
           type: property.getType() as any
@@ -390,11 +386,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     } else {
       propMeta.type = 'object';
       if (property.isReference()) {
-        const targetRef = property.getTargetRef();
-        propMeta.$ref = '#/definitions/' + targetRef.name;
-        if (this.data && !this.data.definitions[targetRef.name]) {
-          this.describeClassRef(targetRef);
-        }
+        this.describeTargetRef(property, propMeta, 'single');
       } else {
         propMeta.type = property.getType() as any;
         this.propertyPostproces(propMeta);
@@ -407,6 +399,31 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       this.options.postProcess(property, propMeta, this);
     }
     return propMeta;
+  }
+
+
+  describeTargetRef(property: IPropertyRef, propMeta: any, mode: 'collection' | 'single') {
+    let targetRef: any = property.getTargetRef();
+    if (targetRef.hasEntityRef()) {
+      targetRef = targetRef.getEntityRef();
+      if (mode === 'collection') {
+        propMeta.items = {$ref: '#/definitions/' + targetRef.name};
+      } else {
+        propMeta.$ref = '#/definitions/' + targetRef.name;
+      }
+      if (this.data && !this.data.definitions[targetRef.name]) {
+        this.describeEntityRef(targetRef);
+      }
+    } else {
+      if (mode === 'collection') {
+        propMeta.items = {$ref: '#/definitions/' + targetRef.name};
+      } else {
+        propMeta.$ref = '#/definitions/' + targetRef.name;
+      }
+      if (this.data && !this.data.definitions[targetRef.name]) {
+        this.describeClassRef(targetRef);
+      }
+    }
   }
 
   propertyPostproces(opt: IJsonSchema7) {
