@@ -31,7 +31,6 @@ class SchemaRefSpec {
   async 'check if schema added'() {
     let entityRef = RegistryFactory.get().getEntityRefFor(EntityWithSchema);
     const schemaNames = entityRef.getOptions('schema');
-    console.log(schemaNames);
     expect(schemaNames).to.be.deep.eq(['simpleschema']);
     const schemaRefs = entityRef.getSchemaRefs();
     expect(schemaRefs).to.have.length(1);

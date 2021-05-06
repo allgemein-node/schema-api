@@ -12,5 +12,15 @@ class ValidationIdnEmailSpec {
     expect([]).to.have.length(0);
   }
 
+
+  @test.skip
+  async 'serialize as json schema'() {
+  }
+
+  @test.skip
+  async 'unserialize as json schema'() {
+  }
+
+
 }
 

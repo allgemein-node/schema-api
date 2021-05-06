@@ -165,7 +165,8 @@ class JsonSchemaDraft07SerializationSpec {
 
     const names = properties.map(x => x.name);
     expect(names).to.deep.eq([
-      'stringValue', 'boolValue', 'dateValue', 'numericValue', 'arrValue', 'objArrValue', 'objValue'
+      'stringValue',
+      'boolValue', 'dateValue', 'numericValue', 'arrValue', 'objArrValue', 'objValue'
     ]);
 
 

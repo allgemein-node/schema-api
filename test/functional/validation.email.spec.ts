@@ -103,5 +103,16 @@ class ValidationEmailSpec {
     );
   }
 
+
+
+  @test.skip
+  async 'serialize as json schema'() {
+  }
+
+  @test.skip
+  async 'unserialize as json schema'() {
+  }
+
+
 }
 

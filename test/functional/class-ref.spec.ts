@@ -116,8 +116,8 @@ class ClassRefSpec {
     MetadataRegistry.$().add(METATYPE_PROPERTY, <IPropertyOptions>{
       target: DynamicObject,
       propertyName: 'strValue',
-      type: 'string',
-      $target: DynamicObject,
+      type: 'string'
+
     });
 
     await waitForEventAdd;
