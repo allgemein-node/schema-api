@@ -5,8 +5,10 @@
  */
 import {isRegExp, isString, keys, remove} from 'lodash';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
-import {ClassType, DEFAULT_NAMESPACE} from '../Constants';
+import {ClassType, DEFAULT_NAMESPACE, METATYPE_ENTITY} from '../Constants';
 import {DefaultNamespacedRegistry} from './DefaultNamespacedRegistry';
+import {MetadataRegistry} from './MetadataRegistry';
+import {C_DEFAULT} from '@allgemein/base';
 
 export class RegistryFactory {
 
@@ -77,10 +79,35 @@ export class RegistryFactory {
     });
   }
 
-
+  /**
+   * Return active and registered namespaces
+   */
   static getNamespaces() {
     return keys(this.$handles);
   }
 
+  static getTargets() {
+    return MetadataRegistry.$().getTargets();
+  }
+
+  /**
+   * Return all declared namespaces
+   */
+  static getDeclaredNamespaces(): { target: Function, namespace: string }[] {
+    return [].concat(...MetadataRegistry.$().getTargets().map(x => {
+      const entries = MetadataRegistry.$().getByContextAndTarget(METATYPE_ENTITY, x, 'merge');
+      return entries.map(x => {
+        return {target: x.target, namespace: x.namespace ? x.namespace : C_DEFAULT};
+      });
+    }));
+  }
+
+
+  static reset(){
+    for(const ns of this.getNamespaces()){
+      this.get(ns).reset();
+      this.remove(ns);
+    }
+  }
 
 }

@@ -389,6 +389,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   create<T>(context: string, options: IAbstractOptions): T {
     const metadata = this.getMetadata(context as METADATA_TYPE, options.target, options.propertyName ? options.propertyName : null);
     if (metadata) {
+
       if (metadata.namespace && metadata.namespace !== this.namespace) {
         throw new NotSupportedError('namespace for ' + context + ' is ' + metadata.namespace + ' the namespace of this registry is ' + this.namespace);
       }
