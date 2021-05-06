@@ -140,7 +140,7 @@ export class DefaultValidator {
 
   static getValidationHandlesForFn(fn: Function) {
     const entries: IValidatorEntry[] = [];
-    const entriesSecond = MetadataRegistry.$().getMetadata().filter(x =>
+    const entriesSecond = MetadataRegistry.$().getCached().filter(x =>
       x.target === fn && intersection(this.lookupKeys, keys(x)).length > 0
     );
 

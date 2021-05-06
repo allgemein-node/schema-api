@@ -16,7 +16,7 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
   constructor(options: IEntityOptions = {}) {
     super(METATYPE_ENTITY, options.name, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
-    AnnotationsHelper.merge(this.object, this.getOptionsEntry());
+    AnnotationsHelper.merge(this.object, options);
     this.setOptions(options);
   }
 
@@ -50,7 +50,7 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
   }
 
   getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
-    return ClassRef.get(<string | Function>object, this.namespace, type == METATYPE_PROPERTY);
+    return this.getRegistry().getClassRefFor(object, this.metaType);
   }
 
   isOf(instance: any): boolean {

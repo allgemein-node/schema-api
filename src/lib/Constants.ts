@@ -7,9 +7,10 @@ export const XS_DEFAULT_CLASSES = 'default_class_ref';
 export const REFLECT_DESIGN_TYPE = 'design:type';
 export const METATYPE_SCHEMA = 'schema';
 export const METATYPE_ENTITY = 'entity';
+export const METATYPE_NAMESPACE = 'namespace';
 export const METATYPE_CLASS_REF = 'class_ref';
 export const METATYPE_PROPERTY = 'property';
-export const METATYPE_OBJECT = 'object';
+export const METATYPE_EMBEDDABLE = 'object';
 
 export type METADATA_TYPE =
   'schema'

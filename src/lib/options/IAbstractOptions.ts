@@ -6,7 +6,7 @@ export interface IAbstractOptions {
   /**
    * target option
    */
-  target?: Function | ClassType<any>;
+  target?: Function | ClassType<any> | string;
 
   /**
    * metadata type of this options

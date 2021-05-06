@@ -4,7 +4,7 @@ import {IPropertyRef} from './IPropertyRef';
 import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
 import {ISchemaRef} from './ISchemaRef';
-import {METADATA_TYPE, METATYPE_CLASS_REF} from '../lib/Constants';
+import {METADATA_TYPE} from '../lib/Constants';
 
 
 export function isLookupRegistry(x: any): x is ILookupRegistry {
@@ -47,6 +47,8 @@ export interface ILookupRegistry {
   listProperties(filter?: (x: IPropertyRef) => boolean): IPropertyRef[];
 
   getPropertyRefs(ref: IClassRef | IEntityRef): IPropertyRef[];
+
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
 
 
   create<T>(context: string, options: any): T;

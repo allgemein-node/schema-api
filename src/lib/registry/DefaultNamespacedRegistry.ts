@@ -3,7 +3,7 @@
  */
 import {
   assign,
-  defaults,
+  cloneDeep,
   isArray,
   isEmpty,
   isFunction,
@@ -43,6 +43,7 @@ import {JsonSchema} from '../json-schema/JsonSchema';
 import {ISchemaRef} from '../../api/ISchemaRef';
 import {SchemaRef} from '../SchemaRef';
 import {AbstractRegistry} from './AbstractRegistry';
+import {IAbstractOptions} from '../options/IAbstractOptions';
 
 
 /**
@@ -68,6 +69,15 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   onAdd(context: METADATA_TYPE,
         options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
+
+    // check namespace, if not given use this as default
+    if (options.namespace) {
+      if (options.namespace !== this.namespace) {
+        // skip not my namespace
+        return;
+      }
+    }
+
     if (context === METATYPE_PROPERTY) {
       const find = this.find(context, (c: IPropertyRef) => c.getClassRef().getClass() === options.target && c.name === options.name);
       if (find) {
@@ -205,13 +215,18 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     if (!isFunction(fn) && !isString(fn) && isObjectLike(fn)) {
       lookup = ClassUtils.getFunction(fn as any);
     }
-    const clsRef = ClassRef.get(lookup, this.namespace);
-    let lookupFn = (x: IEntityRef) => x.getClassRef() === clsRef;
+    let lookupFn = (x: IEntityRef) => x.getClassRef().getClass() === lookup;
+    if (isString(fn)) {
+      lookupFn = (x: IEntityRef) => x.getClassRef().name === lookup;
+    }
     const entityRefExists = this.find<IEntityRef>(METATYPE_ENTITY, lookupFn);
     if (entityRefExists) {
       return entityRefExists;
     }
-    return this.createEntityForRef(clsRef);
+    return this.create(METATYPE_ENTITY, {
+      target: lookup,
+      namespace: this.namespace
+    });
   }
 
 
@@ -274,7 +289,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     }
 
     const propertyOptions = propOptions.concat(metaPropOptions);
-    return propertyOptions.map(opts => this.createPropertyForOptions(opts));
+    return propertyOptions.map(opts => this.create(METATYPE_PROPERTY, opts));
   }
 
 
@@ -285,7 +300,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   createPropertyForOptions(options: IPropertyOptions): DefaultPropertyRef {
     if (keys(options).length === 0) {
-      throw new Error('cant create property for emtpy options');
+      throw new Error('can\'t create property for empty options');
     }
     options.namespace = this.namespace;
     const prop = new DefaultPropertyRef(options);
@@ -300,8 +315,19 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   createEntityForOptions(options: IEntityOptions): DefaultEntityRef {
     options.namespace = this.namespace;
+    if (!options.name) {
+      options.name = ClassRef.getClassName(options.target);
+    }
     const entityRef = new DefaultEntityRef(options);
-    return this.add(entityRef.metaType, entityRef);
+    const retRef = this.add(entityRef.metaType, entityRef);
+    const metaSchemaOptionsForEntity = MetadataRegistry.$()
+      .getByContextAndTarget(METATYPE_SCHEMA, entityRef.getClass()) as ISchemaOptions[];
+    if (metaSchemaOptionsForEntity.length > 0) {
+      for (const schemaOptions of metaSchemaOptionsForEntity) {
+        this.addSchemaToEntityRef(schemaOptions.name, entityRef);
+      }
+    }
+    return retRef;
   }
 
   /**
@@ -316,33 +342,41 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   }
 
   /**
-   * Create default entity reference for passed reference. The options are taken from metadata registry.
-   * Also the schema is looked up.
+   * Return metadata collected in the MetadataRegistry through annotation or explizit attached data.
    *
-   * @param options
+   * @param context
+   * @param target
+   * @return IAbstractOptions
    */
-  createEntityForRef(ref: IClassRef | IEntityRef): DefaultEntityRef {
-    const metaEntityOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_ENTITY, ref.getClass()) as IEntityOptions[];
-    let metaEntityOption: IEntityOptions = {};
-    if (metaEntityOptions.length > 1) {
-      metaEntityOption = merge(metaEntityOption, ...metaEntityOptions);
-    } else if (metaEntityOptions.length === 1) {
-      metaEntityOption = metaEntityOptions.shift();
+  getMetadata(context: METADATA_TYPE, target: Function | string, propertyName?: string): IAbstractOptions {
+    let metadataOptionList: IAbstractOptions[] =
+      MetadataRegistry.$().getByContextAndTarget(context, target, 'merge', propertyName) as IAbstractOptions[];
+
+    let metadataOptions: IAbstractOptions = {};
+    if (metadataOptionList.length > 1) {
+      metadataOptions = merge(metadataOptions, ...metadataOptionList.map(x => cloneDeep(x)));
+    } else if (metadataOptionList.length === 1) {
+      metadataOptions = metadataOptionList.shift();
     }
-    defaults(metaEntityOption, {
-      target: ref.getClass(),
-      name: ref.getClass().name
-    });
-    const entityRef = this.createEntityForOptions(metaEntityOption);
-    const metaSchemaOptionsForEntity = MetadataRegistry.$()
-      .getByContextAndTarget(METATYPE_SCHEMA, ref.getClass()) as ISchemaOptions[];
-    if (metaSchemaOptionsForEntity.length > 0) {
-      for (const schemaOptions of metaSchemaOptionsForEntity) {
-        this.addSchemaToEntityRef(schemaOptions.name, entityRef);
-      }
-    }
-    return entityRef;
+    return metadataOptions;
   }
+
+  // /**
+  //  * Create default entity reference for passed reference. The options are taken from metadata registry.
+  //  * Also the schema is looked up.
+  //  *
+  //  * @param options
+  //  */
+  // createEntityForRef(ref: IClassRef | IEntityRef): DefaultEntityRef {
+  //
+  //   defaults(metaEntityOption, {
+  //     target: ref.getClass(),
+  //     name: ref.getClass().name
+  //   });
+  //   const entityRef = this.createEntityForOptions(metaEntityOption);
+  //
+  //   return entityRef;
+  // }
 
 
   getPropertyRefsFor(fn: string | object | Function): IPropertyRef[] {
@@ -352,20 +386,26 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   }
 
 
-  create<T>(context: string, options: any): T {
+  create<T>(context: string, options: IAbstractOptions): T {
+    const metadata = this.getMetadata(context as METADATA_TYPE, options.target, options.propertyName ? options.propertyName : null);
+    if (metadata) {
+      if (metadata.namespace && metadata.namespace !== this.namespace) {
+        throw new NotSupportedError('namespace for ' + context + ' is ' + metadata.namespace + ' the namespace of this registry is ' + this.namespace);
+      }
+      if (!isEmpty(metadata) && keys(metadata).length > 0) {
+        merge(options, metadata);
+      }
+    }
+    options.metaType = context;
     switch (context as METADATA_TYPE) {
       case METATYPE_CLASS_REF:
         break;
       case METATYPE_ENTITY:
-        if (isClassRef(options)) {
-          return <any>this.createEntityForRef(options);
-        } else {
-          return <any>this.createEntityForOptions(options);
-        }
+        return <any>this.createEntityForOptions(options);
       case METATYPE_PROPERTY:
         return <any>this.createPropertyForOptions(options);
       case METATYPE_SCHEMA:
-        return <any>this.createSchemaForOptions(options);
+        return <any>this.createSchemaForOptions(options as ISchemaOptions);
     }
 
     return null;
@@ -390,6 +430,11 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     const addedClassRef = this.getLookupRegistry().add(METATYPE_CLASS_REF, ref);
     this.createPropertiesForRef(addedClassRef);
     return addedClassRef;
+  }
+
+
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
+    return ClassRef.get(<string | Function>object, this.namespace, type === METATYPE_PROPERTY);
   }
 
 

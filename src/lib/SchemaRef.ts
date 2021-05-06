@@ -4,7 +4,6 @@ import {ISchemaOptions} from './options/ISchemaOptions';
 import {METADATA_TYPE, METATYPE_ENTITY, METATYPE_SCHEMA} from './Constants';
 import {RegistryFactory} from './registry/RegistryFactory';
 import {IClassRef} from '../api/IClassRef';
-import {ClassRef} from './ClassRef';
 import {ISchemaRef} from '../api/ISchemaRef';
 import {IEntityRef} from '../api/IEntityRef';
 
@@ -29,7 +28,7 @@ export class SchemaRef extends AbstractRef implements ISchemaRef {
 
   getClassRefFor(object: string | Function | IClassRef,
                  type: METADATA_TYPE): IClassRef {
-    return ClassRef.get(<string | Function>object, this.namespace);
+    return this.getRegistry().getClassRefFor(object, type);
   }
 
 

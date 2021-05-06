@@ -79,6 +79,15 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
     return LookupRegistry.$(this.namespace);
   }
 
+  /**
+   * Method for returning class ref
+   *
+   * @param object
+   * @param type
+   */
+  getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
+    throw new NotSupportedError('');
+  }
 
   /**
    * Returns property by name for a given class or entity ref

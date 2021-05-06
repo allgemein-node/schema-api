@@ -6,6 +6,8 @@ import {IClassRef, isClassRef} from '../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../api/IEntityRef';
 import {IBuildOptions} from '../api/IBuildOptions';
 
+let anonId = 0;
+
 export class SchemaUtils {
 
   /**
@@ -79,14 +81,27 @@ export class SchemaUtils {
    * @param str
    */
   static clazz(str: string): Function {
-    function X() {
-    }
-
+    const X = this.clazzAnonymous();
     Object.defineProperty(X, C_PROP_NAME, {value: str});
     return X;
   }
 
+  /**
+   * Create a class of given name
+   *
+   * @param str
+   */
+  static clazzAnonymous(): Function {
+    const X = new Function();
+    Object.defineProperty(X, 'anonId', {value: anonId++});
+    return X;
+  }
 
+  /**
+   * Return inherited class if present else null will be delivered
+   *
+   * @param klass
+   */
   static getInherited(klass: Function) {
     const proto = Reflect.getPrototypeOf(klass) as any;
     if (proto.name && !isEmpty(proto.name) && proto.name !== Object.name && proto.name !== klass.name) {

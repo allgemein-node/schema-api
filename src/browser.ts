@@ -13,6 +13,7 @@ export {Property} from './decorators/Property';
 export {Embeddable} from './decorators/Embeddable';
 export {PropertyOf} from './decorators/PropertyOf';
 export {Schema} from './decorators/Schema';
+export {Namespace} from './decorators/Namespace';
 
 export {
   Hostname,
@@ -31,6 +32,8 @@ export {MaxLength, IMaxLengthOptions} from './decorators/validate/MaxLength';
 export {IsNotEmpty, IIsNotEmptyOptions} from './decorators/validate/IsNotEmpty';
 
 export {AbstractRef} from './lib/AbstractRef';
+export {AbstractRegistry} from './lib/registry/AbstractRegistry';
+
 export {AnnotationsHelper} from './lib/AnnotationsHelper';
 export {ClassRef} from './lib/ClassRef';
 export {
@@ -38,6 +41,7 @@ export {
   METATYPE_ENTITY,
   METATYPE_PROPERTY,
   METATYPE_CLASS_REF,
+  METATYPE_NAMESPACE,
   METADATA_TYPE,
   DEFAULT_NAMESPACE,
   XS_ANNOTATION_OPTIONS_CACHE,
@@ -45,10 +49,11 @@ export {
   __CLASS__, __NS__,
   C_EVENT_ADD, C_EVENT_REMOVE, C_EVENT_UPDATE,
   C_PROP_NAME, CLASS_TYPE, GLOBAL_NAMESPACE, JS_DATA_TYPES, JS_PRIMATIVE_TYPES,
-  METADATA_REGISTRY, METATYPE_OBJECT,
+  METADATA_REGISTRY, METATYPE_EMBEDDABLE,
   OPT_CREAT_AND_COPY, REFLECT_DESIGN_TYPE, STATE_KEY,
   T_STRING, XS_DATA_TYPES,
-  XS_DEFAULT_CLASSES, XS_DEFAULT_SCHEMA,
+  XS_DEFAULT_CLASSES,
+  XS_DEFAULT_SCHEMA,
   METADATA_AND_BIND_TYPE,
   XS_ID_SEPARATOR, BINDING_SCHEMA_ENTITY, BINDING_SCHEMA_CLASS_REF
 } from './lib/Constants';
@@ -84,6 +89,7 @@ export {DefaultNamespacedRegistry} from './lib/registry/DefaultNamespacedRegistr
 export {DefaultPropertyRef} from './lib/registry/DefaultPropertyRef';
 export {MetadataRegistry} from './lib/registry/MetadataRegistry';
 export {RegistryFactory} from './lib/registry/RegistryFactory';
+export {Binding} from './lib/registry/Binding';
 export {SchemaRef} from './lib/SchemaRef';
 export {SchemaUtils} from './lib/SchemaUtils';
 export {DefaultValidator, IValidatorEntry} from './lib/validation/DefaultValidator';

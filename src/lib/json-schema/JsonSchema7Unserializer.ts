@@ -397,7 +397,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     if (!classRef) {
       metaType = METATYPE_CLASS_REF;
-      classRef = this.getClassRef(new Function(), namespace);
+      classRef = this.getClassRef(SchemaUtils.clazzAnonymous(), namespace);
     }
 
     // TODO check extentions!
@@ -430,7 +430,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         assign(entityOptions, refOptions);
       } else {
         entityOptions = refOptions;
-        MetadataRegistry.$().add(metaType, refOptions);
+        refOptions.metaType = METATYPE_CLASS_REF;
+        classRef.setOptions(refOptions);
+        // MetadataRegistry.$().add(metaType, refOptions);
       }
 
       if (metaType === METATYPE_ENTITY) {

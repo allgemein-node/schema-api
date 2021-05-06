@@ -1,5 +1,5 @@
 import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
-import {DEFAULT_NAMESPACE, METADATA_TYPE,} from './Constants';
+import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_PROPERTY,} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {MetadataRegistry} from './registry/MetadataRegistry';
@@ -47,17 +47,24 @@ export abstract class AbstractRef implements IBaseRef {
 
   protected getOptionsEntry() {
     if (!this._cachedOptions) {
-      if (this.metaType === 'property') {
-        this._cachedOptions = MetadataRegistry.$().find(this.metaType, (x: any) => x.target === this.getClass(true) && x.propertyName === this.name);
+      if (this.metaType === METATYPE_PROPERTY) {
+        this._cachedOptions = MetadataRegistry.$().findCached(this.metaType, (x: any) =>
+          x.target === this.getClass(true) &&
+          x.propertyName === this.name &&
+          x.namespace === this.getNamespace()
+        );
         if (!this._cachedOptions) {
-          this._cachedOptions = {target: this.getClass(true), propertyName: this.name};
-          MetadataRegistry.$().add(this.metaType, this._cachedOptions, false);
+          this._cachedOptions = {target: this.getClass(true), propertyName: this.name, namespace: this.getNamespace()};
+          MetadataRegistry.$().addCached(this.metaType, this._cachedOptions);
         }
       } else {
-        this._cachedOptions = MetadataRegistry.$().find(this.metaType, (x: any) => x.target === this.getClass(true));
+        this._cachedOptions = MetadataRegistry.$().findCached(this.metaType, (x: any) =>
+          x.target === this.getClass(true) &&
+          x.namespace === this.getNamespace()
+        );
         if (!this._cachedOptions) {
-          this._cachedOptions = {target: this.getClass(true)};
-          MetadataRegistry.$().add(this.metaType, this._cachedOptions, false);
+          this._cachedOptions = {target: this.getClass(true), namespace: this.getNamespace()};
+          MetadataRegistry.$().addCached(this.metaType, this._cachedOptions);
         }
       }
     }
