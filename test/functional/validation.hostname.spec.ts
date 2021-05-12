@@ -40,7 +40,7 @@ class ValidationHostnameSpec {
   async 'validate object with undefined hostname property'() {
     const newClass = new ValidHostname();
     let res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(1);
   }
 
   @test

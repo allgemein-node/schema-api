@@ -4,7 +4,7 @@ import {suite, test} from '@testdeck/mocha';
 import {DataContainer, IsEmail, Property, Required} from '../../src';
 
 class ValidateInContainer {
-  @IsEmail()
+  // @IsEmail()
   @Property()
   email: string;
 }
@@ -43,7 +43,15 @@ class DataContainerSpec {
       'property': 'email',
       'type': 'validate',
       'value': undefined
-    }]);
+    },
+      {
+        'constraints': {
+          'email': 'Value of property "email" must be a valid email.'
+        },
+        'property': 'email',
+        'type': 'validate',
+        'value': undefined
+      }]);
   }
 
   @test

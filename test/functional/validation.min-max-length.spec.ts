@@ -28,10 +28,10 @@ class ValidationRequiredSpec {
 
 
   @test
-  async 'validate all pass for empty'() {
+  async 'validate all fail for empty'() {
     let newClass = new ValidStrLength();
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(4);
   }
 
 
@@ -40,7 +40,7 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.minValue = 'hallo';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(3);
   }
 
 
@@ -49,7 +49,7 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.minValue = 'ha';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(4);
     expect(res).to.be.deep.eq(
       [
         {
@@ -59,6 +59,30 @@ class ValidationRequiredSpec {
           'metaType': 'property',
           'property': 'minValue',
           'value': 'ha'
+        },
+        {
+          'constraints': {
+            'maxLength': 'Length of property "maxValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'maxValue',
+          'value': undefined
+        },
+        {
+          'constraints': {
+            'maxLength': 'Length of property "value" must be greeter then 8.'
+          },
+          'metaType': 'property',
+          'property': 'value',
+          'value': undefined
+        },
+        {
+          'constraints': {
+            'minLength': 'Length of property "value" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'value',
+          'value': undefined
         }
       ]
     );
@@ -70,7 +94,7 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.maxValue = 'hal';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(3);
   }
 
   @test
@@ -78,9 +102,17 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.maxValue = 'hallo ballo';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(4);
     expect(res).to.be.deep.eq(
       [
+        {
+          'constraints': {
+            'minLength': 'Length of property "minValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'minValue',
+          'value': undefined
+        },
         {
           'constraints': {
             'maxLength': 'Length of property "maxValue" must be greeter then 4.'
@@ -88,6 +120,22 @@ class ValidationRequiredSpec {
           'metaType': 'property',
           'property': 'maxValue',
           'value': 'hallo ballo'
+        },
+        {
+          'constraints': {
+            'maxLength': 'Length of property "value" must be greeter then 8.'
+          },
+          'metaType': 'property',
+          'property': 'value',
+          'value': undefined
+        },
+        {
+          'constraints': {
+            'minLength': 'Length of property "value" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'value',
+          'value': undefined
         }
       ]
     );
@@ -99,7 +147,7 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.value = 'hallo';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(2);
   }
 
   @test
@@ -107,9 +155,25 @@ class ValidationRequiredSpec {
     let newClass = new ValidStrLength();
     newClass.value = 'hallo ballo';
     let res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(3);
     expect(res).to.be.deep.eq(
       [
+        {
+          'constraints': {
+            'minLength': 'Length of property "minValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'minValue',
+          'value': undefined
+        },
+        {
+          'constraints': {
+            'maxLength': 'Length of property "maxValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'maxValue',
+          'value': undefined
+        },
         {
           'constraints': {
             'maxLength': 'Length of property "value" must be greeter then 8.'
@@ -122,9 +186,25 @@ class ValidationRequiredSpec {
     );
     newClass.value = 'hal';
     res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(3);
     expect(res).to.be.deep.eq(
       [
+        {
+          'constraints': {
+            'minLength': 'Length of property "minValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'minValue',
+          'value': undefined
+        },
+        {
+          'constraints': {
+            'maxLength': 'Length of property "maxValue" must be greeter then 4.'
+          },
+          'metaType': 'property',
+          'property': 'maxValue',
+          'value': undefined
+        },
         {
           'constraints': {
             'minLength': 'Length of property "value" must be greeter then 4.'
@@ -141,7 +221,6 @@ class ValidationRequiredSpec {
   @test
   async 'serialize as json schema'() {
     const res = JsonSchema.serialize(ClassRef.get(ValidStrLength));
-    console.log(inspect(res, false, 10));
     expect(res).to.be.deep.eq({
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
@@ -193,15 +272,12 @@ class ValidationRequiredSpec {
     entry.minValue = 'a12355';
 
     let res = await Validator.validate(entry, ref);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(3);
     entry.minValue = 'emai';
 
     res = await Validator.validate(entry, ref);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(4);
   }
-
-
-
 
 
 }

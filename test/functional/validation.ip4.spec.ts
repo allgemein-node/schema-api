@@ -31,7 +31,7 @@ class ValidationIp4Spec {
   async 'validate object with undefined ip4 property'() {
     const newClass = new ValidIp4();
     let res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(1);
   }
 
   @test

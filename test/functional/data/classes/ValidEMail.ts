@@ -1,4 +1,5 @@
 import {IsEmail} from '../../../../src/decorators/validate/IsEmail';
+import {Required} from '../../../../src';
 
 export class ValidEMail {
 
@@ -14,7 +15,8 @@ export class ValidEMail {
 
 export class ValidEMailRequired {
 
-  @IsEmail({required: true})
+  @Required()
+  @IsEmail()
   mailOtherMessage: string;
 
 }

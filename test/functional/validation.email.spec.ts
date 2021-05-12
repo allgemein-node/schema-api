@@ -13,15 +13,15 @@ class ValidationEmailSpec {
   async 'validate empty object with mail'() {
     const newClass = new ValidEMail();
     let res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(2);
   }
 
   @test
-  async 'validate empty object with emtpy string as mail'() {
+  async 'validate empty object with empty string as mail'() {
     const newClass = new ValidEMail();
     newClass.mail = '';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(2);
     expect(res).to.be.deep.eq(
       [
         {
@@ -31,6 +31,14 @@ class ValidationEmailSpec {
           constraints: {
             'email': 'Value of property "mail" must be a valid email.'
           }
+        },
+        {
+          'constraints': {
+            'email': 'something else should happen for field mailOtherMessage'
+          },
+          'metaType': 'property',
+          'property': 'mailOtherMessage',
+          'value': undefined
         }
       ]
     );
@@ -41,7 +49,7 @@ class ValidationEmailSpec {
     const newClass = new ValidEMail();
     newClass.mail = 'mailaddress';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(2);
     expect(res).to.be.deep.eq(
       [
         {
@@ -51,6 +59,14 @@ class ValidationEmailSpec {
           constraints: {
             'email': 'Value of property "mail" must be a valid email.'
           }
+        },
+        {
+          'constraints': {
+            'email': 'something else should happen for field mailOtherMessage'
+          },
+          'metaType': 'property',
+          'property': 'mailOtherMessage',
+          'value': undefined
         }
       ]
     );
@@ -61,7 +77,7 @@ class ValidationEmailSpec {
     const newClass = new ValidEMail();
     newClass.mail = 'mailaddress@addedd';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(2);
     expect(res).to.be.deep.eq([
         {
           metaType: 'property',
@@ -70,6 +86,14 @@ class ValidationEmailSpec {
           constraints: {
             'email': 'Value of property "mail" must be a valid email.'
           }
+        },
+        {
+          'constraints': {
+            'email': 'something else should happen for field mailOtherMessage'
+          },
+          'metaType': 'property',
+          'property': 'mailOtherMessage',
+          'value': undefined
         }
       ]
     );
@@ -80,7 +104,7 @@ class ValidationEmailSpec {
     const newClass = new ValidEMail();
     newClass.mail = 'mailaddress@addedd.com';
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(1);
   }
 
 
@@ -89,7 +113,7 @@ class ValidationEmailSpec {
     const newClass = new ValidEMailRequired();
     // empty
     let res = await Validator.validate(newClass);
-    expect(res).to.have.length(1);
+    expect(res).to.have.length(2);
     expect(res).to.be.deep.eq([
         {
           metaType: 'property',
@@ -98,11 +122,18 @@ class ValidationEmailSpec {
           constraints: {
             'email': 'Value of property "mailOtherMessage" must be a valid email.'
           }
+        },
+        {
+          'constraints': {
+            'required': 'Property "mailOtherMessage" is required.'
+          },
+          'metaType': 'property',
+          'property': 'mailOtherMessage',
+          'value': undefined
         }
       ]
     );
   }
-
 
 
   @test.skip

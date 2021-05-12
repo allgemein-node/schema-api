@@ -25,7 +25,7 @@ class ValidationRegexSpec {
   async 'validate regex - only string - empty'() {
     let newClass = new ValidRegex();
     const res = await Validator.validate(newClass);
-    expect(res).to.have.length(0);
+    expect(res).to.have.length(1);
   }
 
   @test
