@@ -38,9 +38,9 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
 DefaultValidator.define({
     name: 'regex',
     fn: (value: string, options: IRegexOptions) => {
-      if (isUndefined(value) || isNull(value)) {
-        return true;
-      }
+      // if (isUndefined(value) || isNull(value)) {
+      //   return true;
+      // }
       if (isString(value)) {
         const r = new RegExp(options.pattern, options.flags);
         if (r.test(value)) {

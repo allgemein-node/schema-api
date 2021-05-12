@@ -1,4 +1,4 @@
-import {first, has, isEmpty, isFunction, isString, isUndefined, snakeCase} from 'lodash';
+import {first, has, isEmpty, isFunction, isString, isUndefined, kebabCase, snakeCase} from 'lodash';
 import {ClassUtils, NotYetImplementedError} from '@allgemein/base';
 import {SchemaUtils} from './SchemaUtils';
 import {
@@ -354,7 +354,7 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   id() {
-    return [this.namespace, this.className].map(x => snakeCase(x)).join(XS_ID_SEPARATOR);
+    return [this.namespace, this.className].map(x => kebabCase(x)).join(XS_ID_SEPARATOR);
   }
 
 

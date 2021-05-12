@@ -12,7 +12,8 @@ export class SchemaRef extends AbstractRef implements ISchemaRef {
 
 
   constructor(options: ISchemaOptions = {name: 'default'}) {
-    super(METATYPE_SCHEMA, options.name, null);
+    super(METATYPE_SCHEMA, options.name, null, options.namespace);
+    this.setOptions(options);
   }
 
 
@@ -38,7 +39,7 @@ export class SchemaRef extends AbstractRef implements ISchemaRef {
         (b: IEntityRef) => {
           let schemaCheck = false;
           if (isString(value)) {
-            schemaCheck = b.name === value;
+            schemaCheck = b.name === value || b.getClassRef().name === value;
           } else if (isFunction(value)) {
             schemaCheck = b.getClass() === value;
           }

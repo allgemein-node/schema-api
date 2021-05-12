@@ -2,14 +2,14 @@ import {IEntityRef} from '../../api/IEntityRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
-import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY, XS_ID_SEPARATOR} from '../Constants';
+import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_ENTITY, XS_ID_SEPARATOR} from '../Constants';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {IClassRef} from '../../api/IClassRef';
-import {ClassRef} from '../ClassRef';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
 import {ISchemaRef} from '../../api/ISchemaRef';
+import {snakeCase} from 'lodash';
 
 export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
@@ -55,6 +55,14 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
   isOf(instance: any): boolean {
     return this.getClassRef().isOf(instance);
+  }
+
+  get storingName() {
+    let name = this.getOptions('name');
+    if (!name) {
+      name = this.name;
+    }
+    return snakeCase(name);
   }
 
 

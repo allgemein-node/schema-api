@@ -5,6 +5,7 @@ import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
 import {ISchemaRef} from './ISchemaRef';
 import {METADATA_TYPE} from '../lib/Constants';
+import {IJsonSchemaSerializeOptions} from '../lib/json-schema/IJsonSchemaSerializeOptions';
 
 
 export function isLookupRegistry(x: any): x is ILookupRegistry {

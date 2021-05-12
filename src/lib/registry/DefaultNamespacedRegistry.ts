@@ -79,14 +79,19 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     }
 
     if (context === METATYPE_PROPERTY) {
-      const find = this.find(context, (c: IPropertyRef) => c.getClassRef().getClass() === options.target && c.name === options.name);
+      const find = this.find(context, (c: IPropertyRef) =>
+        c.getClassRef().getClass() === options.target &&
+        c.name === options.propertyName
+      );
       if (find) {
         // update
       } else {
         this.create(context, options);
       }
     } else if (context === METATYPE_ENTITY) {
-      const find = this.find(context, (c: IEntityRef) => c.getClassRef().getClass() === options.target);
+      const find = this.find(context, (c: IEntityRef) =>
+        c.getClassRef().getClass() === options.target
+      );
       if (!find) {
         this.create(context, options);
       }
@@ -217,7 +222,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     }
     let lookupFn = (x: IEntityRef) => x.getClassRef().getClass() === lookup;
     if (isString(fn)) {
-      lookupFn = (x: IEntityRef) => x.getClassRef().name === lookup;
+      lookupFn = (x: IEntityRef) => x.getClassRef().name === lookup || x.name === lookup;
     }
     const entityRefExists = this.find<IEntityRef>(METATYPE_ENTITY, lookupFn);
     if (entityRefExists) {
@@ -361,23 +366,6 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     return metadataOptions;
   }
 
-  // /**
-  //  * Create default entity reference for passed reference. The options are taken from metadata registry.
-  //  * Also the schema is looked up.
-  //  *
-  //  * @param options
-  //  */
-  // createEntityForRef(ref: IClassRef | IEntityRef): DefaultEntityRef {
-  //
-  //   defaults(metaEntityOption, {
-  //     target: ref.getClass(),
-  //     name: ref.getClass().name
-  //   });
-  //   const entityRef = this.createEntityForOptions(metaEntityOption);
-  //
-  //   return entityRef;
-  // }
-
 
   getPropertyRefsFor(fn: string | object | Function): IPropertyRef[] {
     const clsName = ClassRef.getClassName(fn);
@@ -436,6 +424,13 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
   getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return ClassRef.get(<string | Function>object, this.namespace, type === METATYPE_PROPERTY);
+  }
+
+  reset() {
+    super.reset();
+    MetadataRegistry.$().removeListener(C_EVENT_ADD, this.onAdd.bind(this));
+    MetadataRegistry.$().removeListener(C_EVENT_REMOVE, this.onRemove.bind(this));
+    MetadataRegistry.$().removeListener(C_EVENT_UPDATE, this.onUpdate.bind(this));
   }
 
 

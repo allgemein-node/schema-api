@@ -1,11 +1,11 @@
-import {assign, get, isNull, isUndefined} from 'lodash';
+import {assign, isNull, isString, isUndefined} from 'lodash';
 
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
 export interface IIsEmailOptions extends IValidateOptions {
-  required?: boolean;
+  // required?: boolean;
 }
 
 export function IsEmail(options: IIsEmailOptions = null) {
@@ -32,10 +32,10 @@ export const MAIL_REGEX = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 DefaultValidator.define({
     name: 'email',
     fn: (value: string, options: IIsEmailOptions) => {
-      if (isUndefined(value) || isNull(value)) {
-        if (!get(options, 'required', false)) {
-          return true;
-        }
+      if (isUndefined(value) || isNull(value) || !isString(value)) {
+        // if (!get(options, 'required', false)) {
+        //   return true;
+        // }
         return false;
       }
       return MAIL_REGEX.test(value);

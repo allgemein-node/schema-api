@@ -1,11 +1,11 @@
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
-import {assign, get, isNull, isUndefined} from 'lodash';
+import {assign, isNull, isString, isUndefined} from 'lodash';
 
 
 export interface IIp6Options extends IValidateOptions {
-  required?: boolean;
+  // required?: boolean;
 }
 
 export function Ip6(options?: IIp6Options) {
@@ -33,10 +33,10 @@ export const IP6_REGEX = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F
 DefaultValidator.define({
     name: 'ip6',
     fn: (value: string, options?: IIp6Options) => {
-      if (isUndefined(value) || isNull(value)) {
-        if (!get(options, 'required', false)) {
-          return true;
-        }
+      if (isUndefined(value) || isNull(value) || !isString(value)) {
+        // if (!get(options, 'required', false)) {
+        //   return true;
+        // }
         return false;
       }
       return IP6_REGEX.test(value);

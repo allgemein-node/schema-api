@@ -4,7 +4,14 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
-import {DEFAULT_NAMESPACE, IMinMax, JS_DATA_TYPES, METADATA_TYPE, METATYPE_PROPERTY} from '../Constants';
+import {
+  DEFAULT_NAMESPACE,
+  IMinMax,
+  JS_DATA_TYPES,
+  METADATA_TYPE,
+  METATYPE_PROPERTY,
+  XS_ID_SEPARATOR
+} from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {ClassRef} from '../ClassRef';
 import {NotYetImplementedError} from '@allgemein/base/browser';
@@ -43,8 +50,9 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     }
 
     const jsType = sourceType.toLowerCase();
+    const [baseType, variant] = jsType.split(':');
 
-    switch (jsType) {
+    switch (baseType) {
       case 'datetime':
       case 'timestamp':
       case 'date':
@@ -109,7 +117,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
 
   get(instance: any): any {
-    return get(instance, this.name);
+    return get(instance, this.name, null);
   }
 
 
@@ -127,7 +135,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
    * TODO
    */
   id(): string {
-    return '';
+    return [this.getClassRef().id(), this.name].join(XS_ID_SEPARATOR);
   }
 
   /**
@@ -165,8 +173,8 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
         this.targetRef = type;
         this.reference = true;
       } else if (isFunction(type) ||
-        (isString(type) && !JS_DATA_TYPES.includes(<any>type))) {
-        // try get existing
+        (isString(type) && !JS_DATA_TYPES.find(t => (new RegExp('^' + t + ':?')).test((<string>type).toLowerCase())))) {
+        // try get existing class
         const exists = ClassRef.get(type, this.getClassRef().getNamespace());
         if (exists) {
           this.targetRef = exists;

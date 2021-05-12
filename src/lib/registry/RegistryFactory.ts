@@ -3,7 +3,7 @@
  * We want use one api for use and accessing objects. The registry handle for a namespace can be
  * registered here.
  */
-import {isRegExp, isString, keys, remove} from 'lodash';
+import {has, isRegExp, isString, keys} from 'lodash';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {ClassType, DEFAULT_NAMESPACE, METATYPE_ENTITY} from '../Constants';
 import {DefaultNamespacedRegistry} from './DefaultNamespacedRegistry';
@@ -28,7 +28,7 @@ export class RegistryFactory {
    *
    * @param namespace
    */
-  static get(namespace: string = DEFAULT_NAMESPACE) {
+  static get<T extends ILookupRegistry>(namespace: string = DEFAULT_NAMESPACE): T {
     if (!this.$handles[namespace]) {
       for (const type of this.$types) {
         if (isString(type.pattern)) {
@@ -53,7 +53,7 @@ export class RegistryFactory {
         this.$handles[namespace].prepare();
       }
     }
-    return this.$handles[namespace];
+    return this.$handles[namespace] as T;
   }
 
   /**
@@ -62,8 +62,12 @@ export class RegistryFactory {
    * @param namespace
    */
   static remove(namespace: string) {
+    if (has(this.$handles, namespace)) {
+      this.get(namespace).reset();
+    }
     delete this.$handles[namespace];
   }
+
 
   /**
    * Register a special registry for a given namespace or pattern, remove previous if existed
@@ -72,11 +76,16 @@ export class RegistryFactory {
    * @param registry
    */
   static register(namespace: string | RegExp, registryClass: ClassType<ILookupRegistry>) {
-    remove(this.$types, x => x.pattern === namespace);
-    this.$types.unshift({
-      pattern: namespace,
-      registryClass: registryClass
-    });
+    const existsAlready = this.$types.find(x =>
+      isString(x.pattern) && isString(namespace) ? x.pattern === namespace :
+        isRegExp(x.pattern) && isRegExp(namespace) ? x.pattern.source === namespace.source :
+          x.pattern === namespace);
+    if (!existsAlready) {
+      this.$types.unshift({
+        pattern: namespace,
+        registryClass: registryClass
+      });
+    }
   }
 
   /**
@@ -103,9 +112,8 @@ export class RegistryFactory {
   }
 
 
-  static reset(){
-    for(const ns of this.getNamespaces()){
-      this.get(ns).reset();
+  static reset() {
+    for (const ns of this.getNamespaces()) {
       this.remove(ns);
     }
   }

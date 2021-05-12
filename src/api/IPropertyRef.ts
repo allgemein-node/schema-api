@@ -16,7 +16,7 @@ export interface IPropertyRef extends IBaseRef {
 
   isReference(): boolean;
 
-  getType(): string;
+  getType(): string | Function;
 
   /**
    * get class ref of the property

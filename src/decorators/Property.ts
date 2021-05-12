@@ -35,21 +35,22 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
     options.target = source.constructor;
     options.propertyName = propertyName;
 
-    if (!options.type) {
-      const reflectMetadataType = Reflect && Reflect.getMetadata ? Reflect.getMetadata(REFLECT_DESIGN_TYPE, source, propertyName) : undefined;
-      if (reflectMetadataType) {
-        const className = ClassUtils.getClassName(reflectMetadataType);
-        if (JS_PRIMATIVE_TYPES.includes(className.toLowerCase() as any)) {
-          options.type = className.toLowerCase();
-        } else if (className === Array.name) {
-          options.type = 'object';
-          options.cardinality = 0;
-        } else {
-          options.type = reflectMetadataType;
-        }
+    const reflectMetadataType = Reflect && Reflect.getMetadata ? Reflect.getMetadata(REFLECT_DESIGN_TYPE, source, propertyName) : undefined;
+
+    if (reflectMetadataType) {
+      const className = ClassUtils.getClassName(reflectMetadataType);
+      if (JS_PRIMATIVE_TYPES.includes(className.toLowerCase() as any)) {
+        options.type = options.type ? options.type : className.toLowerCase();
+      } else if (className === Array.name) {
+        options.type = options.type ? options.type : 'object';
+        options.cardinality = 0;
       } else {
-        options.type = T_STRING;
+        options.type = options.type ? options.type : reflectMetadataType;
       }
+    }
+
+    if(!options.type){
+      options.type = T_STRING;
     }
 
     MetadataRegistry.$().add(METATYPE_PROPERTY, options);

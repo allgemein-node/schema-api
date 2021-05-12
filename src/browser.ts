@@ -7,6 +7,7 @@ export {ILookupRegistry} from './api/ILookupRegistry';
 export {IPropertyExtentions} from './api/IPropertyExtentions';
 export {IPropertyRef} from './api/IPropertyRef';
 export {ISchemaRef} from './api/ISchemaRef';
+export {IJsonSchema} from './api/IJsonSchema';
 
 export {Entity} from './decorators/Entity';
 export {Property} from './decorators/Property';

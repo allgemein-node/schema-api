@@ -1,11 +1,11 @@
-import {assign, get, isNull, isUndefined} from 'lodash';
+import {assign, get, isNull, isUndefined, isString} from 'lodash';
 
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
 export interface IHostnameOptions extends IValidateOptions {
-  required?: boolean;
+  // required?: boolean;
 }
 
 export function Hostname(options?: IHostnameOptions) {
@@ -35,10 +35,10 @@ export const HOSTNAME_RFC1034_REGEX = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[
 DefaultValidator.define({
     name: 'hostname',
     fn: (value: string, options?: IHostnameOptions) => {
-      if (isUndefined(value) || isNull(value)) {
-        if (!get(options, 'required', false)) {
-          return true;
-        }
+      if (isUndefined(value) || isNull(value) || !isString(value)) {
+        // if (!get(options, 'required', false)) {
+        //   return true;
+        // }
         return false;
       }
       return HOSTNAME_RFC952_REGEX.test(value);

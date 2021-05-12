@@ -34,7 +34,7 @@ DefaultValidator.define({
       if (isString(value)) {
         return value.length <= opts.maxLength;
       }
-      return true;
+      return false;
     },
     defaultOptions: {
       message: 'Length of property "%propertyName" must be greeter then %options.maxLength.'

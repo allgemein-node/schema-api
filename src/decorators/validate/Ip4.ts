@@ -1,7 +1,7 @@
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
 import {IValidateOptions} from '../../lib/validation/IValidateOptions';
-import {assign, get, isNull, isUndefined} from 'lodash';
+import {assign, isNull, isString, isUndefined} from 'lodash';
 
 
 export interface IIp4Options extends IValidateOptions {
@@ -33,10 +33,10 @@ export const IP4_REGEX = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){
 DefaultValidator.define({
     name: 'ip4',
     fn: (value: string, options?: IIp4Options) => {
-      if (isUndefined(value) || isNull(value)) {
-        if (!get(options, 'required', false)) {
-          return true;
-        }
+      if (isUndefined(value) || isNull(value) || !isString(value)) {
+        // if (!get(options, 'required', false)) {
+        //   return true;
+        // }
         return false;
       }
       return IP4_REGEX.test(value);

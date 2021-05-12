@@ -1,5 +1,5 @@
 import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
-import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_PROPERTY,} from './Constants';
+import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_PROPERTY, METATYPE_SCHEMA,} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {MetadataRegistry} from './registry/MetadataRegistry';
@@ -55,6 +55,15 @@ export abstract class AbstractRef implements IBaseRef {
         );
         if (!this._cachedOptions) {
           this._cachedOptions = {target: this.getClass(true), propertyName: this.name, namespace: this.getNamespace()};
+          MetadataRegistry.$().addCached(this.metaType, this._cachedOptions);
+        }
+      } else if (this.metaType === METATYPE_SCHEMA) {
+        this._cachedOptions = MetadataRegistry.$().findCached(this.metaType, (x: any) =>
+          x.name === this.name &&
+          x.namespace === this.getNamespace()
+        );
+        if (!this._cachedOptions) {
+          this._cachedOptions = {name: this.name, namespace: this.getNamespace()};
           MetadataRegistry.$().addCached(this.metaType, this._cachedOptions);
         }
       } else {
@@ -147,6 +156,7 @@ export abstract class AbstractRef implements IBaseRef {
     if (!name) {
       name = snakeCase(this.name);
     }
+
     return name;
   }
 
