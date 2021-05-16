@@ -39,7 +39,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * @param ref
    * @return ISchemaRef[]
    */
-  getSchemaRefs(filter?: (x: ISchemaRef) => boolean): ISchemaRef[] {
+  getSchemaRefs<T extends ISchemaRef>(filter?: (x: ISchemaRef) => boolean): (T | ISchemaRef)[] {
     throw new NotSupportedError('');
   }
 
@@ -49,7 +49,8 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * @param ref
    * @return ISchemaRef[]
    */
-  getSchemaRefsFor(ref: IEntityRef | IClassRef): ISchemaRef[] {
+  getSchemaRefsFor<T extends ISchemaRef>(ref: string): T | ISchemaRef;
+  getSchemaRefsFor<T extends ISchemaRef>(ref: string | IEntityRef | IClassRef): T | ISchemaRef | (T | ISchemaRef)[] {
     throw new NotSupportedError('');
   }
 
@@ -58,7 +59,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    *
    * @param filter
    */
-  getEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[] {
+  getEntityRefs<T extends IEntityRef>(filter?: (x: IEntityRef) => boolean): (T | IEntityRef)[] {
     return this.filter(METATYPE_ENTITY, filter);
   }
 
@@ -67,7 +68,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    *
    * @param fn
    */
-  getEntityRefFor(fn: string | object | Function): IEntityRef {
+  getEntityRefFor<T extends IEntityRef>(fn: string | object | Function, skipNsCheck: boolean = true): (T | IEntityRef) {
     throw new NotSupportedError('');
   }
 
@@ -94,8 +95,8 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    *
    * @param filter
    */
-  getPropertyRef(ref: IClassRef | IEntityRef, name: string): IPropertyRef {
-    return this.getPropertyRefs(ref).find(x => snakeCase(x.name) === snakeCase(name));
+  getPropertyRef<T extends IPropertyRef>(ref: IClassRef | IEntityRef, name: string): (T | IPropertyRef) {
+    return this.getPropertyRefs<T>(ref).find(x => snakeCase(x.name) === snakeCase(name));
   }
 
 
@@ -104,12 +105,12 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    *
    * @param ref
    */
-  getPropertyRefs(ref: IClassRef | IEntityRef): IPropertyRef[] {
+  getPropertyRefs<T extends IPropertyRef>(ref: IClassRef | IEntityRef): (T | IPropertyRef)[] {
     throw new NotSupportedError('');
   }
 
 
-  getPropertyRefsFor(fn: string | object | Function): IPropertyRef[] {
+  getPropertyRefsFor<T extends IPropertyRef>(fn: string | object | Function): (T | IPropertyRef)[] {
     throw new NotSupportedError('');
   }
 
@@ -120,7 +121,7 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
 
 
   listEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[] {
-    return this.getEntities(filter);
+    return this.getEntityRefs(filter);
   }
 
 
@@ -166,6 +167,10 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * reset current registry
    */
   reset() {
+    this.clear()
+  }
+
+  clear(){
     LookupRegistry.reset(this.namespace);
   }
 

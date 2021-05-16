@@ -28,6 +28,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
   targetRef: IClassRef;
 
+
   constructor(options: IPropertyOptions = {}) {
     super(METATYPE_PROPERTY, options.propertyName, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
     AnnotationsHelper.merge(this.object, options, this.name);
@@ -73,7 +74,6 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
         break;
 
       case 'boolean':
-
         if (isBoolean(data)) {
           return data;
         } else if (isNumber(data)) {
@@ -104,7 +104,6 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
         }
         break;
 
-
       case 'byte':
       case 'json':
       case 'object':
@@ -128,6 +127,10 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
   getType(): string {
     return this.getOptions('type');
+  }
+
+  isAppended(): boolean {
+    return this.getOptions('appended', false);
   }
 
 

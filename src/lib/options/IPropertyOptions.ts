@@ -5,6 +5,8 @@ export interface IPropertyOptions extends IAbstractOptions {
 
   propertyName?: string;
 
+  appended?: boolean;
+
   cardinality?: number | { min: number, max: number };
 
   format?: string;

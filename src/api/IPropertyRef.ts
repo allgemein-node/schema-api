@@ -1,9 +1,9 @@
-import {IClassRef} from "./IClassRef";
-import {IBaseRef} from "./IBaseRef";
-import {IBuildOptions} from "./IBuildOptions";
-import {METATYPE_CLASS_REF, METATYPE_PROPERTY} from '../lib/Constants';
+import {IClassRef} from './IClassRef';
+import {IBaseRef} from './IBaseRef';
+import {IBuildOptions} from './IBuildOptions';
+import {METATYPE_PROPERTY} from '../lib/Constants';
 
-export function isPropertyRef(x: any){
+export function isPropertyRef(x: any) {
   if (x !== undefined && x && x.metaType === METATYPE_PROPERTY) {
     return true;
   }
@@ -24,6 +24,11 @@ export interface IPropertyRef extends IBaseRef {
   getClassRef(): IClassRef;
 
   getTargetRef(): IClassRef;
+
+  /**
+   * If property is added by an extra class.
+   */
+  isAppended(): boolean;
 
   isCollection(): boolean;
 

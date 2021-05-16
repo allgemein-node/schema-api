@@ -5,7 +5,6 @@ import {LookupRegistry} from '../lib/LookupRegistry';
 import {IClassRef} from './IClassRef';
 import {ISchemaRef} from './ISchemaRef';
 import {METADATA_TYPE} from '../lib/Constants';
-import {IJsonSchemaSerializeOptions} from '../lib/json-schema/IJsonSchemaSerializeOptions';
 
 
 export function isLookupRegistry(x: any): x is ILookupRegistry {
@@ -27,15 +26,23 @@ export interface ILookupRegistry {
 
   prepare?(): void;
 
-  getSchemaRefs(filter?: (x: ISchemaRef) => boolean): ISchemaRef[];
+  reload?(): void;
 
-  getSchemaRefsFor(ref: IEntityRef): ISchemaRef[];
+  getSchemaRefs<T extends ISchemaRef>(filter?: (x: ISchemaRef) => boolean): (T | ISchemaRef)[];
 
-  getEntityRefFor(fn: string | object | Function): IEntityRef;
+  getSchemaRefsFor<T extends ISchemaRef>(fn: string): (T | ISchemaRef);
 
-  getPropertyRefsFor(fn: string | object | Function): IPropertyRef[];
+  getSchemaRefsFor<T extends ISchemaRef>(fn: string | IEntityRef | IClassRef): T | ISchemaRef | (T | ISchemaRef)[];
 
-  getPropertyRef(ref: IClassRef | IEntityRef, name: string): IPropertyRef;
+  getEntityRefFor<T extends IEntityRef>(fn: string | object | Function, skipNsCheck?: boolean): (T | IEntityRef);
+
+  getEntityRefs<T extends IEntityRef>(filter?: (x: IEntityRef) => boolean): (T | IEntityRef)[];
+
+  getPropertyRefsFor<T extends IPropertyRef>(fn: string | object | Function): (T | IPropertyRef)[];
+
+  getPropertyRef<T extends IPropertyRef>(ref: IClassRef | IEntityRef, name: string): (T | IPropertyRef);
+
+  getPropertyRefs<T extends IPropertyRef>(ref: IClassRef | IEntityRef): (T | IPropertyRef)[];
 
   getLookupRegistry(): LookupRegistry;
 
@@ -43,11 +50,8 @@ export interface ILookupRegistry {
 
   listEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[];
 
-  getEntities(filter?: (x: IEntityRef) => boolean): IEntityRef[];
 
   listProperties(filter?: (x: IPropertyRef) => boolean): IPropertyRef[];
-
-  getPropertyRefs(ref: IClassRef | IEntityRef): IPropertyRef[];
 
   getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
 

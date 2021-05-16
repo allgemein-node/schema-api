@@ -10,6 +10,7 @@ import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
 import {ISchemaRef} from '../../api/ISchemaRef';
 import {snakeCase} from 'lodash';
+import {SchemaRef} from '../SchemaRef';
 
 export class DefaultEntityRef extends AbstractRef implements IEntityRef {
 
@@ -21,8 +22,8 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
   }
 
 
-  getSchemaRefs(): ISchemaRef[] {
-    return this.getRegistry().getSchemaRefsFor(this);
+  getSchemaRefs(): SchemaRef | SchemaRef[] {
+    return this.getRegistry().getSchemaRefsFor(this) as any;
   }
 
   getRegistry(): ILookupRegistry {
@@ -53,10 +54,18 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
     return this.getRegistry().getClassRefFor(object, this.metaType);
   }
 
+  /**
+   * Check if an object / instance is of same type like this entity ref (same check as IClassRef.isOf).
+   *
+   * @param instance
+   */
   isOf(instance: any): boolean {
     return this.getClassRef().isOf(instance);
   }
 
+  /**
+   * Return machine compatible name for the entity in snake-case style.
+   */
   get storingName() {
     let name = this.getOptions('name');
     if (!name) {

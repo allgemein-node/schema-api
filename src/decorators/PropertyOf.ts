@@ -1,26 +1,27 @@
 import {isFunction, isString} from 'lodash';
 
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
+import {MetadataRegistry} from '../lib/registry/MetadataRegistry';
+import {METATYPE_PROPERTY} from '../lib/Constants';
 
 
 export function PropertyOf(propertyName: string, entityOrOptions: IPropertyOptions | string | Function, options: IPropertyOptions = null) {
   return function (object: any) {
     if (!options) {
-      options = {propertyName: null, sourceClass: null};
+      options = {};
     }
 
     if (isString(entityOrOptions) || isFunction(entityOrOptions)) {
-      options.sourceClass = entityOrOptions;
+      options.target = entityOrOptions;
     } else {
       options = <IPropertyOptions>entityOrOptions;
     }
 
-    options.propertyClass = object;
+    options.appended = true;
+    options.type = object;
     if (propertyName) {
       options.propertyName = propertyName;
     }
-
-    // const xsDef = EntityRegistry.createProperty(options);
-    // EntityRegistry.register(xsDef);
+    MetadataRegistry.$().add(METATYPE_PROPERTY, options);
   };
 }

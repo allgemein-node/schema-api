@@ -178,9 +178,13 @@ export class ClassRef extends AbstractRef implements IClassRef {
     } else {
       let classRef = null;
       if (namespace === GLOBAL_NAMESPACE) {
-        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.getClass(true) === klass);
+        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF,
+          (c: ClassRef) => c.getClass(true) === klass || (c.isPlaceholder() && c.className === klass.name)
+        );
       } else {
-        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.getClass(true) === klass);
+        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF,
+          (c: ClassRef) => c.getClass(true) === klass || (c.isPlaceholder() && c.className === klass.name)
+        );
       }
       return classRef;
     }

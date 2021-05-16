@@ -1,4 +1,5 @@
 import {METADATA_TYPE} from '../lib/Constants';
+import {ILookupRegistry} from './ILookupRegistry';
 
 
 export interface IBaseRef {
@@ -44,5 +45,15 @@ export interface IBaseRef {
    */
   setOptions(value: any): void;
 
+
+  /**
+   * Return the namespace name.
+   */
+  getNamespace(): string;
+
+  /**
+   * Return the registry.
+   */
+  getRegistry?(): ILookupRegistry;
 
 }
