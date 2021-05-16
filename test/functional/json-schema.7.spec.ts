@@ -431,7 +431,7 @@ class JsonSchemaDraft07SerializationSpec {
     expect(classRefThird.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
 
     classRefs = classRefFirst.getRegistry().filter(METATYPE_CLASS_REF, (x: IClassRef) => x.name === 'Car');
-    expect(classRefs).to.have.length(2);
+    expect(classRefs).to.have.length(1);
 
   }
 

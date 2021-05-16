@@ -4,7 +4,7 @@ import {suite, test} from '@testdeck/mocha';
 import {Entity} from '../../src/decorators/Entity';
 import {Property} from '../../src/decorators/Property';
 import {RegistryFactory} from '../../src/lib/registry/RegistryFactory';
-import {Namespace} from '../../src';
+import {Namespace} from '../../src/decorators/Namespace';
 
 
 @Entity()
@@ -57,11 +57,11 @@ class NamespaceSpec {
   @test
   async 'fails add entity to another namespace registry if namespace is declared'() {
     expect(() => {
-      const ref = RegistryFactory.get('myspace').getEntityRefFor(EntityWithPassedNamespace);
+      const ref = RegistryFactory.get('myspace').getEntityRefFor(EntityWithPassedNamespace, false);
     }).to.throws('namespace for entity is testspace the namespace of this registry is myspace');
 
     expect(() => {
-      const ref = RegistryFactory.get('testspace').getEntityRefFor(EntityWithAnnotatedNamespace);
+      const ref = RegistryFactory.get('testspace').getEntityRefFor(EntityWithAnnotatedNamespace, false);
     }).to.throws('namespace for entity is myspace the namespace of this registry is testspace');
   }
 
