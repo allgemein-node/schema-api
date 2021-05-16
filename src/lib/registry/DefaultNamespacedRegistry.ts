@@ -173,7 +173,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
     if (get(options, 'override', false)) {
       if (get(options, 'onlyDefault', false)) {
-        remove(entry, x => x === git'default');
+        remove(entry, x => x === 'default');
       } else {
         entry = [name];
       }
