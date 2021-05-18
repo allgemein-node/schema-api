@@ -23,6 +23,10 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions {
    */
   forceClassRefCreation?: boolean;
 
+  /**
+   * If set then a new entity ref will be created even if an with same name already exists.
+   */
+  forceEntityRefCreation?: boolean;
 
   /**
    * Is root object an entity.

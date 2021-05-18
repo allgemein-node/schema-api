@@ -414,7 +414,6 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     if (classRef) {
       // a named class ref exists
-
       const clazz = classRef.getClass(true);
       const refOptions: IEntityOptions = {
         name: classRef.name,
@@ -437,11 +436,13 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         entityOptions = refOptions;
         refOptions.metaType = METATYPE_CLASS_REF;
         classRef.setOptions(refOptions);
-        // MetadataRegistry.$().add(metaType, refOptions);
       }
 
       if (metaType === METATYPE_ENTITY) {
-        ret = this.getRegistry().create(metaType, entityOptions);
+        ret = this.getRegistry().find(metaType, (x: IEntityRef) => x.getClassRef() === classRef);
+        if (ret || get(this.options, 'forceEntityRefCreation', false)) {
+          ret = this.getRegistry().create(metaType, entityOptions);
+        }
       } else {
         ret = classRef;
       }
@@ -449,9 +450,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     } else {
       throw new NotYetImplementedError();
     }
-
     return ret;
   }
+
 
   collectAndProcess(data: IJsonSchema7,
                     collectingObject: any,
