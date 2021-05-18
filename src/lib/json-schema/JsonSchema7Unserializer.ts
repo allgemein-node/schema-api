@@ -244,7 +244,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         const ref = await this.parse(dataPointer, parseOptions);
         propOptions.type = ref;
       } else if (dataPointer.type) {
-        await this.onTypes(dataPointer, propOptions, options);
+        await this.onTypes(dataPointer, propOptions, parseOptions);
       }
     } else {
       // boolean
@@ -260,7 +260,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   }
 
 
-  async onTypes(dataPointer: IJsonSchema7, propOptions: any, options: any) {
+  async onTypes(dataPointer: IJsonSchema7, propOptions: IPropertyOptions, options: IParseOptions) {
     const hasProps = this.hasProperties(dataPointer);
     let type = dataPointer.type as string;
     if (isString(type)) {
@@ -283,7 +283,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       case 'object':
         propOptions.type = 'object';
         if (hasProps) {
-          propOptions.type = await this.parse(dataPointer, {isRoot: false});
+          propOptions.type = await this.parse(dataPointer, options);
         }
         break;
       case 'array':
@@ -387,7 +387,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     }
 
     if (!className && options?.isProperty && options.propertyName) {
-      className = upperFirst(camelCase(options.sourceRef.name + options.propertyName));
+      if (get(this.options, 'prependClass', false)) {
+        className = [options.sourceRef.name, options.propertyName].map(x => upperFirst(camelCase(x))).join('');
+      } else {
+        className = upperFirst(camelCase(options.propertyName));
+      }
+
     }
 
     if (className && !classRef) {

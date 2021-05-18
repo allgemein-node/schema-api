@@ -15,7 +15,7 @@ import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
 import {Validator} from '../../src/lib/validation/Validator';
 import '../../src/decorators/validate';
 import {ExtendedObject2} from './data/classes/ExtendedObject2';
-import {Property, RegistryFactory} from '../../src';
+import {IPropertyRef, Property, RegistryFactory} from '../../src';
 import {PlainObject04} from './data/classes/PlainObject04';
 import {isPropertyRef} from '../../src/api/IPropertyRef';
 
@@ -1239,5 +1239,51 @@ class JsonSchemaDraft07SerializationSpec {
     expect(extend.name).to.be.eq('ParseTPlainObject02');
 
   }
+
+
+  @test
+  async 'parse schema without class names'() {
+    const CONFIG_SCHEMA = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'type': 'object',
+      'description': 'Root configuration description for @typexs/base and theirs settings. Configuration of other moduls will be added by defaultsDeep functionality. \nSo base settings can not be overridden, only extending is possible.',
+      'properties': {
+        'app': {
+          'type': 'object',
+          'properties': {
+            'name': {
+              'type': 'string',
+              'description': 'Name of the application. Also used for additional config file name pattern.'
+            },
+            'path': {
+              'type': 'string',
+              'description': 'Path to the application, if not the same as the of the installation.'
+            },
+            'enableShutdownOnUncaughtException': {
+              'type': 'boolean',
+              'description': 'TODO'
+            }
+          }
+        }
+      }
+    };
+
+    const unserialized = await JsonSchema.unserialize(
+      CONFIG_SCHEMA, {className: 'Config', namespace: 'config', rootAsEntity: false});
+    const entries = RegistryFactory.get('config').list(METATYPE_CLASS_REF);
+    expect(entries).to.have.length(2);
+    expect(entries.map((x: IClassRef) => x.name)).to.deep.eq(['Config', 'App']);
+
+    const ref = entries.find(((x: IClassRef) => x.name === 'Config')) as IClassRef;
+    const refProps = ref.getPropertyRefs();
+    expect(refProps).to.have.length(1);
+    expect(refProps[0].isReference()).to.be.true;
+    expect(refProps[0].name).to.be.eq('app');
+    const refRef = refProps[0].getTargetRef();
+    const refRefProps = refRef.getPropertyRefs();
+    expect(refRefProps).to.have.length(3);
+    expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'path', 'enableShutdownOnUncaughtException']);
+  }
+
 
 }

@@ -19,13 +19,18 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions {
   collector?: { type: METADATA_TYPE, key: string, fn: (key: string, data: any, options: IParseOptions) => any }[];
 
   /**
-   * If set then a new class ref will be created even if an with same name already exists
+   * If set then a new class ref will be created even if an with same name already exists.
    */
   forceClassRefCreation?: boolean;
 
 
   /**
-   * is root object an entity
+   * Is root object an entity.
    */
   rootAsEntity?: boolean;
+
+  /**
+   * Prepend class name on object which is a property.
+   */
+  prependClass?: boolean;
 }
