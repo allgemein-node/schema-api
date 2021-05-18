@@ -440,7 +440,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
       if (metaType === METATYPE_ENTITY) {
         ret = this.getRegistry().find(metaType, (x: IEntityRef) => x.getClassRef() === classRef);
-        if (ret || get(this.options, 'forceEntityRefCreation', false)) {
+        if (!ret || get(this.options, 'forceEntityRefCreation', false)) {
           ret = this.getRegistry().create(metaType, entityOptions);
         }
       } else {
