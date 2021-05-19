@@ -8,7 +8,6 @@ import {IClassRef} from '../../api/IClassRef';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
-import {ISchemaRef} from '../../api/ISchemaRef';
 import {snakeCase} from 'lodash';
 import {SchemaRef} from '../SchemaRef';
 

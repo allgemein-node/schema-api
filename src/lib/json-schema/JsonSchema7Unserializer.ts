@@ -2,6 +2,7 @@ import {
   assign,
   camelCase,
   clone,
+  defaults,
   get,
   has,
   isArray,
@@ -30,6 +31,7 @@ import {IParseOptions, PARSE_OPTIONS_KEYS} from './IParseOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {IAbstractOptions} from '../options/IAbstractOptions';
 import {SchemaUtils} from '../SchemaUtils';
+import {IPropertyRef} from '../../api/IPropertyRef';
 
 const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema'];
 
@@ -220,6 +222,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   async parseProperty(classRef: IClassRef | IEntityRef, propertyName: string, data: IJsonSchema7Definition, options: IParseOptions = null) {
     const _classRef = isEntityRef(classRef) ? classRef.getClassRef() : classRef;
 
+    const propRefExits = _classRef.getRegistry().find(METATYPE_PROPERTY, (x: IPropertyRef) => x.getClassRef() === _classRef && x.name === propertyName);
+
     const propOptions: IPropertyOptions = {
       metaType: METATYPE_PROPERTY,
       propertyName: propertyName,
@@ -238,7 +242,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       const dataPointer = data as IJsonSchema7;
       const collectOptions = {};
 
-      this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema'], parseOptions);
+      this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema', '$id'], parseOptions);
       assign(propOptions, collectOptions);
       if (dataPointer.$ref) {
         const ref = await this.parse(dataPointer, parseOptions);
@@ -251,7 +255,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       throw new NotSupportedError('passed boolean value as definition not supported');
     }
 
-    _classRef.getRegistry().create(METATYPE_PROPERTY, propOptions);
+    if (!propRefExits || get(this.options, 'forcePropertyRefCreation', false)) {
+      // remove properties key if exists
+      delete propOptions.properties;
+      _classRef.getRegistry().create(METATYPE_PROPERTY, propOptions);
+    }
+
   }
 
 
@@ -266,7 +275,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     if (isString(type)) {
       type = type.toLowerCase();
     }
-    switch (dataPointer.type) {
+    switch (type) {
       case 'string':
         const res = this.onTypeString(dataPointer);
         assign(propOptions, res);
@@ -435,7 +444,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       } else {
         entityOptions = refOptions;
         refOptions.metaType = METATYPE_CLASS_REF;
-        classRef.setOptions(refOptions);
+        const existingOptions = classRef.getOptions();
+
+        classRef.setOptions(defaults(refOptions, existingOptions));
       }
 
       if (metaType === METATYPE_ENTITY) {

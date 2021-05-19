@@ -47,5 +47,8 @@ export interface IJsonSchemaSerializeOptions {
    */
   keysToSkip?: string[];
 
-
+  /**
+   * By default options of reference properties are removed, to pass them set this to 'false'.
+   */
+  deleteReferenceKeys?: boolean;
 }

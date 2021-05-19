@@ -10,6 +10,8 @@ import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IJsonSchemaSerializeOptions} from './IJsonSchemaSerializeOptions';
 import {DRAFT_07} from './Constants';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
+import {IEntityOptions} from '../options/IEntityOptions';
+import {IPropertyOptions} from '../options/IPropertyOptions';
 
 
 export class JsonSchema7Serializer implements IJsonSchemaSerializer {
@@ -345,13 +347,24 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     return propMeta;
   }
 
-  appendAdditionalOptions(propMeta: any, data: object) {
+  appendAdditionalOptions(propMeta: any, data: IEntityOptions | IPropertyOptions) {
     if (data && keys(data).length > 0) {
+      const metaType = data.metaType;
+      if (metaType === METATYPE_PROPERTY) {
+        if (isClassRef(data.type) || isEntityRef(data.type)) {
+          // if reference ignore adding
+          if (get(this.options, 'deleteReferenceKeys', true)) {
+            return;
+          }
+        }
+      }
       const _keys = keys(data);
+
       for (const k of _keys) {
         if (this.options.keysToSkip.includes(k)) {
           continue;
         }
+
         if (!propMeta[k] || get(this.options, 'allowKeyOverride', false)) {
           propMeta[k] = data[k];
         }
@@ -404,9 +417,14 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
   describeTargetRef(property: IPropertyRef, propMeta: any, mode: 'collection' | 'single') {
     let targetRef: any = property.getTargetRef();
+    if (get(this.options, 'deleteReferenceKeys', true)) {
+      keys(propMeta).map(k => delete propMeta[k]);
+    }
+
     if (targetRef.hasEntityRef()) {
       targetRef = targetRef.getEntityRef();
       if (mode === 'collection') {
+        propMeta.type = 'array';
         propMeta.items = {$ref: '#/definitions/' + targetRef.name};
       } else {
         propMeta.$ref = '#/definitions/' + targetRef.name;
@@ -416,6 +434,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       }
     } else {
       if (mode === 'collection') {
+        propMeta.type = 'array';
         propMeta.items = {$ref: '#/definitions/' + targetRef.name};
       } else {
         propMeta.$ref = '#/definitions/' + targetRef.name;

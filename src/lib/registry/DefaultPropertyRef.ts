@@ -18,6 +18,7 @@ import {NotYetImplementedError} from '@allgemein/base/browser';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
+import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 
 
 export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
@@ -172,8 +173,8 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     if (isUndefined(this.reference)) {
       this.reference = false;
       const type = this.getType();
-      if (!isString(type) && isClassRef(type)) {
-        this.targetRef = type;
+      if (!isString(type) && (isClassRef(type) || isEntityRef(type))) {
+        this.targetRef = isEntityRef(type) ? (type as IEntityRef).getClassRef() : type;
         this.reference = true;
       } else if (isFunction(type) ||
         (isString(type) && !JS_DATA_TYPES.find(t => (new RegExp('^' + t + ':?')).test((<string>type).toLowerCase())))) {
