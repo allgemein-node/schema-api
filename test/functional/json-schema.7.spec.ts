@@ -4,7 +4,7 @@ import {suite, test} from '@testdeck/mocha';
 import {expect} from 'chai';
 import {JsonSchema} from '../../src/lib/json-schema/JsonSchema';
 import {IClassRef, isClassRef} from '../../src/api/IClassRef';
-import {DEFAULT_NAMESPACE, METATYPE_CLASS_REF} from '../../src/lib/Constants';
+import {DEFAULT_NAMESPACE, METATYPE_CLASS_REF, METATYPE_ENTITY, METATYPE_PROPERTY} from '../../src/lib/Constants';
 import {IEntityRef, isEntityRef} from '../../src/api/IEntityRef';
 import {PlainObject} from './data/classes/PlainObject';
 import {ExtendedObject} from './data/classes/ExtendedObject';
@@ -18,6 +18,7 @@ import {ExtendedObject2} from './data/classes/ExtendedObject2';
 import {IPropertyRef, Property, RegistryFactory} from '../../src';
 import {PlainObject04} from './data/classes/PlainObject04';
 import {isPropertyRef} from '../../src/api/IPropertyRef';
+import {inspect} from 'util';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -1246,22 +1247,18 @@ class JsonSchemaDraft07SerializationSpec {
     const CONFIG_SCHEMA = {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       'type': 'object',
-      'description': 'Root configuration description for @typexs/base and theirs settings. Configuration of other moduls will be added by defaultsDeep functionality. \nSo base settings can not be overridden, only extending is possible.',
       'properties': {
         'app': {
           'type': 'object',
           'properties': {
             'name': {
               'type': 'string',
-              'description': 'Name of the application. Also used for additional config file name pattern.'
             },
             'path': {
               'type': 'string',
-              'description': 'Path to the application, if not the same as the of the installation.'
             },
             'enableShutdownOnUncaughtException': {
               'type': 'boolean',
-              'description': 'TODO'
             }
           }
         }
@@ -1285,5 +1282,169 @@ class JsonSchemaDraft07SerializationSpec {
     expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'path', 'enableShutdownOnUncaughtException']);
   }
 
+  @test
+  async 'parse multiple schemas after another extending previous structure'() {
+    const NAMESPACE = 'myspace';
+    const CONFIG_SCHEMA = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'type': 'object',
+      'description': 'hallo',
+      'properties': {
+        'app': {
+          '$id': 'App',
+          'type': 'object',
+          'properties': {
+            'name': {
+              'type': 'string',
+            },
+          }
+        }
+      }
+    };
+
+    // add new property, do not override property
+    const CONFIG_SCHEMA2 = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'type': 'object',
+      'properties': {
+        'app': {
+          'type': 'object',
+          'properties': {
+            'path': {
+              'type': 'string',
+            },
+          }
+        }
+      }
+    };
+
+    // add new property, do not override property
+    const CONFIG_SCHEMA3 = {
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      'type': 'object',
+      'properties': {
+        'server': {
+          'type': 'object',
+          'description': 'server stuff',
+          'properties': {
+            'host': {
+              'type': 'string',
+              'format': 'hostname',
+              'description': 'some hostname'
+            },
+          }
+        }
+      }
+    };
+
+    // -----------------------------------
+    // load schema 1
+    //
+    await JsonSchema.unserialize(CONFIG_SCHEMA, {className: 'Config', namespace: NAMESPACE, rootAsEntity: false});
+    let classRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_CLASS_REF);
+    let entityRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_ENTITY);
+    let propertyRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_PROPERTY);
+    expect(classRefs).to.have.length(2);
+    expect(classRefs.map((x: IClassRef) => x.name)).to.deep.eq(['Config', 'App']);
+    expect(entityRefs).to.have.length(1);
+    expect(entityRefs.map((x: IEntityRef) => x.name)).to.deep.eq(['App']);
+    expect(propertyRefs).to.have.length(2);
+    expect(propertyRefs.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'app']);
+
+    let ref = classRefs.find(((x: IClassRef) => x.name === 'Config')) as IClassRef;
+    let refProps = ref.getPropertyRefs();
+    expect(refProps).to.have.length(1);
+    expect(refProps[0].isReference()).to.be.true;
+    expect(refProps[0].name).to.be.eq('app');
+    let refRef = refProps[0].getTargetRef();
+    let refRefProps = refRef.getPropertyRefs();
+    expect(refRefProps).to.have.length(1);
+    expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name']);
+
+    // -----------------------------------
+    // load schema 2
+    //
+    await JsonSchema.unserialize(CONFIG_SCHEMA2, {className: 'Config', namespace: NAMESPACE, rootAsEntity: false});
+    classRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_CLASS_REF);
+    entityRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_ENTITY);
+    propertyRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_PROPERTY);
+    expect(classRefs).to.have.length(2);
+    expect(classRefs.map((x: IClassRef) => x.name)).to.deep.eq(['Config', 'App']);
+    expect(entityRefs).to.have.length(1);
+    expect(entityRefs.map((x: IEntityRef) => x.name)).to.deep.eq(['App']);
+    expect(propertyRefs).to.have.length(3);
+    expect(propertyRefs.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'app', 'path']);
+
+    ref = classRefs.find(((x: IClassRef) => x.name === 'Config')) as IClassRef;
+    refProps = ref.getPropertyRefs();
+    expect(refProps).to.have.length(1);
+    expect(refProps[0].isReference()).to.be.true;
+    expect(refProps[0].name).to.be.eq('app');
+    refRef = refProps[0].getTargetRef();
+    refRefProps = refRef.getPropertyRefs();
+    expect(refRefProps).to.have.length(2);
+    expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'path']);
+
+
+    // -----------------------------------
+    // load schema 3
+    //
+    await JsonSchema.unserialize(CONFIG_SCHEMA3, {className: 'Config', namespace: NAMESPACE, rootAsEntity: false});
+    classRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_CLASS_REF);
+    entityRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_ENTITY);
+    propertyRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_PROPERTY);
+    expect(classRefs).to.have.length(3);
+    expect(classRefs.map((x: IClassRef) => x.name)).to.deep.eq(['Config', 'App', 'Server']);
+    expect(entityRefs).to.have.length(1);
+    expect(entityRefs.map((x: IEntityRef) => x.name)).to.deep.eq(['App']);
+    expect(propertyRefs).to.have.length(5);
+    expect(propertyRefs.map((x: IPropertyRef) => x.name)).to.deep.eq([
+      'name',
+      'app',
+      'path',
+      'host',
+      'server'
+    ]);
+
+    ref = classRefs.find(((x: IClassRef) => x.name === 'Config')) as IClassRef;
+    refProps = ref.getPropertyRefs();
+    expect(refProps).to.have.length(2);
+    expect(refProps[0].isReference()).to.be.true;
+    expect(refProps[0].name).to.be.eq('app');
+    refRef = refProps[0].getTargetRef();
+    refRefProps = refRef.getPropertyRefs();
+    expect(refRefProps).to.have.length(2);
+    expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'path']);
+
+
+    const res = JsonSchema.serialize(ref);
+    // console.log(inspect(res, false, 10));
+    expect(res).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        Config: {
+          title: 'Config',
+          type: 'object',
+          description: 'hallo',
+          properties: {
+            app: {'$ref': '#/definitions/App'},
+            server: {'$ref': '#/definitions/Server'}
+          }
+        },
+        App: {
+          title: 'App',
+          type: 'object',
+          properties: {name: {type: 'string'}, path: {type: 'string'}}
+        },
+        Server: {
+          title: 'Server',
+          type: 'object',
+          description: 'server stuff',
+          properties: {host: {type: 'string', format: 'hostname', 'description': 'some hostname'}}
+        }
+      },
+      '$ref': '#/definitions/Config'
+    });
+  }
 
 }
