@@ -18,7 +18,6 @@ import {ExtendedObject2} from './data/classes/ExtendedObject2';
 import {IPropertyRef, Property, RegistryFactory} from '../../src';
 import {PlainObject04} from './data/classes/PlainObject04';
 import {isPropertyRef} from '../../src/api/IPropertyRef';
-import {inspect} from 'util';
 
 @suite('functional/json-schema-draft-07')
 class JsonSchemaDraft07SerializationSpec {
@@ -1446,5 +1445,97 @@ class JsonSchemaDraft07SerializationSpec {
       '$ref': '#/definitions/Config'
     });
   }
+
+
+  @test
+  async 'parse schema with cyclic ref'() {
+    const data_x =
+      {
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        definitions: {
+          Car: {
+            title: 'Car',
+            type: 'object',
+            metadata: {type: 'regular'},
+            properties: {
+              id: {
+                type: 'number',
+                metadata: {
+                  propertyName: 'id',
+                  mode: 'regular',
+                  options: {primary: true}
+                },
+                tableType: 'column'
+              },
+              name: {
+                type: 'string',
+                metadata: {propertyName: 'name', mode: 'regular', options: {}},
+                tableType: 'column'
+              },
+              driver: {
+                type: 'array',
+                items: {'$ref': '#/definitions/Driver'},
+                metadata: {
+                  propertyName: 'driver',
+                  isLazy: false,
+                  relationType: 'one-to-many',
+                  options: {}
+                },
+                tableType: 'relation'
+              }
+            }
+          },
+          Driver: {
+            title: 'Driver',
+            type: 'object',
+            metadata: {type: 'regular'},
+            properties: {
+              id: {
+                type: 'number',
+                metadata: {
+                  propertyName: 'id',
+                  mode: 'regular',
+                  options: {primary: true}
+                },
+                tableType: 'column'
+              },
+              firstName: {
+                type: 'string',
+                metadata: {propertyName: 'firstName', mode: 'regular', options: {}},
+                tableType: 'column'
+              },
+              lastName: {
+                type: 'string',
+                metadata: {propertyName: 'lastName', mode: 'regular', options: {}},
+                tableType: 'column'
+              },
+              car: {
+                $ref: '#/definitions/Car',
+                metadata: {
+                  propertyName: 'car',
+                  relationType: 'many-to-one',
+                  isLazy: false,
+                  options: {}
+                },
+                tableType: 'relation'
+              }
+            }
+          }
+        },
+        '$ref': '#/definitions/Car'
+      };
+
+    data_x.definitions['Car2'] = _.cloneDeep(data_x.definitions['Car']);
+    data_x.definitions['Car2'].title = 'Car2';
+    data_x.$ref = '#/definitions/Car2';
+
+    const res = await JsonSchema.unserialize(data_x, {namespace: 'cyclic'});
+    expect(isEntityRef(res)).to.be.true;
+    expect((res as IEntityRef).name).to.be.eq('Car2');
+    const c = RegistryFactory.get('cyclic').list(METATYPE_CLASS_REF);
+    expect(c.map((x: any) => x.name)).to.be.deep.eq(['Car2', 'Driver', 'Car']);
+
+  }
+
 
 }
