@@ -1534,6 +1534,14 @@ class JsonSchemaDraft07SerializationSpec {
     expect((res as IEntityRef).name).to.be.eq('Car2');
     const c = RegistryFactory.get('cyclic').list(METATYPE_CLASS_REF);
     expect(c.map((x: any) => x.name)).to.be.deep.eq(['Car2', 'Driver', 'Car']);
+    const schema = JsonSchema.serialize(res, {
+      deleteReferenceKeys: false, postProcess: (src, dst) => {
+        if (_.has(dst, 'cardinality')) {
+          delete dst.cardinality;
+        }
+      }
+    });
+    expect(schema).to.be.deep.eq(data_x);
 
   }
 
