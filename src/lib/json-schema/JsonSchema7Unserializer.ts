@@ -45,6 +45,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   fetched: { [k: string]: IJsonSchema7 } = {};
 
+  reference: { [k: string]: any } = {};
+
   constructor(opts: IJsonSchemaUnserializeOptions) {
     this.options = opts;
   }
@@ -122,6 +124,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
       if (data.type === 'object') {
         ret = await this.parseTypeObject(data, options);
+        if (options.$ref) {
+          // finish reference if waiting
+          this.reference[options.$ref] = ret;
+          delete options.$ref;
+        }
+
         if (this.hasProperties(data)) {
           await this.parseProperties(ret, data.properties, options);
         }
@@ -131,12 +139,17 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     } else if (data.$ref) {
       // refers
-      const res = await this.followRef(data.$ref, this.data);
-      const opts = clone(options);
-      if (!opts.className) {
-        opts.className = this.getClassNameFromRef(data.$ref);
+      if (has(this.reference, data.$ref)) {
+        ret = this.reference[data.$ref];
+      } else {
+        const res = await this.followRef(data.$ref, this.data);
+        const opts = clone(options);
+        opts.$ref = data.$ref;
+        if (!opts.className) {
+          opts.className = this.getClassNameFromRef(data.$ref);
+        }
+        ret = await this.parse(res, opts);
       }
-      ret = await this.parse(res, opts);
     } else if (data.anyOf && options.isRoot) {
       // loading multi schema
       ret = [];
@@ -307,16 +320,18 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         }
 
         if (dataPointer.items) {
+
           if (isArray(dataPointer.items)) {
             throw new NotSupportedError('tuple values for array is not supported');
           } else if (isObjectLike(dataPointer.items)) {
+            options.asArray = true;
             const items = dataPointer.items as IJsonSchema7;
             if (items.$ref) {
-              propOptions.type = await this.parse(items as IJsonSchema7, {isRoot: false});
+              propOptions.type = await this.parse(items as IJsonSchema7, options);
             } else if (items.type === 'object') {
               propOptions.type = items.type;
               if (this.hasProperties(items)) {
-                propOptions.type = await this.parse(items as IJsonSchema7, {isRoot: false});
+                propOptions.type = await this.parse(items as IJsonSchema7, options);
               }
             } else {
               propOptions.type = items.type;

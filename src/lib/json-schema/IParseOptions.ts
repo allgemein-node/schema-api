@@ -11,6 +11,8 @@ export interface IParseOptions {
   metaType?: METADATA_TYPE;
   sourceRef?: IClassRef;
   ignoreDeclared?: boolean;
+  asArray?: boolean;
+  $ref?: string;
 
 }
 
