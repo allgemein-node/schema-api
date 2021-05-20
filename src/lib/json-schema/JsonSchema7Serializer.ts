@@ -419,6 +419,8 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     let targetRef: any = property.getTargetRef();
     if (get(this.options, 'deleteReferenceKeys', true)) {
       keys(propMeta).map(k => delete propMeta[k]);
+    } else {
+      this.options.keysToSkip.map(x => delete propMeta[x]);
     }
 
     if (targetRef.hasEntityRef()) {
