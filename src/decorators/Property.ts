@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {assign, isFunction, isObjectLike, isString} from 'lodash';
-import {ClassUtils} from '@allgemein/base/browser';
+import {ClassUtils} from '@allgemein/base';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
 import {JS_DATA_TYPES, JS_PRIMATIVE_TYPES, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE, T_STRING} from '../lib/Constants';
 import {MetadataRegistry} from '../lib/registry/MetadataRegistry';

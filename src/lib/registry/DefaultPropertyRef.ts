@@ -14,7 +14,7 @@ import {
 } from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {ClassRef} from '../ClassRef';
-import {NotYetImplementedError} from '@allgemein/base/browser';
+import {NotYetImplementedError} from '@allgemein/base';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';

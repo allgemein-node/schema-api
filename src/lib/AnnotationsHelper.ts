@@ -1,8 +1,7 @@
 import {assign, defaults, filter, get, isArray, isEmpty, isObjectLike, isUndefined, keys, merge} from 'lodash';
 import {ClassRef} from './ClassRef';
 import {MERGE_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY, XS_ANNOTATION_OPTIONS_CACHE} from './Constants';
-import {ClassUtils} from '@allgemein/base';
-import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
+import {ClassUtils, MetadataStorage} from '@allgemein/base';
 import {IPropertyExtentions} from '../api/IPropertyExtentions';
 import {IClassRef} from '../api/IClassRef';
 

@@ -16,7 +16,7 @@ import {IEntityOptions} from './../options/IEntityOptions';
 import {IPropertyOptions} from './../options/IPropertyOptions';
 import {ISchemaOptions} from './../options/ISchemaOptions';
 import {IObjectOptions} from './../options/IObjectOptions';
-import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
+import {MetadataStorage} from '@allgemein/base';
 import {EventEmitter} from 'events';
 import {IAbstractOptions} from '../options/IAbstractOptions';
 import {IAttributeOptions} from '../options/IAttributeOptions';
@@ -89,7 +89,7 @@ export class MetadataRegistry extends EventEmitter {
   }
 
   addCached(context: METADATA_TYPE | string,
-      options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions | IAttributeOptions) {
+            options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions | IAttributeOptions) {
     options.metaType = context;
     this.cached.push(options);
     return options;

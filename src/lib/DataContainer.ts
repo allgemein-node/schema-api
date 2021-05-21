@@ -10,7 +10,7 @@ import {IClassRef} from '../api/IClassRef';
 import {IValidationMessage} from './validation/IValidationMessage';
 import {Validator} from './validation/Validator';
 import {ClassRef} from './ClassRef';
-import {ClassUtils} from '@allgemein/base/browser';
+import {ClassUtils} from '@allgemein/base';
 
 /**
  * Container for validation of object

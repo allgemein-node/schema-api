@@ -42,7 +42,7 @@ import {DefaultEntityRef} from './DefaultEntityRef';
 import {hasClassPropertiesInDefinition, IJsonSchema7} from '../json-schema/JsonSchema7';
 import {ISchemaOptions} from '../options/ISchemaOptions';
 import {IObjectOptions} from '../options/IObjectOptions';
-import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
+import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {JsonSchema} from '../json-schema/JsonSchema';
 import {ISchemaRef} from '../../api/ISchemaRef';
 import {SchemaRef} from '../SchemaRef';

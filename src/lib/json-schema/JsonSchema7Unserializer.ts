@@ -25,7 +25,7 @@ import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_CLASS_REF, METATYPE_ENTITY, M
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {ClassRef} from '../ClassRef';
-import {NotSupportedError, NotYetImplementedError} from '@allgemein/base/browser';
+import {NotSupportedError, NotYetImplementedError} from '@allgemein/base';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
 import {IParseOptions, PARSE_OPTIONS_KEYS} from './IParseOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';

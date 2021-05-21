@@ -1,5 +1,5 @@
 import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy} from 'lodash';
-import {ClassUtils, NotSupportedError} from '@allgemein/base/browser';
+import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {DEFAULT_KEY_TO_SKIP, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE} from '../Constants';
 import {IClassRef, isClassRef} from '../../api/IClassRef';

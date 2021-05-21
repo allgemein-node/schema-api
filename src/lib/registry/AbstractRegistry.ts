@@ -6,7 +6,7 @@ import {IEntityRef} from '../../api/IEntityRef';
 import {IClassRef} from '../../api/IClassRef';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {LookupRegistry} from '../LookupRegistry';
-import {NotSupportedError} from '@allgemein/base/browser';
+import {NotSupportedError} from '@allgemein/base';
 import {ISchemaRef} from '../../api/ISchemaRef';
 
 
@@ -167,10 +167,10 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
    * reset current registry
    */
   reset() {
-    this.clear()
+    this.clear();
   }
 
-  clear(){
+  clear() {
     LookupRegistry.reset(this.namespace);
   }
 

@@ -2,11 +2,9 @@ import {assign, clone, defaults, get, intersection, isArray, isObjectLike, keys,
 
 import {IClassRef} from '../../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
-import {ClassUtils} from '@allgemein/base';
-import {NotYetImplementedError} from '@allgemein/base/browser';
+import {ClassUtils, MetadataStorage, NotYetImplementedError} from '@allgemein/base';
 import {IValidationError} from './IValidationError';
 import {ClassRef} from '../ClassRef';
-import {MetadataStorage} from '@allgemein/base/libs/MetadataStorage';
 import {IPropertyExtentions} from '../../api/IPropertyExtentions';
 import {XS_ANNOTATION_OPTIONS_CACHE} from '../Constants';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
