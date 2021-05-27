@@ -78,15 +78,16 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     });
 
     const ret = this.options.return ? this.options.return : 'default';
-    const refs = this.parse(data, opts);
-    switch (ret) {
-      case 'class-refs':
-        return this.classRefs;
-      case 'entity-refs':
-        return this.classRefs.filter(x => x.hasEntityRef()).map(x => x.getEntityRef());
-      default:
-        return refs;
-    }
+    return this.parse(data, opts).then(refs => {
+      switch (ret) {
+        case 'class-refs':
+          return this.classRefs;
+        case 'entity-refs':
+          return this.classRefs.filter(x => x.hasEntityRef()).map(x => x.getEntityRef());
+        default:
+          return refs;
+      }
+    });
   }
 
   /**
