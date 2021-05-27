@@ -43,4 +43,9 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions {
    * Prepend class name on object which is a property.
    */
   prependClass?: boolean;
+
+  /**
+   * Return found entity refs or class refs.
+   */
+  return?: 'entity-refs' | 'class-refs' | 'default';
 }

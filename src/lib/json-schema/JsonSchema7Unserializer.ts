@@ -21,7 +21,16 @@ import {DRAFT_07} from './Constants';
 import {IJsonSchemaUnserializer} from './IJsonSchemaUnserializer';
 import {JsonSchema} from './JsonSchema';
 import {RegistryFactory} from '../registry/RegistryFactory';
-import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_CLASS_REF, METATYPE_ENTITY, METATYPE_PROPERTY} from '../Constants';
+import {
+  DEFAULT_NAMESPACE,
+  METADATA_TYPE,
+  METATYPE_CLASS_REF,
+  METATYPE_ENTITY,
+  METATYPE_PROPERTY,
+  T_ARRAY,
+  T_OBJECT,
+  T_STRING
+} from '../Constants';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {ClassRef} from '../ClassRef';
@@ -42,6 +51,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   options: IJsonSchemaUnserializeOptions;
 
   data: IJsonSchema7;
+
+  classRefs: IClassRef[] = [];
 
   fetched: { [k: string]: IJsonSchema7 } = {};
 
@@ -65,7 +76,17 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         opts[x] = this.options[x];
       }
     });
-    return this.parse(data, opts);
+
+    const ret = this.options.return ? this.options.return : 'default';
+    const refs = this.parse(data, opts);
+    switch (ret) {
+      case 'class-refs':
+        return this.classRefs;
+      case 'entity-refs':
+        return this.classRefs.filter(x => x.hasEntityRef()).map(x => x.getEntityRef());
+      default:
+        return refs;
+    }
   }
 
   /**
@@ -122,7 +143,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     let ret: IClassRef | IEntityRef | (IClassRef | IEntityRef)[] = null;
     if (data.type) {
 
-      if (data.type === 'object') {
+      if (data.type === T_OBJECT) {
         ret = await this.parseTypeObject(data, options);
         if (options.$ref) {
           // finish reference if waiting
@@ -241,7 +262,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       metaType: METATYPE_PROPERTY,
       propertyName: propertyName,
       target: _classRef.getClass(true),
-      type: 'object' // default type is object
+      type: T_OBJECT // default type is object
     };
 
     if (isObjectLike(data)) {
@@ -289,7 +310,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       type = type.toLowerCase();
     }
     switch (type) {
-      case 'string':
+      case T_STRING:
         const res = this.onTypeString(dataPointer);
         assign(propOptions, res);
         break;
@@ -302,13 +323,13 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       case 'number':
         propOptions.type = 'number';
         break;
-      case 'object':
-        propOptions.type = 'object';
+      case T_OBJECT:
+        propOptions.type = T_OBJECT;
         if (hasProps) {
           propOptions.type = await this.parse(dataPointer, options);
         }
         break;
-      case 'array':
+      case T_ARRAY:
         // check items
         if (dataPointer.minItems || dataPointer.maxItems) {
           propOptions.cardinality = {
@@ -328,7 +349,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
             const items = dataPointer.items as IJsonSchema7;
             if (items.$ref) {
               propOptions.type = await this.parse(items as IJsonSchema7, options);
-            } else if (items.type === 'object') {
+            } else if (items.type === T_OBJECT) {
               propOptions.type = items.type;
               if (this.hasProperties(items)) {
                 propOptions.type = await this.parse(items as IJsonSchema7, options);
@@ -347,7 +368,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   onTypeString(dataPointer: any) {
     const propOptions: any = {};
-    propOptions.type = 'string';
+    propOptions.type = T_STRING;
     // or date check format
     if (dataPointer.format) {
       propOptions.format = dataPointer.format;
@@ -438,6 +459,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     if (classRef) {
       // a named class ref exists
+      if (!this.classRefs.find(x => x === classRef)) {
+        this.classRefs.push(classRef);
+      }
       const clazz = classRef.getClass(true);
       const refOptions: IEntityOptions = {
         name: classRef.name,

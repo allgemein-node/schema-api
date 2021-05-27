@@ -9,7 +9,7 @@ import {
   IMinMax,
   JS_DATA_TYPES,
   METADATA_TYPE,
-  METATYPE_PROPERTY,
+  METATYPE_PROPERTY, T_ARRAY, T_OBJECT, T_STRING,
   XS_ID_SEPARATOR
 } from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
@@ -62,7 +62,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
       case 'time':
       case 'text':
-      case 'string':
+      case T_STRING:
         if (isString(data)) {
           return data;
         } else if (isArray(data) && data.length === 1) {
@@ -107,8 +107,8 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
 
       case 'byte':
       case 'json':
-      case 'object':
-      case 'array':
+      case T_OBJECT:
+      case T_ARRAY:
         return data;
     }
 
