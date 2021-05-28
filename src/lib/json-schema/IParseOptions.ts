@@ -13,6 +13,7 @@ export interface IParseOptions {
   ignoreDeclared?: boolean;
   asArray?: boolean;
   $ref?: string;
+  isPattern?: boolean;
 
 }
 

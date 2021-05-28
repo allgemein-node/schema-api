@@ -7,7 +7,7 @@ import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {
   DEFAULT_NAMESPACE,
   IMinMax,
-  JS_DATA_TYPES,
+  JS_DATA_TYPES, K_PATTERN_PROPERTY,
   METADATA_TYPE,
   METATYPE_PROPERTY, T_ARRAY, T_OBJECT, T_STRING,
   XS_ID_SEPARATOR
@@ -28,7 +28,6 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
   reference: boolean = undefined;
 
   targetRef: IClassRef;
-
 
   constructor(options: IPropertyOptions = {}) {
     super(METATYPE_PROPERTY, options.propertyName, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
@@ -155,10 +154,17 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
   }
 
   /**
-   * TODO
+   * Return if is identifier
    */
   isIdentifier(): boolean {
-    return false;
+    return this.getOptions('identifier', false);
+  }
+
+  /**
+   * Return if is a pattern property
+   */
+  isPattern(): boolean {
+    return this.getOptions(K_PATTERN_PROPERTY, false);
   }
 
   /**

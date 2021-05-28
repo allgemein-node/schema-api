@@ -1,7 +1,15 @@
 import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
-import {DEFAULT_KEY_TO_SKIP, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE, T_ARRAY, T_OBJECT, T_STRING} from '../Constants';
+import {
+  DEFAULT_KEY_TO_SKIP,
+  K_PATTERN_PROPERTY,
+  METATYPE_PROPERTY,
+  REFLECT_DESIGN_TYPE,
+  T_ARRAY,
+  T_OBJECT,
+  T_STRING
+} from '../Constants';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {SchemaUtils} from '../SchemaUtils';
 import {IPropertyRef} from '../../api/IPropertyRef';
@@ -132,7 +140,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     const rootProps = this.describePropertiesForRef(klass.getClassRef());
-    root.properties = rootProps;
+    this.appendProperties(root, rootProps);
 
     const proto = klass.getClassRef().getExtend();
     if (proto) {
@@ -152,7 +160,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     const rootProps = this.describePropertiesForRef(klass);
-    root.properties = rootProps;
+    this.appendProperties(root, rootProps);
 
     const proto = klass.getExtend();
     if (proto) {
@@ -167,7 +175,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     if (!this.data.definitions[inheritedClassName]) {
       const inheritedClass = this.getOrCreateRoot(inheritedClassName, proto);
       const props = this.describePropertiesForRef(proto);
-      inheritedClass.properties = props;
+      this.appendProperties(inheritedClass, props);
     }
   }
 
@@ -181,7 +189,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     const rootProps = this.describePropertiesForFunction(klass);
-    root.properties = rootProps;
+    this.appendProperties(root, rootProps);
 
     const proto = SchemaUtils.getInherited(klass);
     if (proto) {
@@ -190,10 +198,26 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       if (this.data && !this.data.definitions[inheritedClassName]) {
         const inheritedClass = this.getOrCreateRoot(inheritedClassName, proto);
         const props = this.describePropertiesForFunction(proto);
-        inheritedClass.properties = props;
+        this.appendProperties(inheritedClass, props);
       }
     }
     return root;
+  }
+
+  appendProperties(data: any, properties: { [k: string]: IJsonSchema7Definition }) {
+    data.properties = {};
+    for (const k of keys(properties)) {
+      const p = properties[k];
+      if (p[K_PATTERN_PROPERTY]) {
+        if (!data.patternProperties) {
+          data.patternProperties = {};
+        }
+        data.patternProperties[k] = p;
+      } else {
+        data.properties[k] = p;
+      }
+      delete p[K_PATTERN_PROPERTY];
+    }
   }
 
 
@@ -340,12 +364,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     this.propertyPostproces(propMeta);
-
     const data = MetadataRegistry.$().find(METATYPE_PROPERTY, (x: any) => x.target === clazz && x.propertyName === propertyName);
     this.appendAdditionalOptions(propMeta, data);
-
     return propMeta;
   }
+
 
   appendAdditionalOptions(propMeta: any, data: IEntityOptions | IPropertyOptions) {
     if (data && keys(data).length > 0) {
@@ -408,6 +431,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
     const data = property.getOptions();
     this.appendAdditionalOptions(propMeta, data);
+    // pass data pattern property for later correct selection
+    if (data[K_PATTERN_PROPERTY]) {
+      (propMeta as any)[K_PATTERN_PROPERTY]= true;
+    }
     if (this.options.postProcess) {
       this.options.postProcess(property, propMeta, this);
     }

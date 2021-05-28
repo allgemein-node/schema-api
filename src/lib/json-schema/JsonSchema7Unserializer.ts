@@ -22,7 +22,7 @@ import {IJsonSchemaUnserializer} from './IJsonSchemaUnserializer';
 import {JsonSchema} from './JsonSchema';
 import {RegistryFactory} from '../registry/RegistryFactory';
 import {
-  DEFAULT_NAMESPACE,
+  DEFAULT_NAMESPACE, K_PATTERN_PROPERTY,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
@@ -42,7 +42,7 @@ import {IAbstractOptions} from '../options/IAbstractOptions';
 import {SchemaUtils} from '../SchemaUtils';
 import {IPropertyRef} from '../../api/IPropertyRef';
 
-const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema'];
+const skipKeys = ['$id', 'id', 'title', 'type', 'properties', 'allOf', 'anyOf', '$schema', 'patternProperties'];
 
 export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
@@ -155,6 +155,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         if (this.hasProperties(data)) {
           await this.parseProperties(ret, data.properties, options);
         }
+        if (this.hasPatternProperties(data)) {
+          options.isPattern = true;
+          await this.parseProperties(ret, data.patternProperties, options);
+        }
       } else {
         throw new Error('type is not supported at this place');
       }
@@ -263,8 +267,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       metaType: METATYPE_PROPERTY,
       propertyName: propertyName,
       target: _classRef.getClass(true),
-      type: T_OBJECT // default type is object
+      // default type is object
+      type: T_OBJECT,
     };
+    if (options.isPattern) {
+      propOptions[K_PATTERN_PROPERTY] = true;
+    }
 
     if (isObjectLike(data)) {
       const parseOptions: IParseOptions = {
@@ -272,7 +280,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         sourceRef: _classRef,
         propertyName: propertyName,
         isRoot: false,
-        metaType: 'property'
+        metaType: 'property',
+        // isPattern: options.isPattern ? true : false
       };
       const dataPointer = data as IJsonSchema7;
       const collectOptions = {};
@@ -282,6 +291,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       if (dataPointer.$ref) {
         const ref = await this.parse(dataPointer, parseOptions);
         propOptions.type = ref;
+        if (options.isPattern) {
+          propOptions[K_PATTERN_PROPERTY] = true;
+        }
       } else if (dataPointer.type) {
         await this.onTypes(dataPointer, propOptions, parseOptions);
       }
@@ -303,9 +315,11 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     return has(datapointer, 'properties');
   }
 
+  hasPatternProperties(datapointer: any) {
+    return has(datapointer, 'patternProperties');
+  }
 
   async onTypes(dataPointer: IJsonSchema7, propOptions: IPropertyOptions, options: IParseOptions) {
-    const hasProps = this.hasProperties(dataPointer);
     let type = dataPointer.type as string;
     if (isString(type)) {
       type = type.toLowerCase();
@@ -326,7 +340,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         break;
       case T_OBJECT:
         propOptions.type = T_OBJECT;
-        if (hasProps) {
+        if (this.hasProperties(dataPointer) || this.hasPatternProperties(dataPointer)) {
           propOptions.type = await this.parse(dataPointer, options);
         }
         break;
@@ -352,11 +366,14 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
               propOptions.type = await this.parse(items as IJsonSchema7, options);
             } else if (items.type === T_OBJECT) {
               propOptions.type = items.type;
-              if (this.hasProperties(items)) {
+              if (this.hasProperties(items) || this.hasPatternProperties(items)) {
                 propOptions.type = await this.parse(items as IJsonSchema7, options);
               }
             } else {
               propOptions.type = items.type;
+            }
+            if (options.isPattern) {
+              propOptions[K_PATTERN_PROPERTY] = true;
             }
           }
         }

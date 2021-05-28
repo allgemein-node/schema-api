@@ -1,3 +1,4 @@
+import exp = require('constants');
 
 export const DEFAULT_NAMESPACE = 'default';
 export const GLOBAL_NAMESPACE = '__global__';
@@ -100,6 +101,8 @@ export const __NS__ = '__NS__';
 export const OPT_CREAT_AND_COPY = 'createAndCopy';
 
 export const STATE_KEY = '$state';
+
+export const K_PATTERN_PROPERTY = 'patternProperty';
 
 export type CLASS_TYPE = Function | ClassType<any>;
 export type MERGE_TYPE = 'default' | 'assign' | 'merge';

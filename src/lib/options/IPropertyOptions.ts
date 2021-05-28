@@ -22,4 +22,9 @@ export interface IPropertyOptions extends IAbstractOptions {
    * Generate automatically values for identifier
    */
   generated?: boolean;
+
+  /**
+   * Mark if property is a pattern property
+   */
+  pattern?: boolean;
 }

@@ -12,7 +12,15 @@ export function isPropertyRef(x: any) {
 
 export interface IPropertyRef extends IBaseRef {
 
+  /**
+   * Return if is identifier
+   */
   isIdentifier(): boolean;
+
+  /**
+   * Return if property is a pattern property
+   */
+  isPattern(): boolean;
 
   isReference(): boolean;
 

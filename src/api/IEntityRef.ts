@@ -6,6 +6,8 @@ import {ISchemaRef} from './ISchemaRef';
 
 // import {IEntityRefMetadata} from "./metadata/IEntityRefMetadata";
 
+
+
 export function isEntityRef(x: any): x is IEntityRef {
   return (x as IEntityRef)?.metaType === 'entity';
 }
