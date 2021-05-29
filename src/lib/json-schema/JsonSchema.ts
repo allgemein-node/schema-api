@@ -52,6 +52,7 @@ export class JsonSchema {
     return null;
   }
 
+
   static serialize(klass: IClassRef | IEntityRef | Function | object, options?: IJsonSchemaSerializeOptions) {
     const serializer = JsonSchema.getSerializer(options);
     return serializer.serialize(klass);
