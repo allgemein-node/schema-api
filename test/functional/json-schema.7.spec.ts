@@ -867,6 +867,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$ref': '#/definitions/PrimativeClass',
       'definitions': {
         'PrimativeClass': {
+          '$id': 'PrimativeClass',
           'type': 'object',
           'title': 'PrimativeClass',
           'properties': {
@@ -959,6 +960,7 @@ class JsonSchemaDraft07SerializationSpec {
   async 'parse json schema with validation settings and additional options'() {
     const json: IJsonSchema7 & any = {
       $schema: 'http://json-schema.org/draft-07/schema#',
+      '$id': 'PersonDataReg',
       type: 'object',
       title: 'PersonDataReg',
       properties: {
@@ -1013,6 +1015,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
         PersonDataReg: {
+          '$id': 'PersonDataReg',
           title: 'PersonDataReg',
           type: 'object',
           properties: {
@@ -1323,6 +1326,7 @@ class JsonSchemaDraft07SerializationSpec {
       'type': 'object',
       'properties': {
         'server': {
+          '$id': 'App',
           'type': 'object',
           'description': 'server stuff',
           'properties': {
@@ -1394,8 +1398,8 @@ class JsonSchemaDraft07SerializationSpec {
     propertyRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_PROPERTY);
     expect(classRefs).to.have.length(3);
     expect(classRefs.map((x: IClassRef) => x.name)).to.deep.eq(['Config', 'App', 'Server']);
-    expect(entityRefs).to.have.length(1);
-    expect(entityRefs.map((x: IEntityRef) => x.name)).to.deep.eq(['App']);
+    expect(entityRefs).to.have.length(2);
+    expect(entityRefs.map((x: IEntityRef) => x.name)).to.deep.eq(['App', 'Server']);
     expect(propertyRefs).to.have.length(5);
     expect(propertyRefs.map((x: IPropertyRef) => x.name)).to.deep.eq([
       'name',
@@ -1431,11 +1435,13 @@ class JsonSchemaDraft07SerializationSpec {
           }
         },
         App: {
+          $id: 'App',
           title: 'App',
           type: 'object',
           properties: {name: {type: 'string'}, path: {type: 'string'}}
         },
         Server: {
+          $id: 'Server',
           title: 'Server',
           type: 'object',
           description: 'server stuff',
@@ -1443,6 +1449,39 @@ class JsonSchemaDraft07SerializationSpec {
         }
       },
       '$ref': '#/definitions/Config'
+    });
+
+
+    const ser = JsonSchema.getSerializer();
+    for (const entity of entityRefs as IEntityRef[]) {
+      ser.serialize(entity);
+    }
+    // console.log(inspect(res, false, 10));
+    expect(ser.getJsonSchema()).to.be.deep.eq({
+      '$schema': 'http://json-schema.org/draft-07/schema#',
+      definitions: {
+        App: {
+          $id: 'App',
+          title: 'App',
+          type: 'object',
+          properties: {name: {type: 'string'}, path: {type: 'string'}}
+        },
+        Server: {
+          $id: 'Server',
+          title: 'Server',
+          type: 'object',
+          description: 'server stuff',
+          properties: {host: {type: 'string', format: 'hostname', 'description': 'some hostname'}}
+        }
+      },
+      'anyOf': [
+        {
+          '$ref': '#/definitions/App'
+        },
+        {
+          '$ref': '#/definitions/Server'
+        }
+      ]
     });
   }
 
@@ -1527,6 +1566,7 @@ class JsonSchemaDraft07SerializationSpec {
 
     data_x.definitions['Car2'] = _.cloneDeep(data_x.definitions['Car']);
     data_x.definitions['Car2'].title = 'Car2';
+    data_x.definitions['Car2'].$id = 'Car2';
     data_x.$ref = '#/definitions/Car2';
 
     const res = await JsonSchema.unserialize(data_x, {namespace: 'cyclic'});

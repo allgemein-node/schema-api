@@ -16,6 +16,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
         ParsePatternProp: {
+          '$id': 'ParsePatternProp',
           title: 'ParsePatternProp',
           type: 'object',
           properties: {
@@ -48,6 +49,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
         ParsePatternObject: {
+          '$id': 'ParsePatternObject',
           title: 'ParsePatternObject',
           type: 'object',
           properties: {
@@ -74,7 +76,7 @@ class JsonSchemaDraft07SerializationSpec {
     const serializer = JsonSchema.getUnserializer();
     let first = await serializer.unserialize(jsonSchema) as IEntityRef;
     const properties = first.getPropertyRefs();
-    const property = properties.filter(x => x.isPattern()).shift()
+    const property = properties.filter(x => x.isPattern()).shift();
     expect(property).to.not.be.null;
     expect(property.isPattern()).to.be.true;
     expect(property.name).to.be.eq('^E_');

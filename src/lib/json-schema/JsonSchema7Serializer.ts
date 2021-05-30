@@ -89,6 +89,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       type: T_OBJECT,
     };
 
+    if (isEntityRef(klass) || (isClassRef(klass) && klass.hasEntityRef())) {
+      // when an entity mark with $id!
+      root.$id = klass.name;
+    }
+
     if (isEntityRef(klass) || isClassRef(klass)) {
       const data = klass.getOptions();
       this.appendAdditionalOptions(root, data);
@@ -131,27 +136,49 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
 
   describeEntityRef(klass: IEntityRef): IJsonSchema7 {
-    const className = klass.name;
-
-    // schema = this.getOrCreateSchemaDefinitions(className);
-    const root = this.getOrCreateRoot(className, klass);
-    if (!root) {
-      return null;
-    }
-
-    const rootProps = this.describePropertiesForRef(klass.getClassRef());
-    this.appendProperties(root, rootProps);
-
-    const proto = klass.getClassRef().getExtend();
-    if (proto) {
-      this.describeInheritedClass(root, proto);
-    }
-    return root;
+    // const className = klass.name;
+    //
+    // // schema = this.getOrCreateSchemaDefinitions(className);
+    // const root = this.getOrCreateRoot(className, klass);
+    // if (!root) {
+    //   return null;
+    // }
+    //
+    // const rootProps = this.describePropertiesForRef(klass.getClassRef());
+    // this.appendProperties(root, rootProps);
+    //
+    // const proto = klass.getClassRef().getExtend();
+    // if (proto) {
+    //   this.describeInheritedClass(root, proto);
+    // }
+    // return root;
+    return this.describeRef(klass);
   }
 
 
   describeClassRef(klass: IClassRef): IJsonSchema7 {
-    const className = klass.name;
+    // const className = klass.name;
+    //
+    // // schema = this.getOrCreateSchemaDefinitions(schema);
+    // const root = this.getOrCreateRoot(className, klass);
+    // if (!root) {
+    //   return null;
+    // }
+    //
+    // const rootProps = this.describePropertiesForRef(klass);
+    // this.appendProperties(root, rootProps);
+    //
+    // const proto = klass.getExtend();
+    // if (proto) {
+    //   this.describeInheritedClass(root, proto);
+    // }
+    // return root;
+    return this.describeRef(klass);
+  }
+
+  private describeRef(klass: IEntityRef | IClassRef): IJsonSchema7 {
+    const clsRef = isEntityRef(klass) ? klass.getClassRef() : klass;
+    const className = clsRef.name;
 
     // schema = this.getOrCreateSchemaDefinitions(schema);
     const root = this.getOrCreateRoot(className, klass);
@@ -159,15 +186,16 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       return null;
     }
 
-    const rootProps = this.describePropertiesForRef(klass);
+    const rootProps = this.describePropertiesForRef(clsRef);
     this.appendProperties(root, rootProps);
 
-    const proto = klass.getExtend();
+    const proto = clsRef.getExtend();
     if (proto) {
       this.describeInheritedClass(root, proto);
     }
     return root;
   }
+
 
   describeInheritedClass(root: IJsonSchema7, proto: IClassRef) {
     const inheritedClassName = proto.name;
@@ -433,7 +461,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     this.appendAdditionalOptions(propMeta, data);
     // pass data pattern property for later correct selection
     if (data[K_PATTERN_PROPERTY]) {
-      (propMeta as any)[K_PATTERN_PROPERTY]= true;
+      (propMeta as any)[K_PATTERN_PROPERTY] = true;
     }
     if (this.options.postProcess) {
       this.options.postProcess(property, propMeta, this);
