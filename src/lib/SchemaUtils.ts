@@ -1,6 +1,6 @@
 //
 import {assign, get, isArray, isEmpty, isFunction, isNull, isSet, isUndefined} from 'lodash';
-import {NotYetImplementedError} from '@allgemein/base';
+import {CryptUtils, NotYetImplementedError} from '@allgemein/base';
 import {C_PROP_NAME, OPT_CREAT_AND_COPY} from './Constants';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../api/IEntityRef';
@@ -93,7 +93,8 @@ export class SchemaUtils {
    */
   static clazzAnonymous(): Function {
     const X = new Function();
-    Object.defineProperty(X, 'anonId', {value: anonId++});
+    const id = anonId++;
+    Object.defineProperty(X, 'anonId', {value: id});
     return X;
   }
 

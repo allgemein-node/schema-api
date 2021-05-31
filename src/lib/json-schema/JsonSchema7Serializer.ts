@@ -1,4 +1,17 @@
-import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy, snakeCase} from 'lodash';
+import {
+  assign,
+  defaults,
+  get,
+  has,
+  isEmpty,
+  isFunction,
+  isNull,
+  isString,
+  isUndefined,
+  keys,
+  snakeCase,
+  uniqBy
+} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {
@@ -42,7 +55,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   }
 
 
-  private isCurrentClass(x: string){
+  private isCurrentClass(x: string) {
     return snakeCase(this.current) === snakeCase(x);
   }
 
@@ -93,9 +106,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       type: T_OBJECT,
     };
 
-    if (isEntityRef(klass) || (isClassRef(klass) && klass.hasEntityRef())) {
+    if (isEntityRef(klass)) {
       // when an entity mark with $id!
       root.$id = '#' + klass.name;
+    } else if (isClassRef(klass) && klass.hasEntityRef()) {
+      root.$id = '#' + klass.getEntityRef().name;
     }
 
     if (isEntityRef(klass) || isClassRef(klass)) {
@@ -140,49 +155,17 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
 
   describeEntityRef(klass: IEntityRef): IJsonSchema7 {
-    // const className = klass.name;
-    //
-    // // schema = this.getOrCreateSchemaDefinitions(className);
-    // const root = this.getOrCreateRoot(className, klass);
-    // if (!root) {
-    //   return null;
-    // }
-    //
-    // const rootProps = this.describePropertiesForRef(klass.getClassRef());
-    // this.appendProperties(root, rootProps);
-    //
-    // const proto = klass.getClassRef().getExtend();
-    // if (proto) {
-    //   this.describeInheritedClass(root, proto);
-    // }
-    // return root;
     return this.describeRef(klass);
   }
 
 
   describeClassRef(klass: IClassRef): IJsonSchema7 {
-    // const className = klass.name;
-    //
-    // // schema = this.getOrCreateSchemaDefinitions(schema);
-    // const root = this.getOrCreateRoot(className, klass);
-    // if (!root) {
-    //   return null;
-    // }
-    //
-    // const rootProps = this.describePropertiesForRef(klass);
-    // this.appendProperties(root, rootProps);
-    //
-    // const proto = klass.getExtend();
-    // if (proto) {
-    //   this.describeInheritedClass(root, proto);
-    // }
-    // return root;
     return this.describeRef(klass);
   }
 
   private describeRef(klass: IEntityRef | IClassRef): IJsonSchema7 {
     const clsRef = isEntityRef(klass) ? klass.getClassRef() : klass;
-    const className = clsRef.name;
+    const className = isEntityRef(klass) ? klass.name : clsRef.name;
 
     // schema = this.getOrCreateSchemaDefinitions(schema);
     const root = this.getOrCreateRoot(className, klass);
