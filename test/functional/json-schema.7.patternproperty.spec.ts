@@ -6,7 +6,7 @@ import {IEntityRef} from '../../src/api/IEntityRef';
 import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
 import '../../src/decorators/validate';
 
-@suite('functional/json-schema-draft-07 pattern property')
+@suite('functional/json-schema-draft-07 - pattern property')
 class JsonSchemaDraft07SerializationSpec {
 
 

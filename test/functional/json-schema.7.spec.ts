@@ -1419,7 +1419,6 @@ class JsonSchemaDraft07SerializationSpec {
     expect(refRefProps).to.have.length(2);
     expect(refRefProps.map((x: IPropertyRef) => x.name)).to.deep.eq(['name', 'path']);
 
-
     const res = JsonSchema.serialize(ref);
     // console.log(inspect(res, false, 10));
     expect(res).to.be.deep.eq({

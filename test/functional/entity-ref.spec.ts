@@ -118,7 +118,6 @@ class EntityRefSpec {
       '__CLASS__': 'TestClass',
       '__NS__': 'default'
     });
-
   }
 
   @test
