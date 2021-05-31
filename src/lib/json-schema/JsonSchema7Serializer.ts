@@ -91,7 +91,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
     if (isEntityRef(klass) || (isClassRef(klass) && klass.hasEntityRef())) {
       // when an entity mark with $id!
-      root.$id = klass.name;
+      root.$id = '#' + klass.name;
     }
 
     if (isEntityRef(klass) || isClassRef(klass)) {
