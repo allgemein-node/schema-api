@@ -1,4 +1,4 @@
-import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy} from 'lodash';
+import {assign, defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, uniqBy, snakeCase} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {
@@ -41,6 +41,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     return `http://json-schema.org/${DRAFT_07}/schema`;
   }
 
+
+  private isCurrentClass(x: string){
+    return snakeCase(this.current) === snakeCase(x);
+  }
 
   serialize(klass: IClassRef | IEntityRef | Function | object): IJsonSchema7 {
 
@@ -116,7 +120,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     if (!this.data.$ref && !this.data.anyOf) {
       this.data.$ref = '#/definitions/' + className;
     } else if (this.data.$ref && !this.data.anyOf) {
-      if (this.current === className) {
+      if (this.isCurrentClass(className)) {
         this.data.anyOf = [
           {$ref: this.data.$ref},
           {$ref: '#/definitions/' + className}
@@ -124,7 +128,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
         delete this.data['$ref'];
       }
     } else if (!this.data.$ref && this.data.anyOf) {
-      if (this.current === className) {
+      if (this.isCurrentClass(className)) {
         this.data.anyOf.push({$ref: '#/definitions/' + className});
       }
     }
