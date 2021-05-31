@@ -16,7 +16,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
         ParsePatternProp: {
-          '$id': 'ParsePatternProp',
+          '$id': '#ParsePatternProp',
           title: 'ParsePatternProp',
           type: 'object',
           properties: {
@@ -49,7 +49,7 @@ class JsonSchemaDraft07SerializationSpec {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       definitions: {
         ParsePatternObject: {
-          '$id': 'ParsePatternObject',
+          '$id': '#ParsePatternObject',
           title: 'ParsePatternObject',
           type: 'object',
           properties: {
