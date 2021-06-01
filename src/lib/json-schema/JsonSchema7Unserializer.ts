@@ -165,18 +165,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       }
 
     } else if (data.$ref) {
-      // refers
-      if (has(this.reference, data.$ref)) {
-        ret = this.reference[data.$ref];
-      } else {
-        const res = await this.followRef(data.$ref, this.data);
-        const opts = clone(options);
-        opts.$ref = data.$ref;
-        if (!opts.className) {
-          opts.className = this.getClassNameFromRef(data.$ref);
-        }
-        ret = await this.parse(res, opts);
-      }
+      return this.parseRef(data, options);
     } else if (data.anyOf && options.isRoot) {
       // loading multi schema
       ret = [];
@@ -185,6 +174,23 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       }
     } else {
       throw new Error('no valid schema element for further parse, key with name type or $ref must be present.');
+    }
+    return ret;
+  }
+
+  async parseRef(data: any, options: IParseOptions) {
+    // refers
+    let ret = null;
+    if (has(this.reference, data.$ref)) {
+      ret = this.reference[data.$ref];
+    } else {
+      const res = await this.followRef(data.$ref, this.data);
+      const opts = clone(options);
+      opts.$ref = data.$ref;
+      if (!opts.className) {
+        opts.className = this.getClassNameFromRef(data.$ref);
+      }
+      ret = await this.parse(res, opts);
     }
     return ret;
   }
@@ -213,7 +219,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     if (isEmpty(addr)) {
       //  local
       if (isEmpty(anchor)) {
-        return data;
+        if (data.$ref) {
+          return this.followRef(data.$ref, data);
+        } else {
+          return data;
+        }
+
       } else if (/^\//.test(anchor)) {
         // starts with path
         const dottedPath = anchor.substr(1).replace(/\//, '.');
@@ -244,6 +255,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         this.fetched[addr] = await JsonSchema.request(addr, {cwd: this.options.cwd});
       }
       return this.followRef('#' + anchor, this.fetched[addr]);
+
     }
     // TODO create exception
     throw new Error($ref + ' not found');
