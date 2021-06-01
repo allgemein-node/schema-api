@@ -48,4 +48,11 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions {
    * Return found entity refs or class refs.
    */
   return?: 'entity-refs' | 'class-refs' | 'default';
+
+  /**
+   * Current working directory
+   */
+  cwd?: string;
 }
+
+

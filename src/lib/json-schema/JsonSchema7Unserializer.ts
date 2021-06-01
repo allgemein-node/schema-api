@@ -22,7 +22,8 @@ import {IJsonSchemaUnserializer} from './IJsonSchemaUnserializer';
 import {JsonSchema} from './JsonSchema';
 import {RegistryFactory} from '../registry/RegistryFactory';
 import {
-  DEFAULT_NAMESPACE, K_PATTERN_PROPERTY,
+  DEFAULT_NAMESPACE,
+  K_PATTERN_PROPERTY,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_ENTITY,
@@ -240,7 +241,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     } else {
       // remote fetch url
       if (!this.fetched[addr]) {
-        this.fetched[addr] = await JsonSchema.request(addr);
+        this.fetched[addr] = await JsonSchema.request(addr, {cwd: this.options.cwd});
       }
       return this.followRef('#' + anchor, this.fetched[addr]);
     }

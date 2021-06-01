@@ -19,6 +19,16 @@ export class JsonSchema {
         const buffer = await PlatformUtils.readFile(addr.replace('file://', ''));
         const strValue = buffer.toString(get(opts, 'encoding', 'utf8'));
         return JSON.parse(strValue);
+      } else if (addr.startsWith('.')) {
+        const cwd = opts.cwd ? opts.cwd : process.cwd();
+        const path = PlatformUtils.join(cwd, addr);
+        const buffer = await PlatformUtils.readFile(path);
+        const strValue = buffer.toString(get(opts, 'encoding', 'utf8'));
+        return JSON.parse(strValue);
+      } else if (PlatformUtils.isAbsolute(addr)) {
+        const buffer = await PlatformUtils.readFile(addr);
+        const strValue = buffer.toString(get(opts, 'encoding', 'utf8'));
+        return JSON.parse(strValue);
       } else {
         const got = PlatformUtils.load('got');
         const response = await got(addr, opts);
