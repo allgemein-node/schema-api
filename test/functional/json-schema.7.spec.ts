@@ -352,43 +352,6 @@ class JsonSchemaDraft07SerializationSpec {
   }
 
 
-  @test
-  async 'parse json schema with ref to follow http'() {
-    const json: IJsonSchema7 = {
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      $ref: 'https://raw.githubusercontent.com/allgemein-node/schema-api/master/test/functional/data/json/person.schema.json'
-    };
-    const classRef = await JsonSchema.unserialize(json) as IEntityRef;
-    expect(isEntityRef(classRef)).to.be.true;
-    expect(isClassRef(classRef)).to.be.false;
-    expect(classRef.name).to.be.eq('Person');
-    expect(classRef.getClassRef().getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
-    let properties = classRef.getClassRef().getPropertyRefs();
-    expect(properties).to.have.length(4);
-    expect(_.first(properties).name).to.be.eq('firstname');
-    expect(_.first(properties).getType()).to.be.eq('string');
-  }
-
-
-  @test
-  async 'parse json schema with ref to follow files'() {
-    const json: IJsonSchema7 = {
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      $ref: 'file:///' + __dirname + '/data/json/person.schema.json'
-    };
-    const classRef = await JsonSchema.unserialize(json, {
-      className: 'PersonSecond',
-      ignoreDeclared: true
-    }) as IEntityRef;
-    expect(isEntityRef(classRef)).to.be.true;
-    expect(isClassRef(classRef)).to.be.false;
-    expect(classRef.name).to.be.eq('PersonSecond');
-    expect(classRef.getClassRef().getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
-    let properties = classRef.getClassRef().getPropertyRefs();
-    expect(properties).to.have.length(4);
-    expect(_.first(properties).name).to.be.eq('firstname');
-    expect(_.first(properties).getType()).to.be.eq('string');
-  }
 
 
   @test
