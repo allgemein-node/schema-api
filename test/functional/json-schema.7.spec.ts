@@ -996,7 +996,6 @@ class JsonSchemaDraft07SerializationSpec {
     const initialSchemaCopy = _.cloneDeep(json);
     delete initialSchemaCopy['$schema'];
     expect(schema.definitions['PersonDataReg']).to.be.deep.eq(initialSchemaCopy);
-
   }
 
 
