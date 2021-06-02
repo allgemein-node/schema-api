@@ -105,7 +105,7 @@ export class JsonSchema implements ISerializerFactory {
     return JsonSchema.getUnserializer(options);
   }
 
-  serialize(klass: IClassRef | IEntityRef | Function | object, options?: IJsonSchemaSerializeOptions): Promise<any> {
+  serialize(klass: IClassRef | IEntityRef | Function | object, options?: IJsonSchemaSerializeOptions): any {
     return JsonSchema.serialize(klass, options);
   }
 

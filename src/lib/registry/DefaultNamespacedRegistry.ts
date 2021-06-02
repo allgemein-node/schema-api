@@ -324,7 +324,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   createPropertiesForRef(clsRef: IClassRef): DefaultPropertyRef[] {
     const cls = clsRef.getClass(true);
-    const jsonSchema = JsonSchema.serialize(cls, {appendTarget: true});
+    const jsonSchema = JsonSchema.serialize(cls, {appendTarget: true}) as any;
     const propOptions: IPropertyOptions[] = [];
     const metaPropOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_PROPERTY, cls) as IPropertyOptions[];
     if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
