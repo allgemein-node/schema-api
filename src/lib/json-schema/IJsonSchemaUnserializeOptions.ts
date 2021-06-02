@@ -1,17 +1,13 @@
 import {METADATA_TYPE} from '../Constants';
 import {IParseOptions} from './IParseOptions';
+import {IUnserializeOptions} from '../serializer/IUnserializeOptions';
 
-export interface IJsonSchemaUnserializeOptions extends IParseOptions {
+export interface IJsonSchemaUnserializeOptions extends IParseOptions, IUnserializeOptions {
 
   /**
    * Version of json schema
    */
   version?: 'draft-7' | string;
-
-  /**
-   * Namespace of the registry
-   */
-  namespace?: string;
 
   /**
    * Key specific method for options extraction from json schema to entity or property options
@@ -43,11 +39,6 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions {
    * Prepend class name on object which is a property.
    */
   prependClass?: boolean;
-
-  /**
-   * Return found entity refs or class refs.
-   */
-  return?: 'entity-refs' | 'class-refs' | 'default';
 
   /**
    * Current working directory

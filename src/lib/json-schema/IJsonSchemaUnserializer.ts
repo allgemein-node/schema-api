@@ -1,4 +1,6 @@
-export interface IJsonSchemaUnserializer {
+import {IUnserializer} from '../serializer/IUnserializer';
+
+export interface IJsonSchemaUnserializer extends IUnserializer{
 
   uri(): string;
 

@@ -1,6 +1,7 @@
 import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
+import {ISerializeOptions} from '../serializer/ISerializeOptions';
 
-export interface IJsonSchemaSerializeOptions {
+export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
 
   /**
    * Version of json schema
@@ -12,11 +13,6 @@ export interface IJsonSchemaSerializeOptions {
    */
   handleMultipleSchemas?: 'reference' | 'clone';
 
-
-  /**
-   * Namespace of the registry
-   */
-  namespace?: string;
 
   /**
    * If set then on entries with type object the class function will be passed under key $target

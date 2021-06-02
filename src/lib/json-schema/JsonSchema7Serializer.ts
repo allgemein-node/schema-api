@@ -59,8 +59,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     return snakeCase(this.current) === snakeCase(x);
   }
 
-  serialize(klass: IClassRef | IEntityRef | Function | object): IJsonSchema7 {
-
+  async serialize(klass: IClassRef | IEntityRef | Function | object): Promise<IJsonSchema7> {
     if (isFunction(klass)) {
       this.current = ClassUtils.getClassName(klass);
       this.describeClass(klass);

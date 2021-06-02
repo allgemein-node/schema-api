@@ -5,12 +5,15 @@ import {IEntityRef} from '../../api/IEntityRef';
 import {JsonSchema7Serializer} from './JsonSchema7Serializer';
 import {IJsonSchemaSerializeOptions} from './IJsonSchemaSerializeOptions';
 import {IJsonSchemaUnserializeOptions} from './IJsonSchemaUnserializeOptions';
-import {DRAFT_07} from './Constants';
+import {DRAFT_07, JSON_SCHEMA_SERIALIZER} from './Constants';
 import {PlatformUtils} from '@allgemein/base';
 import {JsonSchema7Unserializer} from './JsonSchema7Unserializer';
+import {ISerializerFactory} from '../serializer/ISerializerFactory';
+import {ISerializer} from '../serializer/ISerializer';
+import {IUnserializer} from '../serializer/IUnserializer';
 
 
-export class JsonSchema {
+export class JsonSchema implements ISerializerFactory {
 
 
   static async request(addr: string, opts: any = {}) {
@@ -88,6 +91,26 @@ export class JsonSchema {
       }
     }
     return fallback;
+  }
+
+  getName(): string {
+    return JSON_SCHEMA_SERIALIZER;
+  }
+
+  getSerializer(options?: IJsonSchemaSerializeOptions): ISerializer {
+    return JsonSchema.getSerializer(options);
+  }
+
+  getUnserializer(options?: IJsonSchemaUnserializeOptions): IUnserializer {
+    return JsonSchema.getUnserializer(options);
+  }
+
+  serialize(klass: IClassRef | IEntityRef | Function | object, options?: IJsonSchemaSerializeOptions): Promise<any> {
+    return JsonSchema.serialize(klass, options);
+  }
+
+  unserialize(data: string, options?: IJsonSchemaUnserializeOptions): Promise<IClassRef | IEntityRef | (IClassRef | IEntityRef)[]> {
+    return JsonSchema.unserialize(data, options);
   }
 
 
