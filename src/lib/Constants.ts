@@ -103,6 +103,7 @@ export const OPT_CREAT_AND_COPY = 'createAndCopy';
 export const STATE_KEY = '$state';
 
 export const K_PATTERN_PROPERTY = 'patternProperty';
+export const K_TRIGGERED = Symbol('_triggered_');
 
 export type CLASS_TYPE = Function | ClassType<any>;
 export type MERGE_TYPE = 'default' | 'assign' | 'merge';

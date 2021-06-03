@@ -6,7 +6,7 @@ import {assign, defaults, isEmpty, isFunction, keys, merge, remove, uniq} from '
 import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
-  CLASS_TYPE,
+  CLASS_TYPE, K_TRIGGERED,
   METADATA_REGISTRY,
   METADATA_TYPE,
   METATYPE_PROPERTY,
@@ -25,6 +25,8 @@ import {IAttributeOptions} from '../options/IAttributeOptions';
  * Registry for metadata of classes and there properties
  */
 export class MetadataRegistry extends EventEmitter {
+
+  private static INC = 0;
 
   private static $self: MetadataRegistry;
 
@@ -71,6 +73,7 @@ export class MetadataRegistry extends EventEmitter {
     options.metaType = context;
 
     // find?
+    const id = MetadataRegistry.INC++;
     this.metadata.push(options);
     if (this.targets.indexOf(options.target) === -1) {
       this.targets.push(options.target);
@@ -82,6 +85,7 @@ export class MetadataRegistry extends EventEmitter {
     }
 
     if (trigger) {
+      Object.defineProperty(options, K_TRIGGERED, {value: true});
       this.notify(C_EVENT_ADD, context, options);
     }
 

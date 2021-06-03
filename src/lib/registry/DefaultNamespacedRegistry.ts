@@ -23,6 +23,7 @@ import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
   C_EVENT_UPDATE,
+  K_TRIGGERED,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_EMBEDDABLE,
@@ -71,9 +72,23 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   prepare() {
     // apply listener
+    this.drainAlreadyAdded();
     MetadataRegistry.$().on(C_EVENT_ADD, this.onAdd.bind(this));
     MetadataRegistry.$().on(C_EVENT_REMOVE, this.onRemove.bind(this));
     MetadataRegistry.$().on(C_EVENT_UPDATE, this.onUpdate.bind(this));
+  }
+
+  drainAlreadyAdded() {
+    const alreadyFired = MetadataRegistry.$().getMetadata().filter(x => {
+      const v = Object.getOwnPropertyDescriptor(x, K_TRIGGERED);
+      return v && v.value;
+    }) as IAbstractOptions[];
+    for (const event of alreadyFired) {
+      try {
+        this.onAdd(event.metaType as METADATA_TYPE, event);
+      } catch (e) {
+      }
+    }
   }
 
   /**
@@ -122,7 +137,13 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       );
       if (!find) {
         const entityRef = this.create(context, options) as IEntityRef;
-        this.createPropertiesForRef(entityRef.getClassRef());
+        const properties = this.find(METATYPE_PROPERTY, (c: IPropertyRef) =>
+          c.getClassRef().getClass() === options.target
+        );
+        if (isEmpty(properties)) {
+          // create properties only when non exists
+          this.createPropertiesForRef(entityRef.getClassRef());
+        }
       }
     } else if (context === METATYPE_EMBEDDABLE) {
       const find = this.find(METATYPE_CLASS_REF, (c: IClassRef) =>
