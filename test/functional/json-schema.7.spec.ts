@@ -55,6 +55,7 @@ class JsonSchemaDraft07SerializationSpec {
     expect(classRef.getNamespace()).to.be.eq(DEFAULT_NAMESPACE);
   }
 
+
   @test
   async 'parse json schema and create unnamed class ref'() {
     const json: IJsonSchema7 = {
@@ -350,8 +351,6 @@ class JsonSchemaDraft07SerializationSpec {
     expect(_.first(properties).name).to.be.eq('stringValue');
     expect(_.first(properties).getType()).to.be.eq('string');
   }
-
-
 
 
   @test
@@ -1248,7 +1247,7 @@ class JsonSchemaDraft07SerializationSpec {
 
   @test
   async 'parse multiple schemas after another extending previous structure'() {
-    const NAMESPACE = 'myspace';
+    const NAMESPACE = 'myconfig';
     const CONFIG_SCHEMA = {
       '$schema': 'http://json-schema.org/draft-07/schema#',
       'type': 'object',
