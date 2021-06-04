@@ -256,7 +256,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   getSchemaRefsFor(ref: string | IEntityRef | IClassRef): SchemaRef | SchemaRef[] {
     let lookup: SchemaRef[] = [];
     if (isEntityRef(ref) || isClassRef(ref)) {
-      const schemas = ref.getOptions('schema');
+      const schemas = ref.getOptions('schema', []);
       for (const schema of schemas) {
         let schemaRef: SchemaRef = this.find(METATYPE_SCHEMA, (x: ISchemaRef) => x.name === schema);
         if (!schemaRef) {
