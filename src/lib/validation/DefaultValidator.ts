@@ -1,6 +1,6 @@
-import {assign, clone, defaults, get, intersection, isArray, isObjectLike, keys, merge, set, uniq} from 'lodash';
+import {assign, clone, defaults, get, intersection, isArray, isObjectLike, keys, merge, set, uniq, isFunction} from 'lodash';
 
-import {IClassRef} from '../../api/IClassRef';
+import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {ClassUtils, MetadataStorage, NotYetImplementedError} from '@allgemein/base';
 import {IValidationError} from './IValidationError';
@@ -9,14 +9,7 @@ import {IPropertyExtentions} from '../../api/IPropertyExtentions';
 import {XS_ANNOTATION_OPTIONS_CACHE} from '../Constants';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
 import {IValidator} from './IValidator';
-
-
-export interface IValidatorEntry {
-  target: Function,
-  property?: string,
-  options?: any[],
-  handles?: IValidator[]
-}
+import {IValidatorEntry} from './IValidatorEntry';
 
 
 export class DefaultValidator {
@@ -32,6 +25,19 @@ export class DefaultValidator {
       this.lookupKeys.unshift(validator.involveOnOptionKey);
       this.lookupKeys = uniq(this.lookupKeys);
     }
+  }
+
+
+  static async validationInfo(ref: Function | IClassRef | IEntityRef){
+    let clazz: Function = null;
+    if(isEntityRef(ref) || isClassRef(ref)){
+      clazz = ref.getClass();
+    }else if(isFunction(ref)){
+      clazz = ref;
+    }else {
+      throw new Error('not implemented for '+ ref)
+    }
+    return this.getValidationHandlesForFn(clazz);
   }
 
 
