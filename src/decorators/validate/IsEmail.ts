@@ -31,7 +31,7 @@ export const MAIL_REGEX = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=
 
 DefaultValidator.define({
     name: 'email',
-    fn: (value: string, options: IIsEmailOptions) => {
+    fn: (value: string, options: IIsEmailOptions, instance?: any) => {
       if (isUndefined(value) || isNull(value) || !isString(value)) {
         // if (!get(options, 'required', false)) {
         //   return true;

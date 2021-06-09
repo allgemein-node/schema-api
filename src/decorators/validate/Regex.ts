@@ -37,7 +37,7 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
 
 DefaultValidator.define({
     name: 'regex',
-    fn: (value: string, options: IRegexOptions) => {
+    fn: (value: string, options: IRegexOptions, instance?: any) => {
       // if (isUndefined(value) || isNull(value)) {
       //   return true;
       // }

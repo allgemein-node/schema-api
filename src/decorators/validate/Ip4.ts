@@ -32,7 +32,7 @@ export const IP4_REGEX = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){
 
 DefaultValidator.define({
     name: 'ip4',
-    fn: (value: string, options?: IIp4Options) => {
+    fn: (value: string, options?: IIp4Options, instance?: any) => {
       if (isUndefined(value) || isNull(value) || !isString(value)) {
         // if (!get(options, 'required', false)) {
         //   return true;

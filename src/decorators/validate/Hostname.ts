@@ -34,7 +34,7 @@ export const HOSTNAME_RFC1034_REGEX = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[
 
 DefaultValidator.define({
     name: 'hostname',
-    fn: (value: string, options?: IHostnameOptions) => {
+    fn: (value: string, options?: IHostnameOptions, instance?: any) => {
       if (isUndefined(value) || isNull(value) || !isString(value)) {
         // if (!get(options, 'required', false)) {
         //   return true;

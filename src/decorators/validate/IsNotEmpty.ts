@@ -1,8 +1,9 @@
 import {assign, isArray, isEmpty, isNull, isString, isUndefined} from 'lodash';
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
+import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
-export interface IIsNotEmptyOptions {
+export interface IIsNotEmptyOptions extends IValidateOptions {
   message?: string
 }
 
@@ -27,7 +28,7 @@ export function IsNotEmpty(options?: IIsNotEmptyOptions) {
 
 DefaultValidator.define({
     name: 'isNotEmpty',
-    fn: (value: any, opts?: any) => {
+    fn: (value: any, opts?: IIsNotEmptyOptions, instance?: any) => {
       let res = !(isUndefined(value) || isNull(value));
       if (res) {
         if (isString(value) || isArray(value)) {

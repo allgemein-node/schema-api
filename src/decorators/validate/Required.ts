@@ -2,8 +2,9 @@ import {assign, isNull, isUndefined} from 'lodash';
 
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
+import {IValidateOptions} from '../../lib/validation/IValidateOptions';
 
-export interface IRequiredOptions {
+export interface IRequiredOptions extends IValidateOptions {
   message?: string
 }
 
@@ -28,7 +29,7 @@ export function Required(options?: IRequiredOptions) {
 
 DefaultValidator.define({
     name: 'required',
-    fn: (value: string, opts?: any) => {
+    fn: (value: string, opts?: IRequiredOptions, instance?: any) => {
       if (isUndefined(value) || isNull(value)) {
         return false;
       }

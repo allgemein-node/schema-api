@@ -32,7 +32,7 @@ export const IP6_REGEX = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F
 
 DefaultValidator.define({
     name: 'ip6',
-    fn: (value: string, options?: IIp6Options) => {
+    fn: (value: string, options?: IIp6Options, instance?: any) => {
       if (isUndefined(value) || isNull(value) || !isString(value)) {
         // if (!get(options, 'required', false)) {
         //   return true;

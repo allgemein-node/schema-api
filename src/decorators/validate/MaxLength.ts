@@ -30,7 +30,7 @@ export function MaxLength(value: number, options?: IMaxLengthOptions) {
 
 DefaultValidator.define({
     name: 'maxLength',
-    fn: (value: string, opts?: IMaxLengthOptions) => {
+    fn: (value: string, opts?: IMaxLengthOptions, instance?: any) => {
       if (isString(value)) {
         return value.length <= opts.maxLength;
       }

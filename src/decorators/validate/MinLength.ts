@@ -30,7 +30,7 @@ export function MinLength(value: number, options?: IMinLengthOptions) {
 
 DefaultValidator.define({
     name: 'minLength',
-    fn: (value: string, opts?: IMinLengthOptions) => {
+    fn: (value: string, opts?: IMinLengthOptions, instance?: any) => {
       if (isString(value)) {
         return value.length >= opts.minLength;
       }

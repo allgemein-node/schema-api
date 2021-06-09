@@ -1,4 +1,17 @@
-import {assign, clone, defaults, get, intersection, isArray, isObjectLike, keys, merge, set, uniq, isFunction} from 'lodash';
+import {
+  assign,
+  clone,
+  defaults,
+  get,
+  intersection,
+  isArray,
+  isFunction,
+  isObjectLike,
+  keys,
+  merge,
+  set,
+  uniq
+} from 'lodash';
 
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
@@ -28,14 +41,14 @@ export class DefaultValidator {
   }
 
 
-  static async validationInfo(ref: Function | IClassRef | IEntityRef){
+  static async validationInfo(ref: Function | IClassRef | IEntityRef) {
     let clazz: Function = null;
-    if(isEntityRef(ref) || isClassRef(ref)){
+    if (isEntityRef(ref) || isClassRef(ref)) {
       clazz = ref.getClass();
-    }else if(isFunction(ref)){
+    } else if (isFunction(ref)) {
       clazz = ref;
-    }else {
-      throw new Error('not implemented for '+ ref)
+    } else {
+      throw new Error('not implemented for ' + ref);
     }
     return this.getValidationHandlesForFn(clazz);
   }
@@ -76,11 +89,14 @@ export class DefaultValidator {
         }
 
         let instanceOptions = clone(toValidateEntry.options[handle.name]);
+        if (isPropertyCheck) {
+          instanceOptions.property = toValidateEntry.property;
+        }
         if (handle.defaultOptions) {
           defaults(instanceOptions, handle.defaultOptions);
         }
 
-        if (!(await handle.fn(value, instanceOptions))) {
+        if (!(await handle.fn(value, instanceOptions, instance))) {
           const error: IValidationError = {
             metaType: toValidateEntry.property ? 'property' : 'entity',
             property: toValidateEntry.property,
