@@ -45,7 +45,22 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
   constructor(opts: IJsonSchemaSerializeOptions) {
     this.options = opts || {};
-    defaults(this.options, <IJsonSchemaSerializeOptions>{keysToSkip: DEFAULT_KEY_TO_SKIP});
+    defaults(this.options, <IJsonSchemaSerializeOptions>{
+      keysToSkip: DEFAULT_KEY_TO_SKIP,
+      postProcess: (src, dst, serializer) => {
+        if (src && src.metaType === METATYPE_PROPERTY && has(dst, 'cardinality')) {
+          const cardinality = dst['cardinality'];
+          delete dst['cardinality'];
+          // TODO handle value corretly minItem/maxItem when item!
+          if (cardinality === 0) {
+
+          } else {
+            //delete dst['cardinality'];
+          }
+
+        }
+      }
+    });
     this.data = this.getOrCreateSchemaDefinitions();
   }
 

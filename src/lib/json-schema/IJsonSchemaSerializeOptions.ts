@@ -31,6 +31,7 @@ export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
    */
   postProcess?: (src: any, dst: any, serializer?: IJsonSchemaSerializer) => void;
 
+
   /**
    * Allow override of existing standard properties
    */
