@@ -54,6 +54,7 @@ export type JS_DATA_TYPES =
   | 'timestamp'
   | 'byte'
   | 'object'
+  | 'array'
   | 'symbol'
   | 'null'
   | 'undefined'
@@ -83,7 +84,15 @@ export const JS_DATA_TYPES: JS_DATA_TYPES[] = [
 ];
 
 export const JS_PRIMATIVE_TYPES: JS_DATA_TYPES[] = [
-  'string', 'number', 'boolean', 'object', 'symbol', 'date', 'null', 'undefined', 'bigint'
+  'string',
+  'number',
+  'boolean',
+  'object',
+  'symbol',
+  'date',
+  'null',
+  'undefined',
+  'bigint'
 ];
 
 
