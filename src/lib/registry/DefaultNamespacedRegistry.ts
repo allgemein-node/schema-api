@@ -23,11 +23,13 @@ import {
   C_EVENT_ADD,
   C_EVENT_REMOVE,
   C_EVENT_UPDATE,
+  DEFAULT_NAMESPACE,
   K_TRIGGERED,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
   METATYPE_EMBEDDABLE,
   METATYPE_ENTITY,
+  METATYPE_NAMESPACE,
   METATYPE_PROPERTY,
   METATYPE_SCHEMA
 } from './../Constants';
@@ -92,6 +94,33 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   }
 
   /**
+   * Check if object has the correct namespace for this registry handle
+   *
+   * @param options
+   */
+  validNamespace(options: IAbstractOptions): boolean {
+    if (options.namespace) {
+      if (options.namespace !== this.namespace) {
+        // skip not my namespace
+        return false;
+      }
+    } else {
+      // if namespace not present skipping
+      if (options.metaType !== METATYPE_PROPERTY) {
+        // only properties should be pass and check if entity already exists
+        const namespace = MetadataRegistry.$().find(METATYPE_NAMESPACE, (x: IAbstractOptions) => x.target === options.target);
+        if (namespace && namespace.attributes.namespace === this.namespace) {
+          options.namespace = namespace.attributes.namespace;
+        } else if (this.namespace !== DEFAULT_NAMESPACE) {
+          // passing to default namespace if nothing
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
    * react on dynamically added context
    *
    * @param context
@@ -100,15 +129,10 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   onAdd(context: METADATA_TYPE,
         options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
 
-
-    // check namespace, if not given use this as default
-    if (options.namespace) {
-      if (options.namespace !== this.namespace) {
-        // skip not my namespace
-        return;
-      }
+    if (!this.validNamespace(options)) {
+      return;
     }
-
+    // check namespace, if not given use this as default
     // const find = this.find(METATYPE_E, (c: IEntityRef) =>
     //   c.getClassRef().getClass() === options.target
     // );
