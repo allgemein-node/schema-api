@@ -28,6 +28,8 @@ export interface ILookupRegistry {
 
   reload?(): void;
 
+  ready?(timeout?: number): Promise<boolean>;
+
   getSchemaRefs<T extends ISchemaRef>(filter?: (x: ISchemaRef) => boolean): (T | ISchemaRef)[];
 
   getSchemaRefsFor<T extends ISchemaRef>(fn: string): (T | ISchemaRef);

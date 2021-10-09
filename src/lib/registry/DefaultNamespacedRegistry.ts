@@ -45,7 +45,7 @@ import {DefaultEntityRef} from './DefaultEntityRef';
 import {hasClassPropertiesInDefinition, IJsonSchema7} from '../json-schema/JsonSchema7';
 import {ISchemaOptions} from '../options/ISchemaOptions';
 import {IObjectOptions} from '../options/IObjectOptions';
-import {ClassUtils, NotSupportedError} from '@allgemein/base';
+import {C_DEFAULT, ClassUtils, NotSupportedError} from '@allgemein/base';
 import {JsonSchema} from '../json-schema/JsonSchema';
 import {ISchemaRef} from '../../api/ISchemaRef';
 import {SchemaRef} from '../SchemaRef';
@@ -75,11 +75,14 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   prepare() {
     // apply listener
     this.drainAlreadyAdded();
-    MetadataRegistry.$().on(C_EVENT_ADD, this.onAdd.bind(this));
-    MetadataRegistry.$().on(C_EVENT_REMOVE, this.onRemove.bind(this));
-    MetadataRegistry.$().on(C_EVENT_UPDATE, this.onUpdate.bind(this));
+    MetadataRegistry.$().on(C_EVENT_ADD, this.onMetadataAdd.bind(this));
+    MetadataRegistry.$().on(C_EVENT_REMOVE, this.onMetadataRemove.bind(this));
+    MetadataRegistry.$().on(C_EVENT_UPDATE, this.onMetadataUpdate.bind(this));
   }
 
+  /**
+   * Apply already added entries to the metadata registry can be added to this registry
+   */
   drainAlreadyAdded() {
     const alreadyFired = MetadataRegistry.$().getMetadata().filter(x => {
       const v = Object.getOwnPropertyDescriptor(x, K_TRIGGERED);
@@ -91,6 +94,36 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       } catch (e) {
       }
     }
+  }
+
+  async onMetadataAdd(
+    context: METADATA_TYPE,
+    options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
+    await this.lock.acquire();
+    this.onAdd(context, options);
+    this.lock.release();
+  }
+
+  async onMetadataUpdate(
+    context: METADATA_TYPE,
+    options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
+    if (!this.validNamespace(options)) {
+      return;
+    }
+    await this.lock.acquire();
+    this.onUpdate(context, options);
+    this.lock.release();
+  }
+
+  async onMetadataRemove(
+    context: METADATA_TYPE,
+    options: (IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions)[]) {
+    if (!this.validNamespace(options)) {
+      return;
+    }
+    await this.lock.acquire();
+    this.onRemove(context, options);
+    this.lock.release();
   }
 
   /**
@@ -132,17 +165,8 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     if (!this.validNamespace(options)) {
       return;
     }
-    // check namespace, if not given use this as default
-    // const find = this.find(METATYPE_E, (c: IEntityRef) =>
-    //   c.getClassRef().getClass() === options.target
-    // );
-
 
     if (context === METATYPE_PROPERTY) {
-      // if (!!this.processing.find(x => x.target === options.target && x.propertyName === options.propertyName)) {
-      //   return;
-      // }
-      // this.processing.push(options);
       const sourceEntry = this.find(METATYPE_CLASS_REF, (ref: IClassRef) => ref.getClass() === options.target);
       if (sourceEntry) {
         const find = this.find(context, (c: IPropertyRef) =>
@@ -154,11 +178,8 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
           this.create(context, options);
         }
       }
-      // remove(this.processing, x => x === options);
     } else if (context === METATYPE_ENTITY) {
-      const find = this.find(context, (c: IEntityRef) =>
-        c.getClassRef().getClass() === options.target
-      );
+      const find = this.find(context, (c: IEntityRef) => c.getClassRef().getClass() === options.target);
       if (!find) {
         const entityRef = this.create(context, options) as IEntityRef;
         const properties = this.find(METATYPE_PROPERTY, (c: IPropertyRef) =>
@@ -170,9 +191,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
         }
       }
     } else if (context === METATYPE_EMBEDDABLE) {
-      const find = this.find(METATYPE_CLASS_REF, (c: IClassRef) =>
-        c.getClass() === options.target
-      ) as IClassRef;
+      const find = this.find(METATYPE_CLASS_REF, (c: IClassRef) => c.getClass() === options.target) as IClassRef;
       if (!find) {
         this.create(context, options);
       } else {
@@ -180,19 +199,9 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
         defaults(refOptions, options);
       }
     } else if (context === METATYPE_SCHEMA) {
-      let find: ISchemaRef = this
-        .find(context,
-          (c: ISchemaRef) => c.name === (<ISchemaOptions>options).name
-        );
-      if (!find) {
-        find = this.create(context, options);
-      }
-
+      let find: ISchemaRef = this.getOrCreateSchemaRefByName(options as ISchemaOptions);
       if (options.target) {
-        let entityRef: IEntityRef = this
-          .find(METATYPE_ENTITY,
-            (c: IEntityRef) => c.getClass() === options.target
-          );
+        let entityRef: IEntityRef = this.find(METATYPE_ENTITY, (c: IEntityRef) => c.getClass() === options.target);
 
         if (find && entityRef) {
           this.addSchemaToEntityRef(find, entityRef);
@@ -201,29 +210,46 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     }
   }
 
+  getOrCreateSchemaRefByName(options: ISchemaOptions) {
+    let find: ISchemaRef = this.find(METATYPE_SCHEMA, (c: ISchemaRef) => c.name === (<ISchemaOptions>options).name);
+    if (!find) {
+      find = this.createSchemaForOptions(options);
+    }
+    return find;
+  }
+
 
   addSchemaToEntityRef(schemaRef: string | ISchemaRef, entityRef: IEntityRef, options: { override?: boolean, onlyDefault?: boolean } = {}) {
-    const name = isString(schemaRef) ? schemaRef : schemaRef.name;
-    this.onAdd(METATYPE_SCHEMA, {name: name, namespace: this.namespace});
-    let entry = entityRef.getOptions('schema');
-    if (entry) {
-      if (isArray(entry)) {
-        entry.push(name);
-      } else {
-        entry = [entry, name];
-      }
-    } else {
-      entry = [name];
+    if (isString(schemaRef)) {
+      schemaRef = this.getOrCreateSchemaRefByName({
+        metaType: METATYPE_SCHEMA,
+        name: schemaRef,
+        namespace: this.namespace,
+        target: entityRef.getClass()
+      });
     }
-
-    if (get(options, 'override', false)) {
-      if (get(options, 'onlyDefault', false)) {
-        remove(entry, x => x === 'default');
+    const name = schemaRef.name;
+    let entry = entityRef.getOptions(METATYPE_SCHEMA, []);
+    if (!entry.includes(name)) {
+      if (entry) {
+        if (isArray(entry)) {
+          entry.push(name);
+        } else {
+          entry = [entry, name];
+        }
       } else {
         entry = [name];
       }
+
+      if (get(options, 'override', false)) {
+        if (get(options, 'onlyDefault', false)) {
+          remove(entry, x => x === C_DEFAULT);
+        } else {
+          entry = [name];
+        }
+      }
+      entityRef.setOption(METATYPE_SCHEMA, uniq(entry));
     }
-    entityRef.setOption('schema', uniq(entry));
   }
 
 
@@ -237,9 +263,9 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
     if (context === METATYPE_ENTITY || context === METATYPE_CLASS_REF) {
       const targets = entries.map(x => x.target);
-      this.getLookupRegistry().remove('class_ref', (x: any) => targets.includes(x.target));
-      this.getLookupRegistry().remove('entity', (x: any) => targets.includes(x.target));
-      this.getLookupRegistry().remove('property', (x: any) => targets.includes(x.target));
+      this.getLookupRegistry().remove(METATYPE_CLASS_REF, (x: any) => targets.includes(x.target));
+      this.getLookupRegistry().remove(METATYPE_ENTITY, (x: any) => targets.includes(x.target));
+      this.getLookupRegistry().remove(METATYPE_PROPERTY, (x: any) => targets.includes(x.target));
     } else if (context === METATYPE_PROPERTY) {
       const targets = entries.map(x => [x.target, x.propertyName]);
       this.getLookupRegistry().remove(context, (x: any) => targets.includes([x.target, x.name]));
@@ -256,7 +282,8 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    * @param context
    * @param entries
    */
-  onUpdate() {
+  onUpdate(context: METADATA_TYPE,
+           options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions) {
   }
 
 
@@ -280,7 +307,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
   getSchemaRefsFor(ref: string | IEntityRef | IClassRef): SchemaRef | SchemaRef[] {
     let lookup: SchemaRef[] = [];
     if (isEntityRef(ref) || isClassRef(ref)) {
-      const schemas = ref.getOptions('schema', []);
+      const schemas = ref.getOptions(METATYPE_SCHEMA, []);
       for (const schema of schemas) {
         let schemaRef: SchemaRef = this.find(METATYPE_SCHEMA, (x: ISchemaRef) => x.name === schema);
         if (!schemaRef) {
@@ -493,7 +520,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
     let metadataOptions: IAbstractOptions = {};
     if (metadataOptionList.length > 1) {
-      metadataOptions = merge(metadataOptions, ...metadataOptionList.map(x => cloneDeep(x)));
+      metadataOptions = assign(metadataOptions, ...metadataOptionList.map(x => cloneDeep(x)));
     } else if (metadataOptionList.length === 1) {
       metadataOptions = cloneDeep(metadataOptionList.shift());
     }
@@ -594,9 +621,9 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
   reset() {
     super.reset();
-    MetadataRegistry.$().removeListener(C_EVENT_ADD, this.onAdd.bind(this));
-    MetadataRegistry.$().removeListener(C_EVENT_REMOVE, this.onRemove.bind(this));
-    MetadataRegistry.$().removeListener(C_EVENT_UPDATE, this.onUpdate.bind(this));
+    MetadataRegistry.$().off(C_EVENT_ADD, this.onAdd.bind(this));
+    MetadataRegistry.$().off(C_EVENT_REMOVE, this.onRemove.bind(this));
+    MetadataRegistry.$().off(C_EVENT_UPDATE, this.onUpdate.bind(this));
   }
 
 

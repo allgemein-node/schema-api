@@ -6,7 +6,7 @@ import {IEntityRef} from '../../api/IEntityRef';
 import {IClassRef} from '../../api/IClassRef';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {LookupRegistry} from '../LookupRegistry';
-import {NotSupportedError} from '@allgemein/base';
+import {LockFactory, NotSupportedError, Semaphore} from '@allgemein/base';
 import {ISchemaRef} from '../../api/ISchemaRef';
 
 
@@ -17,11 +17,17 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
 
   protected readonly namespace: string;
 
+  readonly lock: Semaphore;
+
   constructor(namespace: string) {
     super();
     this.namespace = namespace;
+    this.lock = LockFactory.$().semaphore(1);
   }
 
+  ready(timeout?: number): Promise<boolean> {
+    return this.lock.await(timeout).then(x => true).catch(x => false);
+  }
 
   // /**
   //  * Initialize events for metadata changes on runtime
