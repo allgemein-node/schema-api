@@ -9,6 +9,7 @@ import {ClassType, DEFAULT_NAMESPACE, METATYPE_ENTITY} from '../Constants';
 import {DefaultNamespacedRegistry} from './DefaultNamespacedRegistry';
 import {MetadataRegistry} from './MetadataRegistry';
 import {C_DEFAULT} from '@allgemein/base';
+import {IRegistryOptions} from './IRegistryOptions';
 
 export class RegistryFactory {
 
@@ -28,17 +29,17 @@ export class RegistryFactory {
    *
    * @param namespace
    */
-  static get<T extends ILookupRegistry>(namespace: string = DEFAULT_NAMESPACE): T {
+  static get<T extends ILookupRegistry>(namespace: string = DEFAULT_NAMESPACE, options?: IRegistryOptions): T {
     if (!this.$handles[namespace]) {
       for (const type of this.$types) {
         if (isString(type.pattern)) {
           if (namespace === type.pattern) {
-            this.$handles[namespace] = Reflect.construct(type.registryClass, [namespace]);
+            this.$handles[namespace] = Reflect.construct(type.registryClass, [namespace, options]);
             break;
           }
         } else {
           if (isRegExp(type.pattern) && type.pattern.test(namespace)) {
-            this.$handles[namespace] = Reflect.construct(type.registryClass, [namespace]);
+            this.$handles[namespace] = Reflect.construct(type.registryClass, [namespace, options]);
             break;
           }
         }
@@ -46,7 +47,7 @@ export class RegistryFactory {
 
       if (!this.$handles[namespace]) {
         // create default as fallback if nothing passes
-        this.$handles[namespace] = new DefaultNamespacedRegistry(namespace);
+        this.$handles[namespace] = new DefaultNamespacedRegistry(namespace, options);
       }
 
       if (this.$handles[namespace].prepare) {

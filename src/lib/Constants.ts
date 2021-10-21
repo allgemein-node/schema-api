@@ -3,6 +3,13 @@ import exp = require('constants');
 export const DEFAULT_NAMESPACE = 'default';
 export const GLOBAL_NAMESPACE = '__global__';
 
+
+export const C_IDENTIFIER = 'identifier';
+export const C_TYPE = 'type';
+export const C_APPENDED = 'appended';
+export const C_CARDINALITY = 'cardinality';
+
+
 export const XS_DEFAULT_CLASSES = 'default_class_ref';
 
 export const REFLECT_DESIGN_TYPE = 'design:type';

@@ -2,7 +2,14 @@ import 'reflect-metadata';
 import {assign, isFunction, isObjectLike, isString} from 'lodash';
 import {ClassUtils} from '@allgemein/base';
 import {IPropertyOptions} from '../lib/options/IPropertyOptions';
-import {JS_DATA_TYPES, JS_PRIMATIVE_TYPES, METATYPE_PROPERTY, REFLECT_DESIGN_TYPE, T_STRING} from '../lib/Constants';
+import {
+  JS_DATA_TYPES,
+  JS_PRIMATIVE_TYPES,
+  METATYPE_PROPERTY,
+  REFLECT_DESIGN_TYPE,
+  T_OBJECT,
+  T_STRING
+} from '../lib/Constants';
 import {MetadataRegistry} from '../lib/registry/MetadataRegistry';
 
 export function Property(typeOrOptions: IPropertyOptions | Function | string = null) {
@@ -42,14 +49,14 @@ export function Property(typeOrOptions: IPropertyOptions | Function | string = n
       if (JS_PRIMATIVE_TYPES.includes(className.toLowerCase() as any)) {
         options.type = options.type ? options.type : className.toLowerCase();
       } else if (className === Array.name) {
-        options.type = options.type ? options.type : 'object';
+        options.type = options.type ? options.type : T_OBJECT;
         options.cardinality = 0;
       } else {
         options.type = options.type ? options.type : reflectMetadataType;
       }
     }
 
-    if(!options.type){
+    if (!options.type) {
       options.type = T_STRING;
     }
 

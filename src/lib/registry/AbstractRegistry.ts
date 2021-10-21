@@ -8,6 +8,7 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {LookupRegistry} from '../LookupRegistry';
 import {LockFactory, NotSupportedError, Semaphore} from '@allgemein/base';
 import {ISchemaRef} from '../../api/ISchemaRef';
+import {IRegistryOptions} from './IRegistryOptions';
 
 
 /**
@@ -19,9 +20,13 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
 
   readonly lock: Semaphore;
 
-  constructor(namespace: string) {
+  readonly options: IRegistryOptions;
+
+
+  constructor(namespace: string, options?: IRegistryOptions) {
     super();
     this.namespace = namespace;
+    this.options = options || {};
     this.lock = LockFactory.$().semaphore(1);
   }
 
@@ -38,6 +43,10 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
   //   MetadataRegistry.$().on(C_EVENT_UPDATE, this.onUpdate.bind(this));
   // }
 
+
+  getOptions(): IRegistryOptions {
+    return this.options;
+  }
 
   /**
    * Return all registered schema references

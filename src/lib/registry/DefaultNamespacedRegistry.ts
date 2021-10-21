@@ -51,6 +51,7 @@ import {ISchemaRef} from '../../api/ISchemaRef';
 import {SchemaRef} from '../SchemaRef';
 import {AbstractRegistry} from './AbstractRegistry';
 import {IAbstractOptions} from '../options/IAbstractOptions';
+import {IRegistryOptions} from './IRegistryOptions';
 
 
 /**
@@ -68,6 +69,11 @@ import {IAbstractOptions} from '../options/IAbstractOptions';
  *
  */
 export class DefaultNamespacedRegistry extends AbstractRegistry {
+
+
+  constructor(namespace: string, options?: IRegistryOptions) {
+    super(namespace, defaults(options || {}, <IRegistryOptions>{detectUnannotatedProperties: true}));
+  }
 
   /**
    * Initialize events for metadata changes on runtime
@@ -396,31 +402,38 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   createPropertiesForRef(clsRef: IClassRef): DefaultPropertyRef[] {
     const cls = clsRef.getClass(true);
-    const jsonSchema = JsonSchema.serialize(cls, {appendTarget: true}) as any;
     const propOptions: IPropertyOptions[] = [];
     const metaPropOptions = MetadataRegistry.$().getByContextAndTarget(METATYPE_PROPERTY, cls) as IPropertyOptions[];
-    if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
-      const properties = (jsonSchema.definitions[clsRef.name] as IJsonSchema7).properties;
-      for (const k of keys(properties)) {
-        const property: IJsonSchema7 = properties[k] as IJsonSchema7;
-        const opts: IPropertyOptions = {
-          metaType: METATYPE_PROPERTY,
-          namespace: clsRef.getNamespace(),
-          type: property.$target ? property.$target : property.type,
-          propertyName: k,
-          target: cls
-        };
 
-        const propMetadata = remove(metaPropOptions, x => x.propertyName === k);
-        if (!isEmpty(propMetadata)) {
-          for (const p of propMetadata) {
-            // clean namespace
-            const copy = clone(p);
-            delete copy.namespace;
-            assign(opts, copy);
+    if (this.getOptions().detectUnannotatedProperties) {
+      const jsonSchema = JsonSchema.serialize(cls, {appendTarget: true}) as any;
+      if (hasClassPropertiesInDefinition(clsRef.name, jsonSchema)) {
+        const properties = (jsonSchema.definitions[clsRef.name] as IJsonSchema7).properties;
+        for (const k of keys(properties)) {
+          const property: IJsonSchema7 = properties[k] as IJsonSchema7;
+          const opts: IPropertyOptions = {
+            metaType: METATYPE_PROPERTY,
+            namespace: clsRef.getNamespace(),
+            type: property.$target ? property.$target : property.type,
+            propertyName: k,
+            target: cls
+          };
+
+          if (property.default) {
+            opts.default = property.default;
           }
+
+          const propMetadata = remove(metaPropOptions, x => x.propertyName === k);
+          if (!isEmpty(propMetadata)) {
+            for (const p of propMetadata) {
+              // clean namespace
+              const copy = clone(p);
+              delete copy.namespace;
+              assign(opts, copy);
+            }
+          }
+          propOptions.push(opts);
         }
-        propOptions.push(opts);
       }
     }
 

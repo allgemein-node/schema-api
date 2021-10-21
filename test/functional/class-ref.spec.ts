@@ -14,6 +14,8 @@ import {AnnotatedObjectWithRefs} from './data/classes/AnnotatedPropertiesWithRef
 import {AnnotatedPrimatives} from './data/classes/AnnotatedPrimatives';
 import {PlainObject02} from './data/classes/PlainObject02';
 import {ObjectWithInitProp02} from './data/classes/ObjectWithInitProp02';
+import {RegistryFactory} from '../../src';
+import {PlainObjectWithDeclaredArray} from './data/classes/PlainObjectWithDeclaredArray';
 
 
 @suite('functional/class-ref')
@@ -71,6 +73,7 @@ class ClassRefSpec {
     const refs = classRef.getPropertyRefs();
     expect(refs).to.have.length(9);
   }
+
 
   /**
    * override create class ref from plain class with initialized property
@@ -180,7 +183,6 @@ class ClassRefSpec {
     const classRef2 = ClassRef.get('PlainObjectAnonymous');
     expect(classRef).to.be.eq(classRef2);
   }
-
 
 
   @test
@@ -315,6 +317,7 @@ class ClassRefSpec {
     expect(prop.getType()).to.be.eq('string');
     expect(prop.isReference()).to.be.false;
   }
+
 
 }
 

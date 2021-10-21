@@ -5,11 +5,19 @@ import {AbstractRef} from '../AbstractRef';
 import {IBuildOptions} from '../../api/IBuildOptions';
 import {IClassRef, isClassRef} from '../../api/IClassRef';
 import {
+  C_APPENDED,
+  C_CARDINALITY,
+  C_IDENTIFIER,
+  C_TYPE,
   DEFAULT_NAMESPACE,
   IMinMax,
-  JS_DATA_TYPES, K_PATTERN_PROPERTY,
+  JS_DATA_TYPES,
+  K_PATTERN_PROPERTY,
   METADATA_TYPE,
-  METATYPE_PROPERTY, T_ARRAY, T_OBJECT, T_STRING,
+  METATYPE_PROPERTY,
+  T_ARRAY,
+  T_OBJECT,
+  T_STRING,
   XS_ID_SEPARATOR
 } from '../Constants';
 import {IPropertyOptions} from '../options/IPropertyOptions';
@@ -32,8 +40,14 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
   constructor(options: IPropertyOptions = {}) {
     super(METATYPE_PROPERTY, options.propertyName, options.target, options.namespace ? options.namespace : DEFAULT_NAMESPACE);
     AnnotationsHelper.merge(this.object, options, this.name);
+    if (options.type === T_ARRAY) {
+      // if array reset
+      options.type = T_OBJECT;
+      options.cardinality = 0;
+      options.array = true;
+    }
     this.setOptions(options);
-    this.cardinality = has(options, 'cardinality') ? options.cardinality : 1;
+    this.cardinality = has(options, C_CARDINALITY) ? options.cardinality : 1;
   }
 
 
@@ -126,11 +140,11 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
   }
 
   getType(): string {
-    return this.getOptions('type');
+    return this.getOptions(C_TYPE);
   }
 
   isAppended(): boolean {
-    return this.getOptions('appended', false);
+    return this.getOptions(C_APPENDED, false);
   }
 
 
@@ -157,7 +171,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
    * Return if is identifier
    */
   isIdentifier(): boolean {
-    return this.getOptions('identifier', false);
+    return this.getOptions(C_IDENTIFIER, false);
   }
 
   /**

@@ -27,4 +27,10 @@ export interface IPropertyOptions extends IAbstractOptions {
    * Mark if property is a pattern property
    */
   pattern?: boolean;
+
+
+  /**
+   * Mark if property is an array
+   */
+  array?: boolean;
 }
