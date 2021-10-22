@@ -443,8 +443,9 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       if (property.isReference()) {
         this.describeTargetRef(property, propMeta, 'collection');
       } else {
+        const normedType = this.getNormedType(property);
         propMeta.items = {
-          type: property.getType() as any
+          type: normedType as any
         };
         this.propertyPostproces(propMeta.items);
       }
@@ -453,7 +454,8 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       if (property.isReference()) {
         this.describeTargetRef(property, propMeta, 'single');
       } else {
-        propMeta.type = property.getType() as any;
+        const normedType = this.getNormedType(property);
+        propMeta.type = normedType as any;
         this.propertyPostproces(propMeta);
       }
     }
@@ -508,8 +510,21 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       opt.type = T_STRING;
       opt.format = 'date-time';
     }
-
   }
 
+
+  getNormedType(property: IPropertyRef) {
+    let retType = null;
+    const type = property.getType();
+    if (this.options.typeConversion) {
+      retType = this.options.typeConversion(type, property);
+    }
+
+    if (!retType) {
+      retType = isFunction(type) ? type.name.toLowerCase() : type;
+    }
+
+    return retType;
+  }
 
 }

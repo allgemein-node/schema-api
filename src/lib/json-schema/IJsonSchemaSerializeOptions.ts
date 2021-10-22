@@ -1,5 +1,6 @@
 import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
 import {ISerializeOptions} from '../serializer/ISerializeOptions';
+import {IPropertyRef} from '../../api/IPropertyRef';
 
 export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
 
@@ -48,4 +49,10 @@ export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
    * By default options of reference properties are removed, to pass them set this to 'false'.
    */
   deleteReferenceKeys?: boolean;
+
+
+  /**
+   * Passed method for type correction if necessary, else
+   */
+  typeConversion?: (type: any, property: IPropertyRef) => string | null;
 }
