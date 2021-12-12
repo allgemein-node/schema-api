@@ -1,4 +1,4 @@
-import {assign, defaults, isEmpty, isFunction, keys, merge, remove, uniq} from 'lodash';
+import {assign, cloneDeep, defaults, isEmpty, isFunction, keys, merge, remove, uniq} from 'lodash';
 
 /**
  * Handler for metadata
@@ -92,6 +92,12 @@ export class MetadataRegistry extends EventEmitter {
     return options;
   }
 
+  /**
+   * Add cached content mostly for ClassRef instances throw AbstractRef
+   *
+   * @param context
+   * @param options
+   */
   addCached(context: METADATA_TYPE | string,
             options: IEntityOptions | IPropertyOptions | ISchemaOptions | IObjectOptions | IAttributeOptions) {
     options.metaType = context;
@@ -126,16 +132,23 @@ export class MetadataRegistry extends EventEmitter {
     return this.targets;
   }
 
-
+  /**
+   * Return the metadata/options for some entry (entity/property/classref/...). A copy of the original will be delivered.
+   *
+   * @param context
+   * @param target
+   * @param attributes
+   * @param propertyName
+   */
   getByContextAndTarget<T extends IAbstractOptions>(context: METADATA_TYPE | string,
                                                     target: CLASS_TYPE | string,
                                                     attributes: 'merge' | 'assign' | 'defaults' = null,
                                                     propertyName?: string): T[] {
-    const data = <T[]>this.metadata.filter(x =>
+    const data = <T[]>cloneDeep(this.metadata.filter(x =>
       x.metaType === context &&
       x.target === target &&
       (propertyName ? x.propertyName === propertyName : true)
-    );
+    ));
     if (attributes && !isEmpty(data)) {
       this.mergeAttributes(context, target, data, attributes);
     }
@@ -181,41 +194,41 @@ export class MetadataRegistry extends EventEmitter {
 
   getAttributesForTarget<T extends IAttributeOptions>(context: METADATA_TYPE | string,
                                                       target: CLASS_TYPE | string): T[] {
-    return <T[]>this.metadata.filter((x: IAttributeOptions) =>
+    return <T[]>cloneDeep(this.metadata.filter((x: IAttributeOptions) =>
       x.targetTypes &&
       !x.propertyName &&
       x.attributes &&
       x.targetTypes.includes(context) &&
       x.target === target
-    );
+    ));
   }
 
   getAttributesForTargetProperty<T extends IAttributeOptions>(context: METADATA_TYPE,
                                                               target: CLASS_TYPE,
                                                               propertyName: string): T[] {
-    return <T[]>this.metadata.filter((x: IAttributeOptions) =>
+    return <T[]>cloneDeep(this.metadata.filter((x: IAttributeOptions) =>
       x.targetTypes &&
       x.propertyName === propertyName &&
       x.attributes &&
       x.targetTypes.includes(context) &&
       x.target === target
-    );
+    ));
   }
 
   getAttributesForTargetProperties<T extends IAttributeOptions>(context: METADATA_TYPE, target: CLASS_TYPE | string): T[] {
-    return <T[]>this.metadata.filter((x: IAttributeOptions) =>
+    return cloneDeep(<T[]>this.metadata.filter((x: IAttributeOptions) =>
       x.targetTypes &&
       x.propertyName &&
       x.attributes &&
       x.targetTypes.includes(context) &&
       x.target === target
-    );
+    ));
   }
 
   getByTarget(target: CLASS_TYPE) {
-    return this.metadata.filter(x =>
+    return cloneDeep(this.metadata.filter(x =>
       x.target === target
-    );
+    ));
   }
 
   private createSearchFunction(find: any) {
