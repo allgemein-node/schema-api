@@ -14,6 +14,21 @@ export class ValidRegex {
   @Regex(/^\w\d+$/)
   onlyString: string;
 
+}
+
+export class ValidRegexMsg {
+
+  @Property()
+  @Regex(/^\w\d+$/, {message: 'Other message'})
+  onlyStringOtherMessage: string;
+
+}
+
+export class ValidRegexWithFlag {
+
+  @Property()
+  @Regex(/^\w\d+$/i)
+  onlyStringCased: string;
 
 }
 
@@ -54,6 +69,76 @@ class ValidationRegexSpec {
       }
     ]);
   }
+
+
+  @test
+  async 'validate regex msg - only string - empty'() {
+    let newClass = new ValidRegexMsg();
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(1);
+  }
+
+  @test
+  async 'validate regex msg - only string - match'() {
+    let newClass = new ValidRegexMsg();
+    newClass.onlyStringOtherMessage = 'a123';
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(0);
+  }
+
+  @test
+  async 'validate regex msg - only string - fail'() {
+    let newClass = new ValidRegexMsg();
+    newClass.onlyStringOtherMessage = 'ab123';
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(1);
+    expect(res).to.be.deep.eq([
+      {
+        metaType: 'property',
+        property: 'onlyStringOtherMessage',
+        value: 'ab123',
+        constraints: {
+          'regex': 'Other message'
+        }
+      }
+    ]);
+  }
+
+
+  @test
+  async 'validate regex with flag - only string - empty'() {
+    let newClass = new ValidRegexWithFlag();
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(1);
+  }
+
+  @test
+  async 'validate regex with flag - only string - match'() {
+    let newClass = new ValidRegexWithFlag();
+    newClass.onlyStringCased = 'a123';
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(0);
+  }
+
+
+  @test
+  async 'validate regex with flag - only string - fail'() {
+    let newClass = new ValidRegexWithFlag();
+    newClass.onlyStringCased = 'ab123';
+    const res = await Validator.validate(newClass);
+    expect(res).to.have.length(1);
+    expect(res).to.be.deep.eq([
+      {
+        metaType: 'property',
+        property: 'onlyStringCased',
+        value: 'ab123',
+        constraints: {
+          'regex': 'Value of property "onlyStringCased" doesn\'t match the regular expression "^\\w\\d+$".'
+        }
+      }
+    ]);
+  }
+
 
   @test
   async 'serialize as json schema'() {
