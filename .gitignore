@@ -72,3 +72,4 @@ tmp/
 
 # package
 package-lock.json
+pnpm-lock.yaml
