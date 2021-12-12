@@ -1,4 +1,4 @@
-import {assign, isEmpty, isNull, isString, isUndefined} from 'lodash';
+import {assign, isEmpty, isString} from 'lodash';
 
 import {AnnotationsHelper} from '../../lib/AnnotationsHelper';
 import {DefaultValidator} from '../../lib/validation/DefaultValidator';
@@ -23,6 +23,9 @@ export function Regex(regex: string | RegExp, options?: IRegexOptions) {
       };
     }
     if (options) {
+      if (!opts.validateOptions) {
+        opts.validateOptions = {regex: {}};
+      }
       assign(opts.validateOptions.regex, options);
     }
 
