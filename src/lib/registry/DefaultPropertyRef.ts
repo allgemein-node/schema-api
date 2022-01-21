@@ -11,7 +11,6 @@ import {
   C_TYPE,
   DEFAULT_NAMESPACE,
   IMinMax,
-  JS_DATA_TYPES,
   K_PATTERN_PROPERTY,
   METADATA_TYPE,
   METATYPE_PROPERTY,
@@ -189,6 +188,17 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     return this.reference;
   }
 
+
+  /**
+   * Check if property is a to an other object referring property.
+   *
+   * Note:
+   *   types defined as string, must match the following conditions to be interpreted as reference to an other object:
+   *   - not contain any upper case
+   *   - not a defined supported type
+   *
+   * @private
+   */
   private checkReference() {
     if (isUndefined(this.reference)) {
       this.reference = false;
@@ -196,8 +206,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
       if (!isString(type) && (isClassRef(type) || isEntityRef(type))) {
         this.targetRef = isEntityRef(type) ? (type as IEntityRef).getClassRef() : type;
         this.reference = true;
-      } else if (isFunction(type) ||
-        (isString(type) && !JS_DATA_TYPES.find(t => (new RegExp('^' + t + ':?')).test((<string>type).toLowerCase())))) {
+      } else if (isFunction(type) || this.isReferencingType(type)) {
         // try get existing class
         const exists = ClassRef.get(type, this.getClassRef().getNamespace());
         if (exists) {
@@ -208,6 +217,25 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
     }
     return this.reference;
   }
+
+
+  /**
+   * Check type given as string if it is an object type.
+   *
+   * Note:
+   *   types defined as string, must match the following conditions to be interpreted as reference to an other object:
+   *   - not contain any upper case
+   *   - not a defined supported type
+   *
+   * @private
+   */
+  isReferencingType(type: string) {
+    return (isString(type) &&
+      (type.toLocaleLowerCase() !== type
+        && !this.getSupportedDataTypes().find(t => (new RegExp('^' + t + ':?')).test((<string>type).toLowerCase())))
+    )
+  }
+
 
   getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef {
     return this.getRegistry().getClassRefFor(object, this.metaType);

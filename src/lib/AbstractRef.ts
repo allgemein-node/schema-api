@@ -1,5 +1,12 @@
 import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
-import {DEFAULT_NAMESPACE, METADATA_TYPE, METATYPE_PROPERTY, METATYPE_SCHEMA,} from './Constants';
+import {
+  C_NAME,
+  DEFAULT_NAMESPACE,
+  JS_DATA_TYPES,
+  METADATA_TYPE,
+  METATYPE_PROPERTY,
+  METATYPE_SCHEMA,
+} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {MetadataRegistry} from './registry/MetadataRegistry';
@@ -152,7 +159,7 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   get storingName() {
-    let name = this.getOptions('name');
+    let name = this.getOptions(C_NAME);
     if (!name) {
       name = snakeCase(this.name);
     }
@@ -162,6 +169,14 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   abstract id(): string;
+
+
+  /**
+   * Return supported primative data types
+   */
+  getSupportedDataTypes() {
+    return JS_DATA_TYPES;
+  }
 
 
   // toJson() {
