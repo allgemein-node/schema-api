@@ -169,13 +169,15 @@ export abstract class AbstractRef implements IBaseRef {
     let name = null;
     if (this.metaType === METATYPE_PROPERTY) {
       name = this.getOptions(C_NAME, null);
-      if(!name){
+      if (!name) {
         name = snakeCase(this.name);
       }
-    } else if (this.name !== this.originalName) {
-      name = this.name;
     } else {
-      name = snakeCase(this.name);
+      if (this.name !== this.originalName) {
+        name = this.name;
+      } else {
+        name = snakeCase(this.name);
+      }
     }
     return name;
   }
