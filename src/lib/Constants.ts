@@ -131,4 +131,4 @@ export interface IMinMax {
 }
 
 
-export const DEFAULT_KEY_TO_SKIP = ['type', '$ref', 'target', 'propertyName', 'metaType', 'namespace', 'name'];
+export const DEFAULT_KEY_TO_SKIP = [C_TYPE, '$ref', 'target', 'propertyName', 'metaType', 'namespace', C_NAME];
