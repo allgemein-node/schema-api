@@ -1,5 +1,12 @@
 import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
-import {DEFAULT_NAMESPACE, JS_DATA_TYPES, METADATA_TYPE, METATYPE_PROPERTY, METATYPE_SCHEMA,} from './Constants';
+import {
+  C_NAME,
+  DEFAULT_NAMESPACE,
+  JS_DATA_TYPES,
+  METADATA_TYPE,
+  METATYPE_PROPERTY,
+  METATYPE_SCHEMA,
+} from './Constants';
 import {IBaseRef} from '../api/IBaseRef';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {MetadataRegistry} from './registry/MetadataRegistry';
@@ -152,7 +159,7 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   get originalName() {
-    if(this.object){
+    if (this.object) {
       return this.object.name;
     }
     return null;
@@ -160,7 +167,12 @@ export abstract class AbstractRef implements IBaseRef {
 
   get storingName() {
     let name = null;
-    if (this.name !== this.originalName) {
+    if (this.metaType === METATYPE_PROPERTY) {
+      name = this.getOptions(C_NAME, null);
+      if(!name){
+        name = snakeCase(this.name);
+      }
+    } else if (this.name !== this.originalName) {
       name = this.name;
     } else {
       name = snakeCase(this.name);
