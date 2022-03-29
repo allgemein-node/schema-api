@@ -8,7 +8,6 @@ import {IClassRef} from '../../api/IClassRef';
 import {AnnotationsHelper} from '../AnnotationsHelper';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {RegistryFactory} from './RegistryFactory';
-import {snakeCase} from 'lodash';
 import {SchemaRef} from '../SchemaRef';
 
 export class DefaultEntityRef extends AbstractRef implements IEntityRef {
@@ -61,17 +60,5 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
   isOf(instance: any): boolean {
     return this.getClassRef().isOf(instance);
   }
-
-  /**
-   * Return machine compatible name for the entity in snake-case style.
-   */
-  get storingName() {
-    let name = this.getOptions('name');
-    if (!name) {
-      name = this.name;
-    }
-    return snakeCase(name);
-  }
-
 
 }

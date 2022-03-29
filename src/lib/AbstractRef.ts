@@ -1,4 +1,4 @@
-import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
+import {assign, get, has, isEmpty, isNull, keys, set, snakeCase} from 'lodash';
 import {
   C_NAME,
   DEFAULT_NAMESPACE,
@@ -159,11 +159,10 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   get storingName() {
-    let name = this.getOptions(C_NAME);
-    if (!name) {
+    let name = this.getOptions(C_NAME, null);
+    if (isNull(name)) {
       name = snakeCase(this.name);
     }
-
     return name;
   }
 
