@@ -32,8 +32,8 @@ export class DefaultEntityRef extends AbstractRef implements IEntityRef {
     return this.getClassRef().build(instance, options);
   }
 
-  create<T>(): T {
-    return this.getClassRef().create();
+  create<T>(addinfo?: boolean): T {
+    return this.getClassRef().create(addinfo);
   }
 
   getPropertyRef(name: string): IPropertyRef {
