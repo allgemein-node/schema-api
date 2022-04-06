@@ -111,6 +111,7 @@ export const C_EVENT_UPDATE = 'update';
 export const T_STRING = 'string';
 export const T_ARRAY = 'array';
 export const T_OBJECT = 'object';
+export const T_BOOLEAN = 'boolean';
 
 export const C_PROP_NAME = 'name';
 export const __CLASS__ = '__CLASS__';

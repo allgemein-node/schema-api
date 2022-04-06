@@ -1,25 +1,12 @@
-import {
-  assign,
-  defaults,
-  get,
-  has,
-  isEmpty,
-  isFunction,
-  isNull,
-  isString,
-  isUndefined,
-  keys,
-  snakeCase,
-  uniqBy
-} from 'lodash';
+import {defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, snakeCase, uniqBy} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {
   DEFAULT_KEY_TO_SKIP,
   K_PATTERN_PROPERTY,
   METATYPE_PROPERTY,
-  REFLECT_DESIGN_TYPE,
   T_ARRAY,
+  T_BOOLEAN,
   T_OBJECT,
   T_STRING
 } from '../Constants';
@@ -33,6 +20,7 @@ import {DRAFT_07} from './Constants';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
+import {getReflectedType, setDefaultArray} from "./functions";
 
 
 export class JsonSchema7Serializer implements IJsonSchemaSerializer {
@@ -47,6 +35,9 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     this.options = opts || {};
     defaults(this.options, <IJsonSchemaSerializeOptions>{
       keysToSkip: DEFAULT_KEY_TO_SKIP,
+      ignoreUnknownType: false,
+      defaultTypeHint: 'string',
+      onlyDecorated: false,
       postProcess: (src, dst, serializer) => {
         if (src && src.metaType === METATYPE_PROPERTY && has(dst, 'cardinality')) {
           const cardinality = dst['cardinality'];
@@ -57,7 +48,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
           } else {
             //delete dst['cardinality'];
           }
-
         }
       }
     });
@@ -73,6 +63,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   private isCurrentClass(x: string) {
     return snakeCase(this.current) === snakeCase(x);
   }
+
 
   serialize(klass: IClassRef | IEntityRef | Function | object): IJsonSchema7 {
     if (isFunction(klass)) {
@@ -90,9 +81,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     return this.getJsonSchema();
   }
 
+
   getJsonSchema() {
     return this.data;
   }
+
 
   private getOrCreateSchemaDefinitions(schema?: IJsonSchema7) {
     if (!schema) {
@@ -256,8 +249,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
       if (isString(p)) {
-        const result = this.describePropertyForFunction(klass, p, instance);
-        properties[p] = result;
+        if (!get(this.options, 'onlyDecorated', false)) {
+          const result = this.describePropertyForFunction(klass, p, instance);
+          properties[p] = result;
+        }
       }
     }
     return properties;
@@ -277,8 +272,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
       if (isString(p) && !has(properties, p)) {
-        const result = this.describePropertyForFunction(klass, p, instance);
-        properties[p] = result;
+        if (!get(this.options, 'onlyDecorated', false)) {
+          const result = this.describePropertyForFunction(klass, p, instance);
+          properties[p] = result;
+        }
       } else if (isString(p) && has(properties, p)) {
         const value = instance[p];
         if (!isNull(value) || !isUndefined(value)) {
@@ -303,22 +300,36 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     // check if property is object
     let value = instance[propertyName];
     let typeHint: any = typeof value;
-    if (typeHint === T_OBJECT) {
-      typeHint = Reflect.getPrototypeOf(value)?.constructor;
-      if (typeHint.name === Object.name) {
-        typeHint = T_OBJECT;
-      } else if (typeHint.name === Array.name) {
-        typeHint = T_ARRAY;
+    const reflectMetadataType = getReflectedType(clazz, propertyName);
+    if (this.options.typeHint && isFunction(this.options.typeHint)) {
+      typeHint = this.options.typeHint(klass, propertyName, instance, value);
+    } else {
+      if (typeHint === T_OBJECT) {
+        if (reflectMetadataType && reflectMetadataType !== T_OBJECT) {
+          typeHint = reflectMetadataType;
+        } else {
+          if (value === null || value === undefined) {
+            typeHint = this.getDefaultTypeHint();
+          } else if (value === false || value === true) {
+            typeHint = T_BOOLEAN;
+          } else {
+            typeHint = Reflect.getPrototypeOf(value)?.constructor;
+            if (typeHint.name === Object.name) {
+              typeHint = T_OBJECT;
+            } else if (typeHint.name === Array.name) {
+              typeHint = T_ARRAY;
+            }
+          }
+        }
       }
     }
 
     let target = null;
     if (typeHint) {
-
       if (isString(typeHint)) {
         propMeta.type = typeHint as IJsonSchema7TypeName;
         if (propMeta.type === T_ARRAY) {
-          this.setDefaultArray(propMeta);
+          setDefaultArray(propMeta);
         }
       } else if (isFunction(typeHint)) {
         if (typeHint === Date) {
@@ -327,7 +338,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
           propMeta.format = 'date-time';
         } else {
           const name = ClassUtils.getClassName(typeHint);
-
           if (name === '' || name === Function.name) {
             // Function passing the parameter type
             // propMeta.$target = typeHint();
@@ -339,7 +349,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
           // maybe follow the object here
           if (target.name === Array.name) {
-            this.setDefaultArray(propMeta);
+            setDefaultArray(propMeta);
           } else {
             propMeta.type = T_OBJECT;
           }
@@ -349,22 +359,19 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
 
     if (!propMeta.type || (isString(propMeta.type) && isEmpty(propMeta.type))) {
-      const reflectMetadataType = Reflect && Reflect.getMetadata ?
-        Reflect.getMetadata(REFLECT_DESIGN_TYPE, clazz, propertyName) : undefined;
-
       if (reflectMetadataType) {
         const className = ClassUtils.getClassName(reflectMetadataType);
         if (JSON_SCHEMA_7_TYPES.includes(className.toLowerCase() as any)) {
           propMeta.type = className.toLowerCase() as IJsonSchema7TypeName;
         } else if (className === Array.name) {
-          this.setDefaultArray(propMeta);
+          setDefaultArray(propMeta);
         } else {
           propMeta.type = T_OBJECT;
           target = reflectMetadataType;
         }
       } else {
         // not reflection data
-        propMeta.type = T_STRING;
+        propMeta.type = this.getDefaultTypeHint();
       }
     }
 
@@ -388,7 +395,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       }
     }
 
-    if (!isUndefined(value) || !isNull(value)) {
+    if (!(isUndefined(value) || isNull(value))) {
       propMeta.default = SchemaUtils.normValue(value);
     }
 
@@ -425,21 +432,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   }
 
 
-  setDefaultArray(schema: IJsonSchema7) {
-    assign(schema, {
-      type: T_ARRAY,
-      items: {
-        type: T_OBJECT
-      }
-    });
-  }
-
-
   describePropertyForRef(klass: IClassRef, property: IPropertyRef): IJsonSchema7Definition {
     const propMeta: IJsonSchema7Definition = {};
 
     if (property.isCollection()) {
-      this.setDefaultArray(propMeta);
+      setDefaultArray(propMeta);
       if (property.isReference()) {
         this.describeTargetRef(property, propMeta, 'collection');
       } else {
@@ -525,6 +522,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     return retType;
+  }
+
+
+  getDefaultTypeHint() {
+    return this.options && this.options.defaultTypeHint ? this.options.defaultTypeHint as any : T_STRING;
   }
 
 }

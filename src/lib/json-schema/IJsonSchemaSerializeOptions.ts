@@ -1,6 +1,7 @@
 import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
 import {ISerializeOptions} from '../serializer/ISerializeOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
+import {IClassRef} from "../../api/IClassRef";
 
 export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
 
@@ -55,4 +56,24 @@ export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
    * Passed method for type correction if necessary, else
    */
   typeConversion?: (type: any, property: IPropertyRef) => string | null;
+
+  /**
+   * Passed method for type hint if necessary, else
+   */
+  typeHint?: (klass: Function | IClassRef, propertyName: string, instance: any, value: any) => string;
+
+  /**
+   * Default type hint on null or undefined
+   */
+  defaultTypeHint?: string;
+
+  /**
+   * Ignore unknown type
+   */
+  ignoreUnknownType?: boolean;
+
+  /**
+   * Serialize only decorated properties (default is true)
+   */
+  onlyDecorated?: boolean;
 }
