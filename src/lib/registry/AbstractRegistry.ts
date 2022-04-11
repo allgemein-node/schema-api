@@ -43,7 +43,6 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
   //   MetadataRegistry.$().on(C_EVENT_UPDATE, this.onUpdate.bind(this));
   // }
 
-
   getOptions(): IRegistryOptions {
     return this.options;
   }

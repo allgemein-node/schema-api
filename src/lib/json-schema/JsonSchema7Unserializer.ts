@@ -125,9 +125,11 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       ret[key] = data[key];
     }
 
-    if (has(this.options, 'collector')) {
+    if (has(this.options, 'collector') && this.options.collector.length > 0) {
       const methods = this.options.collector.filter(x => x.type === type && x.key === key);
-      ret = assign(ret, ...methods.map(e => e.fn(key, data, options)));
+      if(methods){
+        ret = assign(ret, ...methods.map(e => e.fn(key, data, options)));
+      }
     }
     return ret;
   }
@@ -297,9 +299,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         // isPattern: options.isPattern ? true : false
       };
       const dataPointer = data as IJsonSchema7;
-      const collectOptions = {};
-
-      this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema', '$id'], parseOptions);
+      let collectOptions = {};
+      collectOptions = this.collectAndProcess(dataPointer, collectOptions, ['type', '$ref', '$schema', '$id'], parseOptions);
       assign(propOptions, collectOptions);
       if (dataPointer.$ref) {
         const ref = await this.parse(dataPointer, parseOptions);
@@ -548,13 +549,16 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         continue;
       }
       if (entry && isObjectLike(entry)) {
-        assign(collectingObject, entry);
+        collectingObject = assign(collectingObject, entry);
       }
     }
-    if (has(this.options, 'collector')) {
+    if (has(this.options, 'collector') && this.options.collector.length > 0) {
       const methods = this.options.collector.filter(x => x.type === type && isUndefined(x.key));
-      assign(collectingObject, ...methods.map(e => e.fn(null, data, collectorOptions)));
+      if(methods.length > 0){
+        collectingObject = assign(collectingObject, ...methods.map(e => e.fn(null, data, collectorOptions)));
+      }
     }
+    return collectingObject;
   }
 
   getClassNameFromRef(data: string) {
