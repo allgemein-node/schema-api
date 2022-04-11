@@ -12,7 +12,7 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions, IUnseriali
   /**
    * Key specific method for options extraction from json schema to entity or property options
    */
-  collector?: { type: METADATA_TYPE, key: string, fn: (key: string, data: any, options: IParseOptions) => any }[];
+  collector?: { type: METADATA_TYPE, key?: string, fn: (key: string, data: any, options: IParseOptions) => any }[];
 
   /**
    * If set then a new class ref will be created even if an with same name already exists.

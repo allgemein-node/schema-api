@@ -540,6 +540,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
                     skipKeys: string[],
                     collectorOptions: IParseOptions
   ) {
+    const type = get(collectorOptions, 'metaType', METATYPE_ENTITY);
     const _keys = keys(data);
     for (const key of _keys) {
       const entry = this.collectOptions(key, data, collectorOptions);
@@ -549,6 +550,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       if (entry && isObjectLike(entry)) {
         assign(collectingObject, entry);
       }
+    }
+    if (has(this.options, 'collector')) {
+      const methods = this.options.collector.filter(x => x.type === type && isUndefined(x.key));
+      assign(collectingObject, ...methods.map(e => e.fn(null, data, collectorOptions)));
     }
   }
 
