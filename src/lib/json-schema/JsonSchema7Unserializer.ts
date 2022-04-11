@@ -127,8 +127,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
     if (has(this.options, 'collector') && this.options.collector.length > 0) {
       const methods = this.options.collector.filter(x => x.type === type && x.key === key);
-      if(methods){
-        ret = assign(ret, ...methods.map(e => e.fn(key, data, options)));
+      if (methods) {
+        ret = assign(ret, ...methods.map(e => e.fn.apply(null, [key, data, options])));
       }
     }
     return ret;
@@ -276,7 +276,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   async parseProperty(classRef: IClassRef | IEntityRef, propertyName: string, data: IJsonSchema7Definition, options: IParseOptions = null) {
     const _classRef = isEntityRef(classRef) ? classRef.getClassRef() : classRef;
 
-    const propRefExits = _classRef.getRegistry().find(METATYPE_PROPERTY, (x: IPropertyRef) => x.getClassRef() === _classRef && x.name === propertyName);
+    const propRefExits = _classRef.getRegistry()
+      .find(METATYPE_PROPERTY,
+        (x: IPropertyRef) => x.getClassRef() === _classRef && x.name === propertyName) as IPropertyRef;
 
     const propOptions: IPropertyOptions = {
       metaType: METATYPE_PROPERTY,
@@ -320,6 +322,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       // remove properties key if exists
       delete propOptions.properties;
       _classRef.getRegistry().create(METATYPE_PROPERTY, propOptions);
+    } else if (propRefExits) {
+      propRefExits.setOptions(propOptions);
     }
 
   }
@@ -554,8 +558,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     }
     if (has(this.options, 'collector') && this.options.collector.length > 0) {
       const methods = this.options.collector.filter(x => x.type === type && isUndefined(x.key));
-      if(methods.length > 0){
-        collectingObject = assign(collectingObject, ...methods.map(e => e.fn(null, data, collectorOptions)));
+      if (methods.length > 0) {
+        collectingObject = assign(collectingObject, ...methods.map(e => e.fn.apply(null, [null, data, collectorOptions])));
       }
     }
     return collectingObject;
