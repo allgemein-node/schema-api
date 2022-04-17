@@ -1,7 +1,13 @@
 import 'reflect-metadata';
 import {expect} from 'chai';
 import {suite, test} from '@testdeck/mocha';
-import {C_EVENT_ADD, DEFAULT_NAMESPACE, METATYPE_CLASS_REF, METATYPE_ENTITY} from '../../src/lib/Constants';
+import {
+  C_EVENT_ADD,
+  DEFAULT_NAMESPACE,
+  K_ENTITY_BUILT,
+  METATYPE_CLASS_REF,
+  METATYPE_ENTITY
+} from '../../src/lib/Constants';
 import {RegistryFactory} from '../../src/lib/registry/RegistryFactory';
 import {AnnotatedEntity} from './data/classes/AnnotatedEntity';
 import {AnnotatedEntityWithProp} from './data/classes/AnnotatedEntityWithProp';
@@ -13,6 +19,7 @@ import {IClassRef} from '../../src/api/IClassRef';
 import {TestClass} from './data/classes/TestClass';
 import {TestClassWithEmbedded} from './data/classes/TestClassWithEmbedded';
 import {isLookupRegistry} from '../../src/api/ILookupRegistry';
+import {Entity} from "../../src";
 
 
 @suite('functional/entity-ref')
@@ -35,6 +42,26 @@ class EntityRefSpec {
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
   }
 
+  @test
+  async 'additional properties over static properties'() {
+    Entity()
+    class AddProp {
+
+    }
+
+    Object.defineProperty(AddProp, K_ENTITY_BUILT, {value: true, writable: false});
+    const registry = RegistryFactory.get();
+    const entityRef = registry.getEntityRefFor(AddProp);
+    const namespace = entityRef.getClassRef().getNamespace();
+    expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
+    expect(entityRef.getOptions()).to.deep.eq({
+      [K_ENTITY_BUILT]: true,
+      "metaType": "entity",
+      "name": "AddProp",
+      "namespace": "default",
+      "target": AddProp
+    });
+  }
 
   @test
   async 'lookup registry for annotated class with properties'() {

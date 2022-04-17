@@ -40,6 +40,7 @@ export abstract class AbstractRef implements IBaseRef {
     }
   }
 
+
   abstract getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
 
   getNamespace() {

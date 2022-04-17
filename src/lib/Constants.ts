@@ -38,7 +38,7 @@ export type METADATA_AND_BIND_TYPE = METADATA_TYPE
   | 'property_entity'
   | 'schema_class_ref';
 
-export type XS_DATA_TYPES = 'string' | 'number' | 'boolean' | 'entity' | 'array' | 'any' ;
+export type XS_DATA_TYPES = 'string' | 'number' | 'boolean' | 'entity' | 'array' | 'any';
 export const XS_ID_SEPARATOR = '--';
 
 export const XS_DEFAULT_SCHEMA = 'default';
@@ -134,3 +134,10 @@ export interface IMinMax {
 
 
 export const DEFAULT_KEY_TO_SKIP = [C_TYPE, '$ref', 'target', 'propertyName', 'metaType', 'namespace', C_NAME];
+
+/**
+ * Entity option signals that entity is generate by an other
+ */
+export const K_ENTITY_BUILT = '_built_';
+
+export const DEFINED_PROPS_TO_OPTS = [K_ENTITY_BUILT];
