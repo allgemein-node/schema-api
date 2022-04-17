@@ -1218,7 +1218,9 @@ class JsonSchemaDraft07SerializationSpec {
     // -----------------------------------
     // load schema 3
     //
-    await JsonSchema.unserialize(CONFIG_SCHEMA3, {className: 'Config', namespace: NAMESPACE, rootAsEntity: false});
+    await JsonSchema.unserialize(CONFIG_SCHEMA3, {
+      className: 'Config', namespace: NAMESPACE, rootAsEntity: false
+    });
     classRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_CLASS_REF);
     entityRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_ENTITY);
     propertyRefs = RegistryFactory.get(NAMESPACE).list(METATYPE_PROPERTY);

@@ -444,6 +444,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     const id = get(data, '$id', get(data, 'id', null));
     let metaType: METADATA_TYPE = options.isRoot || !isEmpty(id) ? METATYPE_ENTITY : METATYPE_CLASS_REF;
 
+
     const title = get(data, 'title', null);
     // get namespace or override
     const namespace = get(data, 'namespace', this.getNamespace());
@@ -467,13 +468,15 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       }
     }
 
+    let entityName = metaType === METATYPE_ENTITY && id ? id.replace(/^#/, '') : className;
     if (!className && options?.isProperty && options.propertyName) {
       if (get(this.options, 'prependClass', false)) {
         className = [options.sourceRef.name, options.propertyName].map(x => upperFirst(camelCase(x))).join('');
       } else {
         className = upperFirst(camelCase(options.propertyName));
       }
-
+      // pass property name as entity name if the object is declared as a property
+      entityName = className;
     }
 
     if (className && !classRef) {
@@ -498,9 +501,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       if (!this.classRefs.find(x => x === classRef)) {
         this.classRefs.push(classRef);
       }
+
       const clazz = classRef.getClass(true);
       const refOptions: IEntityOptions = {
-        name: classRef.name,
+        name: entityName,
         namespace: this.getNamespace(),
         target: clazz
       };

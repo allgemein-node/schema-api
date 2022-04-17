@@ -21,6 +21,7 @@ import {MetadataRegistry} from '../registry/MetadataRegistry';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
 import {getReflectedType, setDefaultArray} from "./functions";
+import {getClassName} from "../functions";
 
 
 export class JsonSchema7Serializer implements IJsonSchemaSerializer {
@@ -100,16 +101,19 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   }
 
 
-  private getOrCreateRoot(className: string, klass: Function | IClassRef | IEntityRef) {
-    if (this.data.definitions[className]) {
+  private getOrCreateRoot(entityName: string, klass: Function | IClassRef | IEntityRef) {
+    if (this.data.definitions[entityName]) {
       // definition is present and
-      this.applyRef(className);
+      this.applyRef(entityName);
       return null;
     }
 
+    const className = getClassName(klass);
+
+
     const appendTarget = this.isAppendTargetSet();
-    const root: IJsonSchema7Definition = this.data.definitions[className] = {
-      title: className,
+    const root: IJsonSchema7Definition = this.data.definitions[entityName] = {
+      title: className ? className : entityName,
       type: T_OBJECT,
     };
 
@@ -129,7 +133,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       root.$target = SchemaUtils.getFunction(klass);
     }
 
-    this.applyRef(className);
+    this.applyRef(entityName);
 
     if (this.options.postProcess) {
       this.options.postProcess(klass, root, this);

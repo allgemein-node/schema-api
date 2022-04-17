@@ -44,7 +44,7 @@ class JsonSchemaDraft07SerializationSpec {
         'hallo': {
           '$id': '#hallo',
           'properties': {},
-          'title': 'hallo',
+          'title': 'anonymous',
           'type': 'object'
         }
       }
