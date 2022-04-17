@@ -20,7 +20,7 @@ import {
 } from 'lodash';
 
 import {
-  C_EVENT_ADD,
+  C_EVENT_ADD, C_EVENT_DRAIN_FINISHED,
   C_EVENT_REMOVE,
   C_EVENT_UPDATE,
   DEFAULT_NAMESPACE,
@@ -70,6 +70,7 @@ import {IRegistryOptions} from './IRegistryOptions';
  */
 export class DefaultNamespacedRegistry extends AbstractRegistry {
 
+  private drained = false;
 
   constructor(namespace: string, options?: IRegistryOptions) {
     super(namespace, defaults(options || {}, <IRegistryOptions>{detectUnannotatedProperties: true}));
@@ -86,10 +87,27 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     MetadataRegistry.$().on(C_EVENT_UPDATE, this.onMetadataUpdate.bind(this));
   }
 
+  
+  isDrained() {
+    if (this.drained) {
+      return Promise.resolve(this.drained);
+    } else {
+      return new Promise<boolean>((resolve, reject) => {
+        const t = setTimeout(args => {
+          reject();
+        }, 10000);
+        MetadataRegistry.$().once(C_EVENT_DRAIN_FINISHED + this.namespace, () => {
+          resolve(true);
+        });
+      });
+    }
+  }
+
   /**
    * Apply already added entries to the metadata registry can be added to this registry
    */
   drainAlreadyAdded() {
+    this.drained = false;
     const alreadyFired = MetadataRegistry.$().getMetadata().filter(x => {
       const v = Object.getOwnPropertyDescriptor(x, K_TRIGGERED);
       return v && v.value;
@@ -100,6 +118,9 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       } catch (e) {
       }
     }
+    this.drained = true;
+    MetadataRegistry.$().emit(C_EVENT_DRAIN_FINISHED + this.namespace, true);
+
   }
 
   async onMetadataAdd(

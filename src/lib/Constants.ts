@@ -107,6 +107,7 @@ export const JS_PRIMATIVE_TYPES: JS_DATA_TYPES[] = [
 export const C_EVENT_ADD = 'add';
 export const C_EVENT_REMOVE = 'remove';
 export const C_EVENT_UPDATE = 'update';
+export const C_EVENT_DRAIN_FINISHED = 'drain_finished';
 
 export const T_STRING = 'string';
 export const T_ARRAY = 'array';
