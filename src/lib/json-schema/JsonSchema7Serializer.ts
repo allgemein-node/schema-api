@@ -16,7 +16,7 @@ import {IPropertyRef} from '../../api/IPropertyRef';
 import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
 import {IEntityRef, isEntityRef} from '../../api/IEntityRef';
 import {IJsonSchemaSerializeOptions} from './IJsonSchemaSerializeOptions';
-import {DRAFT_07} from './Constants';
+import {C_ONLY_DECORATED, DRAFT_07} from './Constants';
 import {MetadataRegistry} from '../registry/MetadataRegistry';
 import {IEntityOptions} from '../options/IEntityOptions';
 import {IPropertyOptions} from '../options/IPropertyOptions';
@@ -38,7 +38,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       keysToSkip: DEFAULT_KEY_TO_SKIP,
       ignoreUnknownType: false,
       defaultTypeHint: 'string',
-      onlyDecorated: false,
+      [C_ONLY_DECORATED]: false,
       postProcess: (src, dst, serializer) => {
         if (src && src.metaType === METATYPE_PROPERTY && has(dst, 'cardinality')) {
           const cardinality = dst['cardinality'];
@@ -253,7 +253,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
       if (isString(p)) {
-        if (!get(this.options, 'onlyDecorated', false)) {
+        if (!get(this.options, C_ONLY_DECORATED, false)) {
           const result = this.describePropertyForFunction(klass, p, instance);
           properties[p] = result;
         }
@@ -276,7 +276,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
       if (isString(p) && !has(properties, p)) {
-        if (!get(this.options, 'onlyDecorated', false)) {
+        if (!get(this.options, C_ONLY_DECORATED, false)) {
           const result = this.describePropertyForFunction(klass, p, instance);
           properties[p] = result;
         }

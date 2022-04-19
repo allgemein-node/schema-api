@@ -102,8 +102,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   /**
    * Get registry containing elements
    */
-  getRegistry() {
-    return RegistryFactory.get(this.getNamespace());
+  getRegistry(ns: string = null) {
+    return RegistryFactory.get(ns ? ns : this.getNamespace());
   }
 
 
@@ -529,9 +529,9 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       }
 
       if (metaType === METATYPE_ENTITY) {
-        ret = this.getRegistry().find(metaType, (x: IEntityRef) => x.getClassRef() === classRef);
+        ret = this.getRegistry(namespace).find(metaType, (x: IEntityRef) => x.getClassRef() === classRef);
         if (!ret || get(this.options, 'forceEntityRefCreation', false)) {
-          ret = this.getRegistry().create(metaType, entityOptions);
+          ret = this.getRegistry(namespace).create(metaType, entityOptions);
         }
       } else {
         ret = classRef;
@@ -547,8 +547,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   collectAndProcess(data: IJsonSchema7,
                     collectingObject: any,
                     skipKeys: string[],
-                    collectorOptions: IParseOptions
-  ) {
+                    collectorOptions: IParseOptions) {
     const type = get(collectorOptions, 'metaType', METATYPE_ENTITY);
     const _keys = keys(data);
     for (const key of _keys) {
