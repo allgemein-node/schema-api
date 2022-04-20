@@ -26,7 +26,8 @@ export type METADATA_TYPE =
   | 'object'
   | 'entity'
   | 'property'
-  | 'class_ref';
+  | 'class_ref'
+  | 'namespace';
 
 
 export const BINDING_SCHEMA_ENTITY = 'schema_entity';

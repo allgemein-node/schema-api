@@ -26,7 +26,7 @@ import {
   K_PATTERN_PROPERTY,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
-  METATYPE_ENTITY,
+  METATYPE_ENTITY, METATYPE_NAMESPACE,
   METATYPE_PROPERTY,
   T_ARRAY,
   T_OBJECT,
@@ -226,7 +226,6 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         } else {
           return data;
         }
-
       } else if (/^\//.test(anchor)) {
         // starts with path
         const dottedPath = anchor.substr(1).replace(/\//, '.');
@@ -257,7 +256,6 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         this.fetched[addr] = await JsonSchema.request(addr, {cwd: this.options.cwd});
       }
       return this.followRef('#' + anchor, this.fetched[addr]);
-
     }
     // TODO create exception
     throw new Error($ref + ' not found');
@@ -444,10 +442,12 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     const id = get(data, '$id', get(data, 'id', null));
     let metaType: METADATA_TYPE = options.isRoot || !isEmpty(id) ? METATYPE_ENTITY : METATYPE_CLASS_REF;
 
-
     const title = get(data, 'title', null);
+
     // get namespace or override
-    const namespace = get(data, 'namespace', this.getNamespace());
+    const namespace = !get(this.options, 'skipNamespace', false) ?
+      get(data, '$' + METATYPE_NAMESPACE, this.getNamespace()) : this.getNamespace();
+
     // check if class ref exists else create one or recreate if parse options are set
     let classRef: IClassRef = null;
     let className = null;

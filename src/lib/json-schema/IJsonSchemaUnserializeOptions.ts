@@ -44,6 +44,11 @@ export interface IJsonSchemaUnserializeOptions extends IParseOptions, IUnseriali
    * Current working directory
    */
   cwd?: string;
+
+  /**
+   *  Ignore namespaces marked by $namespace in json schema data
+   */
+  skipNamespace?: boolean;
 }
 
 

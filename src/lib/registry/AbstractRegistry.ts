@@ -14,7 +14,7 @@ import {IRegistryOptions} from './IRegistryOptions';
 /**
  * Registry for metadata of classes and there properties
  */
-export abstract class AbstractRegistry extends EventEmitter implements ILookupRegistry {
+export abstract class AbstractRegistry implements ILookupRegistry {
 
   protected readonly namespace: string;
 
@@ -24,28 +24,22 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
 
 
   constructor(namespace: string, options?: IRegistryOptions) {
-    super();
     this.namespace = namespace;
     this.options = options || {};
     this.lock = LockFactory.$().semaphore(1);
   }
 
+
+
   ready(timeout?: number): Promise<boolean> {
     return this.lock.await(timeout).then(x => true).catch(x => false);
   }
 
-  // /**
-  //  * Initialize events for metadata changes on runtime
-  //  */
-  // prepare() {
-  //   MetadataRegistry.$().on(C_EVENT_ADD, this.onAdd.bind(this));
-  //   MetadataRegistry.$().on(C_EVENT_REMOVE, this.onRemove.bind(this));
-  //   MetadataRegistry.$().on(C_EVENT_UPDATE, this.onUpdate.bind(this));
-  // }
 
   getOptions(): IRegistryOptions {
     return this.options;
   }
+
 
   /**
    * Return all registered schema references
@@ -90,8 +84,8 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
   /**
    * Returns the used instance of lookup registry handler
    */
-  getLookupRegistry(): LookupRegistry {
-    return LookupRegistry.$(this.namespace);
+  getLookupRegistry(namespace: string = null): LookupRegistry {
+    return LookupRegistry.$(namespace ? namespace : this.namespace);
   }
 
   /**
@@ -151,30 +145,30 @@ export abstract class AbstractRegistry extends EventEmitter implements ILookupRe
   /**
    * TODO
    */
-  add<T>(context: string, entry: T): T {
-    return this.getLookupRegistry().add(context, entry);
+  add<T>(context: string, entry: T, ns?: string): T {
+    return this.getLookupRegistry(ns).add(context, entry);
   }
 
 
   /**
    * TODO
    */
-  filter<T>(context: string, search: any): T[] {
-    return this.getLookupRegistry().filter(context, search);
+  filter<T>(context: string, search: any, ns?: string): T[] {
+    return this.getLookupRegistry(ns).filter(context, search);
   }
 
   /**
    * TODO
    */
-  find<T>(context: string, search: any): T {
-    return this.getLookupRegistry().find(context, search);
+  find<T>(context: string, search: any, ns?: string): T {
+    return this.getLookupRegistry(ns).find(context, search);
   }
 
   /**
    * TODO
    */
-  remove<T>(context: string, search: any): T[] {
-    return this.getLookupRegistry().remove(context, search);
+  remove<T>(context: string, search: any, ns?: string): T[] {
+    return this.getLookupRegistry(ns).remove(context, search);
   }
 
   /**

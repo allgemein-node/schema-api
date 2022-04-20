@@ -6,7 +6,11 @@ export function Namespace(ns: string) {
   return function (object: Function) {
     const options: IAttributeOptions = {
       target: object,
-      targetTypes: [METATYPE_ENTITY, METATYPE_CLASS_REF, METATYPE_EMBEDDABLE],
+      targetTypes: [
+        METATYPE_ENTITY,
+        METATYPE_CLASS_REF,
+        METATYPE_EMBEDDABLE
+      ],
       attributes: {
         namespace: ns
       }

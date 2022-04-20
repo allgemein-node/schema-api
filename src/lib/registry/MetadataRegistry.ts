@@ -20,6 +20,7 @@ import {MetadataStorage} from '@allgemein/base';
 import {EventEmitter} from 'events';
 import {IAbstractOptions} from '../options/IAbstractOptions';
 import {IAttributeOptions} from '../options/IAttributeOptions';
+import {ClassRef} from "../ClassRef";
 
 /**
  * Registry for metadata of classes and there properties
@@ -146,7 +147,7 @@ export class MetadataRegistry extends EventEmitter {
                                                     propertyName?: string): T[] {
     const data = <T[]>cloneDeep(this.metadata.filter(x =>
       x.metaType === context &&
-      x.target === target &&
+      (isFunction(target) ? x.target === target : ClassRef.getClassName(x.target) === target) &&
       (propertyName ? x.propertyName === propertyName : true)
     ));
     if (attributes && !isEmpty(data)) {

@@ -76,4 +76,9 @@ export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
    * Serialize only decorated properties (default is true)
    */
   onlyDecorated?: boolean;
+
+  /**
+   * Add $namespace to schema
+   */
+  appendNamespace?: boolean;
 }

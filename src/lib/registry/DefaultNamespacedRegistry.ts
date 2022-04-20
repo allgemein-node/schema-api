@@ -87,20 +87,22 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
     MetadataRegistry.$().on(C_EVENT_UPDATE, this.onMetadataUpdate.bind(this));
   }
 
-  
-  isDrained() {
-    if (this.drained) {
-      return Promise.resolve(this.drained);
-    } else {
-      return new Promise<boolean>((resolve, reject) => {
-        const t = setTimeout(args => {
-          reject();
-        }, 10000);
-        MetadataRegistry.$().once(C_EVENT_DRAIN_FINISHED + this.namespace, () => {
-          resolve(true);
+
+  ready(timeout?: number) {
+    return super.ready(timeout).then(() => {
+      if (this.drained) {
+        return Promise.resolve(this.drained);
+      } else {
+        return new Promise<boolean>((resolve, reject) => {
+          const t = setTimeout(args => {
+            reject();
+          }, timeout ? timeout : 10000);
+          MetadataRegistry.$().once(C_EVENT_DRAIN_FINISHED + this.namespace, () => {
+            resolve(true);
+          });
         });
-      });
-    }
+      }
+    });
   }
 
   /**
@@ -119,9 +121,9 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       }
     }
     this.drained = true;
-    MetadataRegistry.$().emit(C_EVENT_DRAIN_FINISHED + this.namespace, true);
-
+    MetadataRegistry.$().emit([C_EVENT_DRAIN_FINISHED, this.namespace].join('_'), true);
   }
+
 
   async onMetadataAdd(
     context: METADATA_TYPE,
@@ -642,7 +644,10 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       ref = this.find(METATYPE_CLASS_REF, (x: IClassRef) => x === object);
     }
     if (!ref) {
-      ref = ClassRef.get(<string | Function>object, this.namespace, type === METATYPE_PROPERTY);
+      ref = ClassRef.get(<string | Function>object, this.namespace, {
+        resolve: type === METATYPE_PROPERTY,
+        checkNamespace: true
+      });
       const metadata = this.getMetadata(METATYPE_EMBEDDABLE, <string | Function>object);
       if (!isEmpty(metadata) && keys(metadata).length > 0) {
         const refOptions = ref.getOptions();

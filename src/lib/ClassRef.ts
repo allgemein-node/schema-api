@@ -1,4 +1,16 @@
-import {first, has, isEmpty, isFunction, isString, isUndefined, kebabCase, snakeCase} from 'lodash';
+import {
+  first,
+  has,
+  isEmpty,
+  isFunction,
+  isString,
+  isUndefined,
+  kebabCase,
+  snakeCase,
+  get,
+  isBoolean,
+  isObjectLike
+} from 'lodash';
 import {ClassUtils, NotYetImplementedError} from '@allgemein/base';
 import {SchemaUtils} from './SchemaUtils';
 import {
@@ -9,7 +21,7 @@ import {
   GLOBAL_NAMESPACE,
   METADATA_TYPE,
   METATYPE_CLASS_REF,
-  METATYPE_ENTITY,
+  METATYPE_ENTITY, METATYPE_NAMESPACE,
   METATYPE_PROPERTY,
   XS_ID_SEPARATOR
 } from './Constants';
@@ -20,6 +32,7 @@ import {IPropertyRef} from '../api/IPropertyRef';
 import {IBuildOptions} from '../api/IBuildOptions';
 import {RegistryFactory} from './registry/RegistryFactory';
 import {AbstractRef} from './AbstractRef';
+import {MetadataRegistry} from "./registry/MetadataRegistry";
 
 /**
  * Reflective reference to a class function
@@ -166,28 +179,21 @@ export class ClassRef extends AbstractRef implements IClassRef {
 
 
   static find(klass: string | Function, namespace: string = DEFAULT_NAMESPACE): ClassRef {
+    const registry = namespace === GLOBAL_NAMESPACE ? LookupRegistry : LookupRegistry.$(namespace);
+    let className = ClassRef.getClassName(klass);
+    let classRef = null;
     if (isString(klass)) {
-      let name = ClassRef.getClassName(klass);
-      let classRef = null;
-      if (namespace === GLOBAL_NAMESPACE) {
-        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className === name);
-      } else {
-        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF, (c: ClassRef) => c.className === name);
-      }
-      return classRef;
+      classRef = registry.find<ClassRef>(METATYPE_CLASS_REF,
+        (c: ClassRef) => c.className === className
+      );
     } else {
-      let classRef = null;
-      if (namespace === GLOBAL_NAMESPACE) {
-        classRef = LookupRegistry.find<ClassRef>(METATYPE_CLASS_REF,
-          (c: ClassRef) => c.getClass(true) === klass || (c.isPlaceholder() && c.className === klass.name)
-        );
-      } else {
-        classRef = LookupRegistry.$(namespace).find<ClassRef>(METATYPE_CLASS_REF,
-          (c: ClassRef) => c.getClass(true) === klass || (c.isPlaceholder() && c.className === klass.name)
-        );
-      }
-      return classRef;
+      classRef = registry.find<ClassRef>(METATYPE_CLASS_REF,
+        (c: ClassRef) =>
+          c.getClass(true) === klass ||
+          (c.isPlaceholder() && c.className === className)
+      );
     }
+    return classRef;
   }
 
 
@@ -220,9 +226,8 @@ export class ClassRef extends AbstractRef implements IClassRef {
       if (isEmpty(name)) {
         let fn = null;
         try {
-          //fn = klass();
+          fn = klass();
         } catch (e) {
-
         }
         if (fn) {
           let name = ClassRef.getClassName(fn);
@@ -243,12 +248,23 @@ export class ClassRef extends AbstractRef implements IClassRef {
    * @param namespace
    * @param resolve
    */
-  static get(klass: string | Function, namespace: string = GLOBAL_NAMESPACE, resolve: boolean = false): ClassRef {
+  static get(klass: string | Function,
+             namespace: string = GLOBAL_NAMESPACE,
+             options?: boolean | { resolve?: boolean, checkNamespace?: boolean }): ClassRef {
+    const resolve = isBoolean(options) ? options : get(options || {}, 'resolve', false);
     if (resolve) {
       klass = this.checkIfFunctionCallback(klass);
     }
 
+    const checkNs = isObjectLike(options) ? get(options || {}, 'checkNamespace', false) : false;
     const isAnonymous = isFunction(klass) && klass.name === 'anonymous';
+
+    if (checkNs) {
+      const ns = MetadataRegistry.$().getByContextAndTarget(METATYPE_NAMESPACE, isFunction(klass) ? klass.name : klass);
+      if (ns.length > 0) {
+        namespace = get(first(ns), 'attributes.' + METATYPE_NAMESPACE, namespace);
+      }
+    }
 
     let classRef = this.find(klass, namespace);
     if (classRef) {

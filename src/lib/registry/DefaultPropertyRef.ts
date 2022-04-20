@@ -208,7 +208,7 @@ export class DefaultPropertyRef extends AbstractRef implements IPropertyRef {
         this.reference = true;
       } else if (isFunction(type) || this.isReferencingType(type)) {
         // try get existing class
-        const exists = ClassRef.get(type, this.getClassRef().getNamespace());
+        const exists = ClassRef.get(type, this.getClassRef().getNamespace(), {checkNamespace: true});
         if (exists) {
           this.targetRef = exists;
           this.reference = true;

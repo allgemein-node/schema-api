@@ -1,9 +1,22 @@
-import {defaults, get, has, isEmpty, isFunction, isNull, isString, isUndefined, keys, snakeCase, uniqBy} from 'lodash';
+import {
+  defaults,
+  get,
+  has,
+  isEmpty,
+  isFunction,
+  isNull,
+  isString,
+  isUndefined,
+  keys,
+  set,
+  snakeCase,
+  uniqBy
+} from 'lodash';
 import {ClassUtils, NotSupportedError} from '@allgemein/base';
 import {IJsonSchema7, IJsonSchema7Definition, IJsonSchema7TypeName, JSON_SCHEMA_7_TYPES} from './JsonSchema7';
 import {
   DEFAULT_KEY_TO_SKIP,
-  K_PATTERN_PROPERTY,
+  K_PATTERN_PROPERTY, METATYPE_NAMESPACE,
   METATYPE_PROPERTY,
   T_ARRAY,
   T_BOOLEAN,
@@ -124,7 +137,10 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       root.$id = '#' + klass.getEntityRef().name;
     }
 
-    if (isEntityRef(klass) || isClassRef(klass)) {
+    if ((isEntityRef(klass) || isClassRef(klass))) {
+      if (get(this.options, 'appendNamespace', false)) {
+        set(root, '$' + METATYPE_NAMESPACE, klass.getRegistry().getLookupRegistry().getNamespace());
+      }
       const data = klass.getOptions();
       this.appendAdditionalOptions(root, data);
     }
@@ -178,7 +194,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const clsRef = isEntityRef(klass) ? klass.getClassRef() : klass;
     const className = isEntityRef(klass) ? klass.name : clsRef.name;
 
-    // schema = this.getOrCreateSchemaDefinitions(schema);
     const root = this.getOrCreateRoot(className, klass);
     if (!root) {
       return null;
