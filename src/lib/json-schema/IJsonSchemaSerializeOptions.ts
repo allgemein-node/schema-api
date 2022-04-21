@@ -2,6 +2,7 @@ import {IJsonSchemaSerializer} from './IJsonSchemaSerializer';
 import {ISerializeOptions} from '../serializer/ISerializeOptions';
 import {IPropertyRef} from '../../api/IPropertyRef';
 import {IClassRef} from "../../api/IClassRef";
+import {IEntityRef} from "../../api/IEntityRef";
 
 export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
 
@@ -81,4 +82,13 @@ export interface IJsonSchemaSerializeOptions extends ISerializeOptions {
    * Add $namespace to schema
    */
   appendNamespace?: boolean;
+
+  /**
+   * Check if kind of property should be serialized
+   *
+   * - check for property ref
+   * - or klass + property name
+   *
+   */
+  allowedProperty?: (entry: IPropertyRef | string, klass?: Function) => boolean;
 }

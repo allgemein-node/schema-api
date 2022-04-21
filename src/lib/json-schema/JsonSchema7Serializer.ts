@@ -122,14 +122,11 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     const className = getClassName(klass);
-
-
     const appendTarget = this.isAppendTargetSet();
     const root: IJsonSchema7Definition = this.data.definitions[entityName] = {
       title: className ? className : entityName,
       type: T_OBJECT,
     };
-
     if (isEntityRef(klass)) {
       // when an entity mark with $id!
       root.$id = '#' + klass.name;
@@ -150,7 +147,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     }
 
     this.applyRef(entityName);
-
     if (this.options.postProcess) {
       this.options.postProcess(klass, root, this);
     }
@@ -189,6 +185,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   describeClassRef(klass: IClassRef): IJsonSchema7 {
     return this.describeRef(klass);
   }
+
 
   private describeRef(klass: IEntityRef | IClassRef): IJsonSchema7 {
     const clsRef = isEntityRef(klass) ? klass.getClassRef() : klass;
@@ -231,7 +228,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
     const rootProps = this.describePropertiesForFunction(klass);
     this.appendProperties(root, rootProps);
-
     const proto = SchemaUtils.getInherited(klass);
     if (proto) {
       const inheritedClassName = ClassUtils.getClassName(proto);
@@ -268,7 +264,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
       if (isString(p)) {
-        if (!get(this.options, C_ONLY_DECORATED, false)) {
+        if (!get(this.options, C_ONLY_DECORATED, false) && this.allowed(p, klass)) {
           const result = this.describePropertyForFunction(klass, p, instance);
           properties[p] = result;
         }
@@ -280,10 +276,13 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
   describePropertiesForRef(klass: IClassRef) {
     const properties: { [k: string]: IJsonSchema7Definition } = {};
-
     for (const prop of klass.getPropertyRefs()) {
-      const result = this.describePropertyForRef(klass, prop);
-      properties[prop.name] = result;
+      if (this.allowed(prop)) {
+        const result = this.describePropertyForRef(klass, prop);
+        if (result) {
+          properties[prop.name] = result;
+        }
+      }
     }
 
     const instance = klass.create<object>(false);
@@ -293,7 +292,9 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       if (isString(p) && !has(properties, p)) {
         if (!get(this.options, C_ONLY_DECORATED, false)) {
           const result = this.describePropertyForFunction(klass, p, instance);
-          properties[p] = result;
+          if (result) {
+            properties[p] = result;
+          }
         }
       } else if (isString(p) && has(properties, p)) {
         const value = instance[p];
@@ -441,13 +442,12 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
           }
         }
       }
-      const _keys = keys(data);
 
+      const _keys = keys(data);
       for (const k of _keys) {
         if (this.options.keysToSkip.includes(k)) {
           continue;
         }
-
         if (!propMeta[k] || get(this.options, 'allowKeyOverride', false)) {
           propMeta[k] = data[k];
         }
@@ -456,9 +456,21 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   }
 
 
+  /**
+   * General handle to check allow options method
+   *
+   * @param entry
+   */
+  allowed(entry: IPropertyRef | string, klass?: any) {
+    if (this.options && this.options.allowedProperty && isFunction(this.options.allowedProperty)) {
+      return this.options.allowedProperty(entry, klass);
+    }
+    return true;
+  }
+
+
   describePropertyForRef(klass: IClassRef, property: IPropertyRef): IJsonSchema7Definition {
     const propMeta: IJsonSchema7Definition = {};
-
     if (property.isCollection()) {
       setDefaultArray(propMeta);
       if (property.isReference()) {
