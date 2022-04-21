@@ -325,6 +325,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     } else {
       if (typeHint === T_OBJECT) {
         if (reflectMetadataType && reflectMetadataType !== T_OBJECT) {
+          //
           typeHint = reflectMetadataType;
         } else {
           if (value === null || value === undefined) {
@@ -333,10 +334,14 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
             typeHint = T_BOOLEAN;
           } else {
             typeHint = Reflect.getPrototypeOf(value)?.constructor;
-            if (typeHint.name === Object.name) {
-              typeHint = T_OBJECT;
-            } else if (typeHint.name === Array.name) {
-              typeHint = T_ARRAY;
+            if (typeHint && typeHint.name) {
+              if (typeHint.name === Object.name) {
+                typeHint = T_OBJECT;
+              } else if (typeHint.name === Array.name) {
+                typeHint = T_ARRAY;
+              }
+            } else {
+              typeHint = this.getDefaultTypeHint();
             }
           }
         }
