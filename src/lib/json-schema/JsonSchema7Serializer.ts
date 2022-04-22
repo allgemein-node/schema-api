@@ -260,8 +260,14 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
 
   describePropertiesForFunction(klass: Function) {
     const properties: { [k: string]: IJsonSchema7Definition } = {};
-    const instance = Reflect.construct(klass, []);
-    const _properties = Reflect.ownKeys(instance);
+    let _properties: (string | symbol)[] = [];
+    let instance = null;
+    try {
+      instance = Reflect.construct(klass, []);
+      _properties = Reflect.ownKeys(instance);
+    } catch (e) {
+    }
+
     for (const p of _properties) {
       if (isString(p)) {
         if (!get(this.options, C_ONLY_DECORATED, false) && this.allowed(p, klass)) {
@@ -318,7 +324,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     const propMeta: IJsonSchema7Definition = {};
 
     // check if property is object
-    let value = instance[propertyName];
+    let value = instance ? instance[propertyName] : undefined;
     let typeHint: any = typeof value;
     const reflectMetadataType = getReflectedType(clazz, propertyName);
     if (this.options.typeHint && isFunction(this.options.typeHint)) {
@@ -326,7 +332,6 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     } else {
       if (typeHint === T_OBJECT) {
         if (reflectMetadataType && reflectMetadataType !== T_OBJECT) {
-          //
           typeHint = reflectMetadataType;
         } else {
           if (value === null || value === undefined) {
