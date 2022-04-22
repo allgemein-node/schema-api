@@ -50,7 +50,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
     defaults(this.options, <IJsonSchemaSerializeOptions>{
       keysToSkip: DEFAULT_KEY_TO_SKIP,
       ignoreUnknownType: false,
-      defaultTypeHint: 'string',
+      defaultTypeHint: T_STRING,
       [C_ONLY_DECORATED]: false,
       postProcess: (src, dst, serializer) => {
         if (src && src.metaType === METATYPE_PROPERTY && has(dst, 'cardinality')) {
