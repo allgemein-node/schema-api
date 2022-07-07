@@ -174,6 +174,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
       for (const anyEntry of data.anyOf) {
         ret.push(await this.parse(anyEntry as any, options) as (IClassRef | IEntityRef));
       }
+    } else if (data.definitions && keys(data.definitions).length === 0) {
+      // doing nothing no entries found
     } else {
       throw new Error('no valid schema element for further parse, key with name type or $ref must be present.');
     }
