@@ -94,7 +94,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
         return Promise.resolve(this.drained);
       } else {
         return new Promise<boolean>((resolve, reject) => {
-          const t = setTimeout(args => {
+          const t = setTimeout(() => {
             reject();
           }, timeout ? timeout : 10000);
           MetadataRegistry.$().once(C_EVENT_DRAIN_FINISHED + this.namespace, () => {
@@ -200,7 +200,7 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
       if (sourceEntry) {
         const find = this.find(context, (c: IPropertyRef) =>
           c.getClassRef().getClass() === options.target &&
-          c.name === options.propertyName
+          c.name === (options as IPropertyOptions).propertyName
         );
         if (!find) {
           // update

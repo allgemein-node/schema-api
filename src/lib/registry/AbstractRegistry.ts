@@ -1,5 +1,4 @@
 import {snakeCase} from 'lodash';
-import {EventEmitter} from 'events';
 import {METADATA_TYPE, METATYPE_ENTITY, METATYPE_PROPERTY} from './../Constants';
 import {ILookupRegistry} from '../../api/ILookupRegistry';
 import {IEntityRef} from '../../api/IEntityRef';
@@ -18,7 +17,7 @@ export abstract class AbstractRegistry implements ILookupRegistry {
 
   protected readonly namespace: string;
 
-  readonly lock: Semaphore;
+  private _lock: Semaphore;
 
   readonly options: IRegistryOptions;
 
@@ -26,9 +25,15 @@ export abstract class AbstractRegistry implements ILookupRegistry {
   constructor(namespace: string, options?: IRegistryOptions) {
     this.namespace = namespace;
     this.options = options || {};
-    this.lock = LockFactory.$().semaphore(1);
   }
 
+
+  get lock() {
+    if (!this._lock) {
+      this._lock = LockFactory.$().semaphore(1);
+    }
+    return this._lock;
+  }
 
 
   ready(timeout?: number): Promise<boolean> {
@@ -178,7 +183,13 @@ export abstract class AbstractRegistry implements ILookupRegistry {
     this.clear();
   }
 
+  /**
+   * Remove namespace from LookupRegistry and also remove semaphore lock if exists
+   */
   clear() {
+    if (this._lock) {
+      LockFactory.$().remove(this._lock);
+    }
     LookupRegistry.reset(this.namespace);
   }
 
