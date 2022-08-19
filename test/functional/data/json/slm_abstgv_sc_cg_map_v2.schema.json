@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "slm_abstgv_sc_cg_map_v2": {
+      "title": "SlmAbstgvScCgMapV2",
+      "type": "object",
+      "$id": "#slm_abstgv_sc_cg_map_v2",
+      "storable": true,
+      "schema": [
+        "slmdb"
+      ],
+      "namespace": "built-entity",
+      "properties": {
+        "id": {
+          "type": "number",
+          "auto": true,
+          "form": "readonly",
+          "identifier": true,
+          "generated": true
+        },
+        "abschl": {
+          "type": "string",
+          "length": 2,
+          "form": "text"
+        },
+        "stg": {
+          "type": "string",
+          "length": 3,
+          "form": "text"
+        },
+        "vert": {
+          "type": "string",
+          "length": 3,
+          "form": "text"
+        },
+        "pversion": {
+          "type": "number",
+          "form": "text"
+        },
+        "fach": {
+          "type": "string",
+          "length": 1,
+          "form": "text"
+        },
+        "tu": {
+          "type": "boolean",
+          "form": "checkbox",
+          "default": true
+        },
+        "sc": {
+          "type": "string",
+          "length": 12,
+          "form": "text"
+        },
+        "cg": {
+          "type": "string",
+          "length": 12,
+          "form": "text"
+        },
+        "his_sap": {
+          "type": "boolean",
+          "form": "checkbox",
+          "default": true
+        },
+        "sap_his": {
+          "type": "boolean",
+          "form": "checkbox",
+          "default": true
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/definitions/slm_abstgv_sc_cg_map_v2"
+    }
+  ]
+}
