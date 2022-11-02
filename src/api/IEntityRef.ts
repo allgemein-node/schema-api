@@ -3,13 +3,11 @@ import {IClassRef} from './IClassRef';
 import {IBuildOptions} from './IBuildOptions';
 import {IBaseRef} from './IBaseRef';
 import {ISchemaRef} from './ISchemaRef';
-
-// import {IEntityRefMetadata} from "./metadata/IEntityRefMetadata";
-
+import {METATYPE_ENTITY} from "../lib/Constants";
 
 
 export function isEntityRef(x: any): x is IEntityRef {
-  return (x as IEntityRef)?.metaType === 'entity';
+  return (x as IEntityRef)?.metaType === METATYPE_ENTITY;
 }
 
 export interface IEntityRef extends IBaseRef {
@@ -30,7 +28,5 @@ export interface IEntityRef extends IBaseRef {
   build<T>(instance: any, options?: IBuildOptions): T;
 
   isOf(instance: any): boolean;
-
-  // toJson(follow?:boolean): IEntityRefMetadata;
 
 }

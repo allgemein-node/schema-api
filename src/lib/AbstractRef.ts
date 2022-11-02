@@ -1,5 +1,6 @@
 import {assign, get, has, isEmpty, keys, set, snakeCase} from 'lodash';
 import {
+  C_INTERNAL_NAME,
   C_NAME,
   DEFAULT_NAMESPACE,
   JS_DATA_TYPES,
@@ -15,8 +16,14 @@ import {ILookupRegistry} from '../api/ILookupRegistry';
 
 export abstract class AbstractRef implements IBaseRef {
 
+  /**
+   * Type of this entry
+   */
   readonly metaType: METADATA_TYPE;
 
+  /**
+   * Namespace better registry of this entry
+   */
   namespace: string = DEFAULT_NAMESPACE;
 
   private _cachedOptions: any;
@@ -41,17 +48,18 @@ export abstract class AbstractRef implements IBaseRef {
   }
 
 
-  abstract getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
-
   getNamespace() {
     return this.namespace;
   }
 
-  abstract getRegistry(): ILookupRegistry;
 
   getSourceRef() {
     return this.object;
   }
+
+  abstract getClassRefFor(object: string | Function | IClassRef, type: METADATA_TYPE): IClassRef;
+
+  abstract getRegistry(): ILookupRegistry;
 
   protected getOptionsEntry() {
     if (!this._cachedOptions) {
@@ -118,47 +126,27 @@ export abstract class AbstractRef implements IBaseRef {
     return has(opts, key);
   }
 
-  // getOptions(key: string = null, defaultValue: any = null): any | OPTS {
-  //   if (key) {
-  //     return get(this.options, key, defaultValue);
-  //   }
-  //   return this.options;
-  // }
-  //
-  // setOptions(opts: any) {
-  //   if (opts && !isEmpty(keys(opts))) {
-  //     if (!isEmpty(keys(this.options))) {
-  //       this.options = merge(this.options, opts);
-  //     } else {
-  //       this.options = opts;
-  //     }
-  //   }
-  // }
-  //
-  //
-  // setOption(key: string, value: any) {
-  //   if (!this.options) {
-  //     this.options = <any>{};
-  //   }
-  //   set(<any>this.options, key, value);
-  // }
-
-
-  getClassRef() {
+  /**
+   * Return class ref
+   */
+  getClassRef(): IClassRef {
     return this.object;
   }
 
 
-  getClass(create: boolean = false) {
+  /**
+   * Get class for the entry
+   *
+   * @param create: create anonymous placeholder if no class exists
+   */
+  getClass(create: boolean = false): Function {
     return this.getClassRef().getClass(create);
   }
 
 
-  get machineName() {
-    return snakeCase(this.name);
-  }
-
-
+  /**
+   * Return the name of the class ref, if not exits then return null
+   */
   get originalName() {
     if (this.object) {
       return this.object.name;
@@ -166,8 +154,24 @@ export abstract class AbstractRef implements IBaseRef {
     return null;
   }
 
+
+  /**
+   * Return internal name (same as calling storingName)
+   */
+  get internalName(): string {
+    return this.storingName;
+  }
+
+
+  /**
+   * Return internal name, check if internalName is set else check if name options is present
+   *
+   */
   get storingName() {
-    let name = null;
+    let name = this.getOptions(C_INTERNAL_NAME, null);
+    if (name) {
+      return name;
+    }
     if (this.metaType === METATYPE_PROPERTY) {
       name = this.getOptions(C_NAME, null);
       if (!name) {
@@ -188,24 +192,12 @@ export abstract class AbstractRef implements IBaseRef {
 
 
   /**
-   * Return supported primative data types
+   * Return supported primitive data types
    */
   getSupportedDataTypes() {
     return JS_DATA_TYPES;
   }
 
-
-  // toJson() {
-  //   let options = cloneDeep(this.getOptions());
-  //   let o: any = {
-  //     id: this.id(),
-  //     name: this.name,
-  //     type: this.metaType,
-  //     machineName: this.machineName,
-  //     options: options
-  //   };
-  //   return o;
-  // }
 
 }
 

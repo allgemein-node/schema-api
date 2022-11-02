@@ -1,4 +1,5 @@
 import exp = require('constants');
+import {INamedOptions} from "./options/INamedOptions";
 
 export const DEFAULT_NAMESPACE = 'default';
 export const GLOBAL_NAMESPACE = '__global__';
@@ -7,6 +8,7 @@ export const GLOBAL_NAMESPACE = '__global__';
 export const C_IDENTIFIER = 'identifier';
 export const C_TYPE = 'type';
 export const C_NAME = 'name';
+export const C_INTERNAL_NAME = 'internalName';
 export const C_APPENDED = 'appended';
 export const C_CARDINALITY = 'cardinality';
 

@@ -9,7 +9,12 @@ export {ILookupRegistry} from './api/ILookupRegistry';
 export {IPropertyExtentions} from './api/IPropertyExtentions';
 export {IPropertyRef} from './api/IPropertyRef';
 export {ISchemaRef} from './api/ISchemaRef';
-export {IJsonSchema, supportsJsonSchemaExport, supportsJsonSchema, supportsJsonSchemaImport} from './api/IJsonSchema';
+export {
+  IJsonSchema,
+  supportsJsonSchemaExport,
+  supportsJsonSchema,
+  supportsJsonSchemaImport
+} from './api/IJsonSchema';
 
 export {Entity} from './decorators/Entity';
 export {Property} from './decorators/Property';
@@ -82,11 +87,15 @@ export {
 export {JsonSchema7Serializer} from './lib/json-schema/JsonSchema7Serializer';
 export {JsonSchema7Unserializer} from './lib/json-schema/JsonSchema7Unserializer';
 export {LookupRegistry} from './lib/LookupRegistry';
+
+export {INamedOptions} from './lib/options/INamedOptions';
 export {IAbstractOptions} from './lib/options/IAbstractOptions';
+export {IAttributeOptions} from './lib/options/IAttributeOptions';
 export {IEntityOptions} from './lib/options/IEntityOptions';
 export {IObjectOptions} from './lib/options/IObjectOptions';
 export {IPropertyOptions} from './lib/options/IPropertyOptions';
 export {ISchemaOptions} from './lib/options/ISchemaOptions';
+
 export {DefaultEntityRef} from './lib/registry/DefaultEntityRef';
 export {DefaultNamespacedRegistry} from './lib/registry/DefaultNamespacedRegistry';
 export {DefaultPropertyRef} from './lib/registry/DefaultPropertyRef';

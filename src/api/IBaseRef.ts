@@ -1,5 +1,6 @@
 import {METADATA_TYPE} from '../lib/Constants';
 import {ILookupRegistry} from './ILookupRegistry';
+import {INamedOptions} from "../lib/options/INamedOptions";
 
 
 export interface IBaseRef {
@@ -14,10 +15,10 @@ export interface IBaseRef {
    */
   storingName: string;
 
-  /**
-   * Name for processing and identifing
-   */
-  machineName: string;
+  // /**
+  //  * Name for processing and identifing
+  //  */
+  // machineName: string;
 
   /**
    * meta data tpye
