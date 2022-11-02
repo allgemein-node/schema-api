@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import {expect} from 'chai';
 import {suite, test} from '@testdeck/mocha';
 import {
-  C_EVENT_ADD,
+  C_EVENT_ADD, C_INTERNAL_NAME, C_NAME,
   DEFAULT_NAMESPACE,
   K_ENTITY_BUILT,
   METATYPE_CLASS_REF,
@@ -20,6 +20,10 @@ import {TestClass} from './data/classes/TestClass';
 import {TestClassWithEmbedded} from './data/classes/TestClassWithEmbedded';
 import {isLookupRegistry} from '../../src/api/ILookupRegistry';
 import {Entity} from "../../src";
+import {WithInternalName} from "./data/classes/WithInternalName";
+import {SimpleEntity} from "./data/classes/SimpleEntity";
+import {WithName} from "./data/classes/WithName";
+import {WithInternalNameAndName} from "./data/classes/WithInternalNameAndName";
 
 
 @suite('functional/entity-ref')
@@ -32,6 +36,7 @@ class EntityRefSpec {
     expect(isLookupRegistry({})).to.be.false;
   }
 
+
   @test
   async 'lookup registry for simple annotated class'() {
     const registry = RegistryFactory.get();
@@ -40,11 +45,15 @@ class EntityRefSpec {
     const refs = entityRef.getPropertyRefs();
     expect(refs).to.have.length(0);
     expect(namespace).to.be.eq(DEFAULT_NAMESPACE);
+    expect(entityRef.name).to.be.eq('AnnotatedEntity');
+    expect(entityRef.storingName).to.be.eq('annotated_entity');
   }
+
 
   @test
   async 'additional properties over static properties'() {
     Entity()
+
     class AddProp {
 
     }
@@ -264,5 +273,31 @@ class EntityRefSpec {
   }
 
 
-}
+  /**
+   *  Check naming of entity
+   */
+  @test
+  async 'check naming of entity'() {
+    const registry = RegistryFactory.get();
+    let entityRef = registry.getEntityRefFor(WithInternalName);
+    expect(entityRef.name).to.be.eq('WithInternalName');
+    expect(entityRef.storingName).to.be.eq('settedInternal_Name');
+    expect(entityRef.getClassRef().name).to.be.eq('WithInternalName');
+    expect(entityRef.getOptions(C_NAME)).to.be.eq('WithInternalName');
+    expect(entityRef.getOptions(C_INTERNAL_NAME)).to.be.eq('settedInternal_Name');
 
+    entityRef = registry.getEntityRefFor(WithName);
+    expect(entityRef.name).to.be.eq('settedName');
+    expect(entityRef.storingName).to.be.eq('settedName');
+    expect(entityRef.getClassRef().name).to.be.eq('WithName');
+    expect(entityRef.getOptions(C_INTERNAL_NAME)).to.be.eq(null);
+    expect(entityRef.getOptions(C_NAME)).to.be.eq('settedName');
+
+    entityRef = registry.getEntityRefFor(WithInternalNameAndName);
+    expect(entityRef.name).to.be.eq('withInternalName2');
+    expect(entityRef.storingName).to.be.eq('settedInternal_Name');
+    expect(entityRef.getClassRef().name).to.be.eq('WithInternalNameAndName');
+    expect(entityRef.getOptions(C_INTERNAL_NAME)).to.be.eq('settedInternal_Name');
+    expect(entityRef.getOptions(C_NAME)).to.be.eq('withInternalName2');
+  }
+}
