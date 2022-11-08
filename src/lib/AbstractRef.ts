@@ -162,6 +162,12 @@ export abstract class AbstractRef implements IBaseRef {
     return this.storingName;
   }
 
+  /**
+   * Return name in snake case notation
+   */
+  get machineName() {
+    return snakeCase(this.name);
+  }
 
   /**
    * Return internal name, check if internalName is set else check if name options is present
