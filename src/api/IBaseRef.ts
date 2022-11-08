@@ -15,10 +15,10 @@ export interface IBaseRef {
    */
   storingName: string;
 
-  // /**
-  //  * Name for processing and identifing
-  //  */
-  // machineName: string;
+  /**
+   * Name for processing and identifing
+   */
+  machineName: string;
 
   /**
    * meta data tpye
