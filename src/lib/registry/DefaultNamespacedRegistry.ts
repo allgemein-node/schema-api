@@ -579,16 +579,22 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
 
   create<T>(context: string, options: IAbstractOptions): T {
     const skipNsCheck = get(options, 'skipNsCheck', false);
+    const failedNsCheck = get(options, 'failedNsCheckMode', 'throw');
     delete options.skipNsCheck;
     const metadata = this.getMetadata(context as METADATA_TYPE, options.target, options.propertyName ? options.propertyName : null);
     if (metadata) {
-
-      if (!skipNsCheck && metadata.namespace && metadata.namespace !== this.namespace) {
-        if (context !== METATYPE_PROPERTY) {
-          throw new NotSupportedError(
-            'namespace for ' + context + ' is ' + metadata.namespace +
-            ' the namespace of this registry is ' + this.namespace
-          );
+      if (metadata.namespace && metadata.namespace !== this.namespace) {
+        if (!skipNsCheck) {
+          if (context !== METATYPE_PROPERTY) {
+            if (failedNsCheck === 'ignore') {
+              return null;
+            } else {
+              throw new NotSupportedError(
+                'namespace for ' + context + ' is ' + metadata.namespace +
+                ' the namespace of this registry is ' + this.namespace
+              );
+            }
+          }
         }
       }
       if (!isEmpty(metadata) && keys(metadata).length > 0) {

@@ -59,6 +59,8 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
   reference: { [k: string]: any } = {};
 
+  issues: { msg: string, level: 'error' | 'warning' | 'info' }[] = [];
+
   constructor(opts: IJsonSchemaUnserializeOptions) {
     this.options = opts;
   }
@@ -106,6 +108,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     return RegistryFactory.get(ns ? ns : this.getNamespace());
   }
 
+
+  getIssues() {
+    return this.issues;
+  }
 
   /**
    * If collectors are defined use them before default
@@ -321,7 +327,11 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
     if (!propRefExits || get(this.options, 'forcePropertyRefCreation', false)) {
       // remove properties key if exists
       delete propOptions.properties;
-      _classRef.getRegistry().create(METATYPE_PROPERTY, propOptions);
+      try {
+        _classRef.getRegistry().create(METATYPE_PROPERTY, propOptions);
+      } catch (e) {
+        this.issues.push({msg: e.message, level: 'error'})
+      }
     } else if (propRefExits) {
       propRefExits.setOptions(propOptions);
     }
@@ -526,14 +536,17 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         entityOptions = refOptions;
         refOptions.metaType = METATYPE_CLASS_REF;
         const existingOptions = classRef.getOptions();
-
         classRef.setOptions(defaults(refOptions, existingOptions));
       }
 
       if (metaType === METATYPE_ENTITY) {
         ret = this.getRegistry(namespace).find(metaType, (x: IEntityRef) => x.getClassRef() === classRef);
         if (!ret || get(this.options, 'forceEntityRefCreation', false)) {
-          ret = this.getRegistry(namespace).create(metaType, entityOptions);
+          try {
+            ret = this.getRegistry(namespace).create(metaType, entityOptions);
+          } catch (e) {
+            this.issues.push({msg: e.message, level: 'error'})
+          }
         }
       } else {
         ret = classRef;
