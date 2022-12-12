@@ -110,13 +110,16 @@ export class DefaultNamespacedRegistry extends AbstractRegistry {
    */
   drainAlreadyAdded() {
     this.drained = false;
-    const alreadyFired = MetadataRegistry.$().getMetadata().filter(x => {
-      const v = Object.getOwnPropertyDescriptor(x, K_TRIGGERED);
-      return v && v.value;
-    }) as IAbstractOptions[];
+    const alreadyFired = MetadataRegistry.$()
+      .getMetadata()
+      .filter(x => {
+        const v = Object.getOwnPropertyDescriptor(x, K_TRIGGERED);
+        return v && v.value;
+      }) as IAbstractOptions[];
     for (const event of alreadyFired) {
+      const cloneEvent = cloneDeep(event);
       try {
-        this.onAdd(event.metaType as METADATA_TYPE, event);
+        this.onAdd(cloneEvent.metaType as METADATA_TYPE, cloneEvent);
       } catch (e) {
       }
     }
