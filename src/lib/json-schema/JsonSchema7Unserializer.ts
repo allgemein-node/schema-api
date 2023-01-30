@@ -155,18 +155,20 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
 
       if (data.type === T_OBJECT) {
         ret = await this.parseTypeObject(data, options);
-        if (options.$ref) {
-          // finish reference if waiting
-          this.reference[options.$ref] = ret;
-          delete options.$ref;
-        }
+        if (ret) {
+          if (options.$ref) {
+            // finish reference if waiting
+            this.reference[options.$ref] = ret;
+            delete options.$ref;
+          }
 
-        if (this.hasProperties(data)) {
-          await this.parseProperties(ret, data.properties, options);
-        }
-        if (this.hasPatternProperties(data)) {
-          options.isPattern = true;
-          await this.parseProperties(ret, data.patternProperties, options);
+          if (this.hasProperties(data)) {
+            await this.parseProperties(ret, data.properties, options);
+          }
+          if (this.hasPatternProperties(data)) {
+            options.isPattern = true;
+            await this.parseProperties(ret, data.patternProperties, options);
+          }
         }
       } else {
         throw new Error('type is not supported at this place');
