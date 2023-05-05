@@ -64,7 +64,6 @@ export {
 export {JsonSchema7Serializer} from './lib/json-schema/JsonSchema7Serializer';
 export {JsonSchema7Unserializer} from './lib/json-schema/JsonSchema7Unserializer';
 export {LookupRegistry} from './lib/LookupRegistry';
-
 export {INamedOptions} from './lib/options/INamedOptions';
 export {IAbstractOptions} from './lib/options/IAbstractOptions';
 export {IAttributeOptions} from './lib/options/IAttributeOptions';
