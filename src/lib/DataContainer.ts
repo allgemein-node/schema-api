@@ -1,4 +1,4 @@
-import {find, get, has, isBoolean, isEmpty, isFunction, keys, remove, set} from 'lodash';
+import {get, has, isBoolean, isEmpty, isFunction, keys, remove, set} from 'lodash';
 
 
 import {STATE_KEY} from './Constants';
@@ -137,7 +137,7 @@ export class DataContainer<T> {
     keys(this.validation).forEach(key => {
       if (this.validation[key]) {
         const valid = this.validation[key];
-        const found = find(this.errors, {property: key});
+        const found = this.errors.find(x => x.property === key);
         valid.messages = [];
         if (found) {
           valid.valid = false;

@@ -1,4 +1,4 @@
-import {filter, find, has, isEmpty, keys, remove} from 'lodash';
+import {has, isEmpty, remove} from 'lodash';
 
 import {DEFAULT_NAMESPACE} from './Constants';
 
@@ -57,14 +57,14 @@ export class LookupRegistry {
     if (!has(this._entries, context)) {
       this._entries[context] = [];
     }
-    return filter(this._entries[context], search);
+    return this._entries[context].filter(search);
   }
 
   find<T>(context: string, search: any): T {
     if (!has(this._entries, context)) {
       this._entries[context] = [];
     }
-    return find(this._entries[context], search);
+    return this._entries[context].find(search);
   }
 
 
@@ -72,14 +72,14 @@ export class LookupRegistry {
    * return lookup registry namespaces
    */
   static getRegistryNamespaces() {
-    return keys(this.$self);
+    return Object.keys(this.$self);
   }
 
   /**
    * return lookup registries
    */
   static getLookupRegistries() {
-    return keys(this.$self).map(x => this.$self[x]);
+    return Object.keys(this.$self).map(x => this.$self[x]);
   }
 
   /**
@@ -89,7 +89,7 @@ export class LookupRegistry {
    * @param search
    */
   static find<T>(context: string, search: any): T {
-    const registryNames = keys(this.$self);
+    const registryNames = this.getRegistryNamespaces();
     for (const registryName of registryNames) {
       const found = <T>this.$self[registryName].find(context, search);
       if (found) {
@@ -107,7 +107,7 @@ export class LookupRegistry {
    */
   static filter<T>(context: string, search: any): T[] {
     const results: T[] = [];
-    const namespaces = keys(this.$self);
+    const namespaces = Object.keys(this.$self);
     for (const namespace of namespaces) {
       const found = <T[]>this.$self[namespace].filter(context, search);
       if (!isEmpty(found)) {
