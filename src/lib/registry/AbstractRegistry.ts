@@ -158,7 +158,7 @@ export abstract class AbstractRegistry implements ILookupRegistry {
   /**
    * TODO
    */
-  filter<T>(context: string, search: any, ns?: string): T[] {
+  filter<T>(context: string, search: (x: any) => boolean, ns?: string): T[] {
     return this.getLookupRegistry(ns).filter(context, search);
   }
 

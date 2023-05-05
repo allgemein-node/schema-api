@@ -53,14 +53,18 @@ export class LookupRegistry {
     return remove<T>(this._entries[context], search);
   }
 
-  filter<T>(context: string, search: any): T[] {
+  filter<T>(context: string, search: (x: any) => boolean): T[] {
     if (!has(this._entries, context)) {
       this._entries[context] = [];
     }
-    return this._entries[context].filter(search);
+    if(search){
+      return this._entries[context].filter(search);
+    }
+    return this._entries[context];
+
   }
 
-  find<T>(context: string, search: any): T {
+  find<T>(context: string, search: (x: any) => boolean): T {
     if (!has(this._entries, context)) {
       this._entries[context] = [];
     }
