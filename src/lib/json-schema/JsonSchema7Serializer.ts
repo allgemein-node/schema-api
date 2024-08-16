@@ -304,7 +304,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
         }
       } else if (isString(p) && has(properties, p)) {
         const value = instance[p];
-        if (!isNull(value) || !isUndefined(value)) {
+        if (!(isNull(value) || isUndefined(value))) {
           // add default value if exists
           (properties[p] as any).default = SchemaUtils.normValue(value);
         }

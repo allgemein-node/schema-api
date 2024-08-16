@@ -1,6 +1,6 @@
 //
 import {assign, get, isArray, isEmpty, isFunction, isNull, isSet, isUndefined} from 'lodash';
-import {CryptUtils, NotYetImplementedError} from '@allgemein/base';
+import {CryptUtils, Logger, NotYetImplementedError} from '@allgemein/base';
 import {C_PROP_NAME, OPT_CREAT_AND_COPY} from './Constants';
 import {IClassRef, isClassRef} from '../api/IClassRef';
 import {IEntityRef, isEntityRef} from '../api/IEntityRef';
@@ -125,7 +125,12 @@ export class SchemaUtils {
 
 
   static normValue(value: any) {
-    return JSON.parse(JSON.stringify(value));
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (err) {
+      console.error(err);
+    }
+    return 'undefined';
   }
 
   //
