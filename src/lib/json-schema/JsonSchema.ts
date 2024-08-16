@@ -81,7 +81,7 @@ export class JsonSchema implements ISerializerFactory {
   }
 
 
-  static detectSchemaVersion(schema: object, fallback: string = DRAFT_07) {
+  static detectSchemaVersion(schema: any, fallback: string = DRAFT_07) {
     if (schema['$schema']) {
       if (isString(schema['$schema'])) {
         const match = schema['$schema'].match(/json-schema.org\/(.*)\/schema/);

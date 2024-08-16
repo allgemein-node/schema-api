@@ -1391,8 +1391,11 @@ class JsonSchemaDraft07SerializationSpec {
         '$ref': '#/definitions/Car'
       };
 
+    // @ts-ignore
     data_x.definitions['Car2'] = _.cloneDeep(data_x.definitions['Car']);
+    // @ts-ignore
     data_x.definitions['Car2'].title = 'Car2';
+    // @ts-ignore
     data_x.definitions['Car2'].$id = '#Car2';
     data_x.$ref = '#/definitions/Car2';
 

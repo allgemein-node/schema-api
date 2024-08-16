@@ -123,7 +123,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
    * @param options
    * @private
    */
-  private collectOptions(key: string, data: IJsonSchema7, options: IParseOptions = {}) {
+  private collectOptions(key: keyof IJsonSchema7, data: IJsonSchema7, options: IParseOptions = {}) {
     const type = get(options, 'metaType', METATYPE_ENTITY);
     let ret: any = null;
     if (!isUndefined(data[key]) || !isNull(data[key])) {
@@ -208,7 +208,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
   }
 
 
-  getDefinitionsKey(data: object) {
+  getDefinitionsKey(data: any) {
     for (const k of keys(data)) {
       if (k !== 'properties' && isObjectLike(data[k])) {
         const exists = keys(data[k]).find(x => has(data[k][x], 'type'));
@@ -249,9 +249,10 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
         if (data.$id === refHashed) {
           return data;
         } else {
-          const defKey = this.getDefinitionsKey(data);
+          const defKey = this.getDefinitionsKey(data) as keyof IJsonSchema7;
           if (data[defKey]) {
             for (const k of keys(data[defKey])) {
+              // @ts-ignore
               const x = data[defKey][k] as IJsonSchema7;
               if (x && x.$id && x.$id === refHashed) {
                 return x;
@@ -566,7 +567,7 @@ export class JsonSchema7Unserializer implements IJsonSchemaUnserializer {
                     skipKeys: string[],
                     collectorOptions: IParseOptions) {
     const type = get(collectorOptions, 'metaType', METATYPE_ENTITY);
-    const _keys = keys(data);
+    const _keys = keys(data) as (keyof IJsonSchema7)[];
     for (const key of _keys) {
       const entry = this.collectOptions(key, data, collectorOptions);
       if (skipKeys.includes(key)) {

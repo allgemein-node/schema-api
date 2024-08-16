@@ -6,6 +6,7 @@ import {RegistryFactory} from '../../src/lib/registry/RegistryFactory';
 
 import {EntityWithSchemaSimple} from './data/classes/EntityWithSchemaSimple';
 import {EntityWithNamespaceSchemaSimple} from './data/classes/EntityWithNamespaceSchemaSimple';
+import {ISchemaRef} from '../../src';
 
 const OTHER_NAMESPACE = 'other'
 
@@ -19,7 +20,7 @@ class SchemaRefSpec {
     let entityRef = RegistryFactory.get().getEntityRefFor(EntityWithSchemaSimple);
     const schemaNames = entityRef.getOptions('schema');
     expect(schemaNames).to.be.deep.eq(['simpleschema']);
-    const schemaRefs = entityRef.getSchemaRefs();
+    const schemaRefs = entityRef.getSchemaRefs() as any;
     expect(schemaRefs).to.have.length(1);
     expect(schemaRefs[0].name).to.be.eq('simpleschema');
 
@@ -99,7 +100,7 @@ class SchemaRefSpec {
     let entityRef = RegistryFactory.get(OTHER_NAMESPACE).getEntityRefFor(EntityWithNamespaceSchemaSimple);
     const schemaNames = entityRef.getOptions('schema');
     expect(schemaNames).to.be.deep.eq(['simple']);
-    const schemaRefs = entityRef.getSchemaRefs();
+    const schemaRefs = entityRef.getSchemaRefs() as ISchemaRef[];
     expect(schemaRefs).to.have.length(1);
     expect(schemaRefs[0].name).to.be.eq('simple');
 

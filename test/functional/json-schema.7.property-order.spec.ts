@@ -8,9 +8,9 @@ import {DEFAULT_NAMESPACE, METATYPE_PROPERTY} from '../../src/lib/Constants';
 import {IEntityRef, isEntityRef} from '../../src/api/IEntityRef';
 import {IJsonSchema7} from '../../src/lib/json-schema/JsonSchema7';
 import '../../src/decorators/validate';
-import {FileUtils} from "@allgemein/base";
-import {keys} from "lodash";
-import {ClassRef, IParseOptions} from "../../src";
+import {FileUtils} from '@allgemein/base';
+import {keys} from 'lodash';
+import {ClassRef, IParseOptions} from '../../src';
 
 @suite('functional/json-schema-draft-07 - property order')
 class JsonSchemaDraft07SerializationSpec {
@@ -22,24 +22,24 @@ class JsonSchemaDraft07SerializationSpec {
 
     const classRefs = await JsonSchema.unserialize(json, {
       cwd: __dirname + '/data/json',
-      return: "class-refs",
+      return: 'class-refs',
     }) as IClassRef[];
 
     expect(classRefs).to.have.length(1);
 
     expect(classRefs.map(x => x.name)).to.deep.eq(['SlmAbstgvScCgMapV2']);
     expect(classRefs.find(x => x.name === 'SlmAbstgvScCgMapV2').getPropertyRefs().map(x => x.name)).to.deep.eq([
-      "id",
-      "abschl",
-      "stg",
-      "vert",
-      "pversion",
-      "fach",
-      "tu",
-      "sc",
-      "cg",
-      "his_sap",
-      "sap_his"
+      'id',
+      'abschl',
+      'stg',
+      'vert',
+      'pversion',
+      'fach',
+      'tu',
+      'sc',
+      'cg',
+      'his_sap',
+      'sap_his'
     ]);
   }
 
@@ -55,7 +55,8 @@ class JsonSchemaDraft07SerializationSpec {
           type: METATYPE_PROPERTY,
           fn: (key: string, data: any, options: IParseOptions) => {
             // passing all properties
-            const r = {};
+            const r: any = {};
+            // @ts-ignore
             keys(data)
               .filter(k => !(arrDef.indexOf(k) >= 0 || k.startsWith('$')))
               .map(x => r[x] = data[x]);
@@ -70,33 +71,33 @@ class JsonSchemaDraft07SerializationSpec {
 
     expect(classRefs.map(x => x.name)).to.deep.eq(['slm_abstgv_sc_cg_map_v2']);
     expect(classRefs.find(x => x.name === 'slm_abstgv_sc_cg_map_v2').getPropertyRefs().map((x: any) => x.name)).to.deep.eq([
-      "id",
-      "abschl",
-      "stg",
-      "vert",
-      "pversion",
-      "fach",
-      "tu",
-      "sc",
-      "cg",
-      "his_sap",
-      "sap_his"
+      'id',
+      'abschl',
+      'stg',
+      'vert',
+      'pversion',
+      'fach',
+      'tu',
+      'sc',
+      'cg',
+      'his_sap',
+      'sap_his'
     ]);
 
     const ref = ClassRef.get('SlmAbstgvScCgMapV2');
 
     expect(ref.getPropertyRefs().map((x: any) => x.name)).to.deep.eq([
-      "id",
-      "abschl",
-      "stg",
-      "vert",
-      "pversion",
-      "fach",
-      "tu",
-      "sc",
-      "cg",
-      "his_sap",
-      "sap_his"
+      'id',
+      'abschl',
+      'stg',
+      'vert',
+      'pversion',
+      'fach',
+      'tu',
+      'sc',
+      'cg',
+      'his_sap',
+      'sap_his'
     ]);
   }
 

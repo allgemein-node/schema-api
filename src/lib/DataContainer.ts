@@ -90,12 +90,15 @@ export class DataContainer<T> {
     const wrap = {};
     Object.defineProperty(wrap, str, {
       get: () => {
+        // @ts-ignore
         return this.instance[str];
       },
       set: (y: any) => {
+        // @ts-ignore
         this.instance[str] = y;
       }
     });
+    // @ts-ignore
     return wrap[str];
   }
 

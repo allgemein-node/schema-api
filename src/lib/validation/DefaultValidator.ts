@@ -88,6 +88,7 @@ export class DefaultValidator {
           value = instance;
         }
 
+        // @ts-ignore
         let instanceOptions = clone(toValidateEntry.options[handle.name]);
         if (isPropertyCheck) {
           instanceOptions.property = toValidateEntry.property;
@@ -214,7 +215,7 @@ export class DefaultValidator {
   private static extractValidationInfox(entryOptions: any) {
     const intersect = intersection(this.lookupKeys, keys(entryOptions));
     const handles: any[] = [];
-    const options = {};
+    const options: any = {};
     for (const k of intersect) {
       const isLookupKey = ['validate', 'format'].includes(k);
       const valueForKey = get(entryOptions, k, null);

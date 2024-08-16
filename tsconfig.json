@@ -9,6 +9,7 @@
     "target": "es6",
     "module": "CommonJS",
     "moduleResolution": "node",
+    "ignoreDeprecations": "5.0",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

@@ -244,7 +244,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
   appendProperties(data: any, properties: { [k: string]: IJsonSchema7Definition }) {
     data.properties = {};
     for (const k of keys(properties)) {
-      const p = properties[k];
+      const p = properties[k] as any;
       if (p[K_PATTERN_PROPERTY]) {
         if (!data.patternProperties) {
           data.patternProperties = {};
@@ -291,7 +291,7 @@ export class JsonSchema7Serializer implements IJsonSchemaSerializer {
       }
     }
 
-    const instance = klass.create<object>(false);
+    const instance = klass.create<object>(false) as any;
     // TODO own key
     const _properties = Reflect.ownKeys(instance);
     for (const p of _properties) {
